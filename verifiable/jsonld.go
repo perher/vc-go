@@ -26,7 +26,7 @@ const (
 )
 
 // GetBaseContext gets the base context from the contexts.
-// The base context is the first element in the array and must be one of:
+// The base context is an element in the array and must be one of:
 // - https://www.w3.org/2018/credentials/v1
 // - https://www.w3.org/ns/credentials/v2
 func GetBaseContext(contexts []string) (string, error) {
@@ -34,13 +34,13 @@ func GetBaseContext(contexts []string) (string, error) {
 		return "", errors.New("@context is required")
 	}
 
-	ctx := contexts[0]
-
-	if ctx == V1ContextURI || ctx == V2ContextURI {
-		return ctx, nil
+	for _, ctx := range contexts {
+		if ctx == V1ContextURI || ctx == V2ContextURI {
+			return ctx, nil
+		}
 	}
 
-	return "", fmt.Errorf("unsupported @context: %s", ctx)
+	return "", fmt.Errorf("unsupported @context entries: %s", contexts)
 }
 
 // GetBaseContextFromRawDocument gets the base context from the raw document.

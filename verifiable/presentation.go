@@ -35,12 +35,10 @@ const v1BasePresentationSchema = `
         },
         {
           "type": "array",
-          "items": [
-            {
-              "type": "string",
-              "const": "https://www.w3.org/2018/credentials/v1"
-            }
-          ],
+          "contains": {
+            "type": "string",
+            "const": "https://www.w3.org/2018/credentials/v1"
+          },
           "uniqueItems": true,
           "additionalItems": {
             "oneOf": [
