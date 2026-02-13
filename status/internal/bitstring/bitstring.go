@@ -65,7 +65,7 @@ func Decode(src string, opts ...Opt) ([]byte, error) {
 // BitAt returns the bit in the idx'th position (zero-indexed) in the given bitstring.
 func BitAt(bitString []byte, idx int) (bool, error) {
 	nByte := idx / bitsPerByte
-	nBit := idx % bitsPerByte
+	nBit := 7 - (idx % bitsPerByte)
 
 	if idx < 0 || nByte >= len(bitString) {
 		return false, errors.New("position is invalid")
