@@ -519,10 +519,11 @@ func (vp *Presentation) raw() (rawPresentation, error) {
 	if len(vp.credentials) > 0 {
 		var err error
 
+		envelope := !IsBaseContext(vp.Context, V1ContextURI)
 		rp[vpFldCredential], err = mapSlice2(
 			vp.credentials,
 			func(cred *Credential) (interface{}, error) {
-				return cred.ToUniversalForm()
+				return cred.ToUniversalForm(envelope)
 			},
 		)
 		if err != nil {

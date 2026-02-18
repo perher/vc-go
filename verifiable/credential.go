@@ -962,15 +962,14 @@ func (vc *Credential) ToJWTString() (string, error) {
 }
 
 // ToUniversalForm returns vc in its natural form. For jwt-vc it is a jwt string. For json-ld vc it is a json object.
-func (vc *Credential) ToUniversalForm() (interface{}, error) {
+func (vc *Credential) ToUniversalForm(envelope bool) (interface{}, error) {
 	switch {
 	case vc.IsCWT():
-		return vc.toEnvelopedForm(
-			VCMediaTypeCOSE,
-			func(vc *Credential) (string, error) {
-				return hex.EncodeToString(vc.CWTEnvelope.Sign1MessageRaw), nil
-			},
-		)
+		str := hex.EncodeToString(vc.CWTEnvelope.Sign1MessageRaw)
+		if !envelope {
+			return str, nil
+		}
+		return vc.toEnvelopedForm(VCMediaTypeCOSE, str)
 	case vc.IsJWT():
 		var mediaType MediaType
 
@@ -980,34 +979,24 @@ func (vc *Credential) ToUniversalForm() (interface{}, error) {
 			mediaType = VCMediaTypeJWT
 		}
 
-		return vc.toEnvelopedForm(
-			mediaType,
-			func(vc *Credential) (string, error) {
-				jwtStr, err := vc.ToJWTString()
-				return jwtStr, err
-			},
-		)
+		jwtStr, err := vc.ToJWTString()
+		if err != nil {
+			return nil, err
+		}
+		if !envelope {
+			return jwtStr, nil
+		}
+		return vc.toEnvelopedForm(mediaType, jwtStr)
 	default:
 		return vc.ToRawJSON(), nil
 	}
 }
 
-func (vc *Credential) toEnvelopedForm(mediaType MediaType, marshal func(vc *Credential) (string, error),
-) (interface{}, error) {
-	result, err := marshal(vc)
-	if err != nil {
-		return nil, err
-	}
-
-	// For VC DM 1.1 the JWT/CWT is returned directly, otherwise it must be enveloped.
-	if IsBaseContext(vc.credentialContents.Context, V1ContextURI) {
-		return result, nil
-	}
-
+func (vc *Credential) toEnvelopedForm(mediaType MediaType, payload string) (interface{}, error) {
 	ec := &Envelope{
 		Context: []string{V2ContextURI},
 		Type:    []string{VCEnvelopedType},
-		ID:      NewDataURL(mediaType, "", result),
+		ID:      NewDataURL(mediaType, "", payload),
 	}
 
 	return ec.ToRawJSON()
@@ -2583,7 +2572,8 @@ func typedIDsToRaw(typedIDs []TypedID) interface{} {
 
 // MarshalJSON converts Verifiable Credential to JSON bytes.
 func (vc *Credential) MarshalJSON() ([]byte, error) {
-	obj, err := vc.ToUniversalForm()
+	envelope := IsBaseContext(vc.credentialContents.Context, V1ContextURI)
+	obj, err := vc.ToUniversalForm(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("object marshalling of verifiable credential: %w", err)
 	}
