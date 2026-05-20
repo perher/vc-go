@@ -30,15 +30,15 @@ const (
 const (
 	// VPMediaTypeJWT is the media type for JWT-based verifiable presentations.
 	// See https://www.w3.org/TR/vc-jose-cose/#vp-ld-json-jwt.
-	VPMediaTypeJWT MediaType = "application/vp-ld+jwt"
+	VPMediaTypeJWT MediaType = "application/vp+jwt"
 
 	// VPMediaTypeSDJWT is the media type for selective disclosure JWT-based verifiable presentations.
 	// See https://www.w3.org/TR/vc-jose-cose/#vp-ld-json-sd-jwt
-	VPMediaTypeSDJWT MediaType = "application/vp-ld+sd-jwt"
+	VPMediaTypeSDJWT MediaType = "application/vp+sd-jwt"
 
 	// VPMediaTypeCOSE is the media type for COSE-based verifiable presentations.
 	// See https://www.w3.org/TR/vc-jose-cose/#vp-ld-json-cose.
-	VPMediaTypeCOSE MediaType = "application/vp-ld+cose"
+	VPMediaTypeCOSE MediaType = "application/vp+cose"
 )
 
 const v1BasePresentationSchema = `

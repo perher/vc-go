@@ -602,15 +602,15 @@ const (
 const (
 	// VCMediaTypeJWT is the media type for JWT-based verifiable credentials.
 	// See https://www.w3.org/TR/vc-jose-cose/#vcc-ld-json-jwt.
-	VCMediaTypeJWT MediaType = "application/vc-ld+jwt"
+	VCMediaTypeJWT MediaType = "application/vc+jwt"
 
 	// VCMediaTypeSDJWT is the media type for selective disclosure JWT-based verifiable credentials.
 	// See https://www.w3.org/TR/vc-jose-cose/#vc-ld-json-sd-jwt.
-	VCMediaTypeSDJWT MediaType = "application/vc-ld+sd-jwt"
+	VCMediaTypeSDJWT MediaType = "application/vc+sd-jwt"
 
 	// VCMediaTypeCOSE is the media type for COSE-based verifiable credentials.
 	// See https://www.w3.org/TR/vc-jose-cose/#vc-ld-json-cose.
-	VCMediaTypeCOSE MediaType = "application/vc-ld+cose"
+	VCMediaTypeCOSE MediaType = "application/vc+cose"
 )
 
 // vcModelValidationMode defines constraint put on context and type of VC.
