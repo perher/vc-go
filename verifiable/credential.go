@@ -905,6 +905,57 @@ type Envelope struct {
 	Context []string `json:"@context"`
 }
 
+func (e Envelope) MarshalJSON() ([]byte, error) {
+	m := map[string]any{
+		"@context": e.Context,
+		"id":       e.ID,
+	}
+	if len(e.Type) == 1 {
+		m["type"] = e.Type[0]
+	} else {
+		m["type"] = e.Type
+	}
+
+	return json.Marshal(m)
+}
+
+func (e *Envelope) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	if v, ok := raw["id"]; ok {
+		if err := json.Unmarshal(v, &e.ID); err != nil {
+			return err
+		}
+	}
+	if v, ok := raw["@context"]; ok {
+		if err := json.Unmarshal(v, &e.Context); err != nil {
+			return err
+		}
+	}
+
+	var err error
+	if v, ok := raw["type"]; ok {
+		var arr []string
+		if err = json.Unmarshal(v, &arr); err == nil {
+			e.Type = arr
+		}
+		if err != nil {
+			var s string
+			if err = json.Unmarshal(v, &s); err == nil {
+				e.Type = []string{s}
+			}
+		}
+	}
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ToRawJSON returns the JSON object.
 func (ec *Envelope) ToRawJSON() (JSONObject, error) {
 	ecBytes, err := json.Marshal(ec)
