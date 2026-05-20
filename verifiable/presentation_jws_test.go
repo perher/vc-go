@@ -35,6 +35,21 @@ func TestJWTPresClaims_MarshalJWS(t *testing.T) {
 	require.Equal(t, vp.stringJSON(t), jsonObjectToString(t, rawVC))
 }
 
+func TestJWTPresClaimsV2_MarshalJWS(t *testing.T) {
+	vp, err := newTestPresentation(t, []byte(validPresentationV2), WithPresDisabledProofCheck())
+	require.NoError(t, err)
+
+	proofCreator, proofChecker := testsupport.NewKMSSigVerPair(t, kms.RSARS256Type, "did:123#key1")
+	require.NoError(t, err)
+
+	jws := createCredJWS(t, vp, proofCreator)
+
+	_, rawVC, err := decodeVPFromJWS(jws, proofChecker)
+
+	require.NoError(t, err)
+	require.Equal(t, vp.stringJSON(t), jsonObjectToString(t, rawVC))
+}
+
 type invalidPresClaims struct {
 	*jwt.Claims
 

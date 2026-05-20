@@ -8,15 +8,19 @@ package verifiable
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 
 	"github.com/trustbloc/vc-go/jwt"
 )
+
+var jwtClaims = []string{"iss", "sub", "aud", "exp", "nbf", "iat", "jti"}
 
 // JWTPresClaims is JWT Claims extension by Verifiable Presentation (with custom "vp" claim).
 type JWTPresClaims struct {
 	*jwt.Claims
 
-	Presentation rawPresentation `json:"vp,omitempty"`
+	InlineVPClaims bool
+	Presentation   rawPresentation `json:"vp,omitempty"`
 }
 
 func (jpc *JWTPresClaims) refineFromJWTClaims() {
@@ -61,11 +65,69 @@ func newJWTPresClaims(vp *Presentation, audience []string, minimizeVP bool) (*JW
 	}
 
 	presClaims := &JWTPresClaims{
-		Claims:       jwtClaims,
-		Presentation: rawVP,
+		Claims:         jwtClaims,
+		InlineVPClaims: IsBaseContext(vp.Context, V2ContextURI),
+		Presentation:   rawVP,
 	}
 
 	return presClaims, nil
+}
+
+func (c JWTPresClaims) MarshalJSON() ([]byte, error) {
+	claimMap := map[string]any{}
+	if c.Claims != nil {
+		b, err := json.Marshal(c.Claims)
+		if err != nil {
+			return nil, fmt.Errorf("marshal jwt claims: %w", err)
+		}
+		if err := json.Unmarshal(b, &claimMap); err != nil {
+			return nil, fmt.Errorf("unmarshal jwt claims: %w", err)
+		}
+	}
+
+	if c.Presentation != nil {
+		if c.InlineVPClaims {
+			maps.Copy(claimMap, c.Presentation)
+		} else {
+			claimMap["vp"] = c.Presentation
+		}
+	}
+
+	return json.Marshal(claimMap)
+}
+
+func (c *JWTPresClaims) UnmarshalJSON(data []byte) error {
+	if c.Claims == nil {
+		c.Claims = &jwt.Claims{}
+	}
+	if err := json.Unmarshal(data, c.Claims); err != nil {
+		return fmt.Errorf("unmarshal jwt claims: %w", err)
+	}
+
+	var root map[string]json.RawMessage
+	if err := json.Unmarshal(data, &root); err != nil {
+		return fmt.Errorf("unmarshal vp: %w", err)
+	}
+	if vpRaw, found := root["vp"]; found {
+		// vc-data-model v1
+		c.InlineVPClaims = false
+		if err := json.Unmarshal(vpRaw, &c.Presentation); err != nil {
+			return fmt.Errorf("unmarshal vp claims: %w", err)
+		}
+	} else {
+		// vc-data-model v2
+		c.InlineVPClaims = true
+		if err := json.Unmarshal(data, &c.Presentation); err != nil {
+			return fmt.Errorf("unmarshal inline vp claims: %w", err)
+		}
+		if c.Presentation != nil {
+			for _, s := range jwtClaims {
+				delete(c.Presentation, s)
+			}
+		}
+	}
+
+	return nil
 }
 
 // JWTPresClaimsUnmarshaller parses JWT of certain type to JWT Claims containing "vp" (Presentation) claim.

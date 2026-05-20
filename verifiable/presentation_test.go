@@ -53,6 +53,42 @@ const validPresentation = `
 }
 `
 
+const validPresentationV2 = `
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://www.w3.org/ns/credentials/examples/v2",
+    "https://trustbloc.github.io/context/vc/examples-v1.jsonld"
+  ],
+  "id": "urn:uuid:313801ba-24b7-11ee-be02-ff560265cf9b",
+  "type": [
+    "VerifiablePresentation",
+    "ExamplePresentation"
+  ],
+  "holder": "did:example:12345678",
+  "verifiableCredential": [
+    {
+      "@context": [
+        "https://www.w3.org/ns/credentials/v2",
+        "https://www.w3.org/ns/credentials/examples/v2"
+      ],
+      "type": [
+        "VerifiableCredential",
+        "ExampleAssertCredential"
+      ],
+      "issuer": "did:example:12345678",
+      "credentialSubject": {
+        "id": "urn:uuid:313801ba-24b7-11ee-be02-ff560265cf9b",
+        "assertion": "This VP is submitted by the subject as evidence of a legal right to drive"
+      },
+      "proof": {
+        "type": "RsaSignature2018"
+      }
+    }
+  ]
+}
+`
+
 const notStrictPresentation = `
 {
   "@context": [
