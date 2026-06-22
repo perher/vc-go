@@ -29,7 +29,7 @@ func TestJWTPresClaims_MarshalJWS(t *testing.T) {
 
 	jws := createCredJWS(t, vp, proofCreator)
 
-	_, rawVC, err := decodeVPFromJWS(jws, proofChecker)
+	_, rawVC, err := decodeVPFromJWS(jws, proofChecker, nil)
 
 	require.NoError(t, err)
 	require.Equal(t, vp.stringJSON(t), jsonObjectToString(t, rawVC))
@@ -44,7 +44,7 @@ func TestJWTPresClaimsV2_MarshalJWS(t *testing.T) {
 
 	jws := createCredJWS(t, vp, proofCreator)
 
-	_, rawVC, err := decodeVPFromJWS(jws, proofChecker)
+	_, rawVC, err := decodeVPFromJWS(jws, proofChecker, nil)
 
 	require.NoError(t, err)
 	require.Equal(t, vp.stringJSON(t), jsonObjectToString(t, rawVC))
@@ -65,13 +65,13 @@ func TestUnmarshalPresJWSClaims(t *testing.T) {
 
 		jws := createCredJWS(t, vp, holderProofCreator)
 
-		claims, err := unmarshalPresJWSClaims(jws, proofChecker)
+		claims, err := unmarshalPresJWSClaims(jws, proofChecker, nil)
 		require.NoError(t, err)
 		require.Equal(t, vp.stringJSON(t), jsonObjectToString(t, claims.Presentation))
 	})
 
 	t.Run("Invalid serialized JWS", func(t *testing.T) {
-		claims, err := unmarshalPresJWSClaims("invalid JWS", proofChecker)
+		claims, err := unmarshalPresJWSClaims("invalid JWS", proofChecker, nil)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "parse JWT")
 		require.Nil(t, claims)
@@ -94,7 +94,7 @@ func TestUnmarshalPresJWSClaims(t *testing.T) {
 		token, err := jwt.Signed(signer).Claims(claims).CompactSerialize()
 		require.NoError(t, err)
 
-		uc, err := unmarshalPresJWSClaims(token, proofChecker)
+		uc, err := unmarshalPresJWSClaims(token, proofChecker, nil)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "parse JWT")
 		require.Nil(t, uc)
@@ -108,7 +108,7 @@ func TestUnmarshalPresJWSClaims(t *testing.T) {
 
 		_, otherProofChecker := testsupport.NewKMSSigVerPair(t, kms.RSARS256Type, "did:123#key1")
 
-		uc, err := unmarshalPresJWSClaims(jws, otherProofChecker)
+		uc, err := unmarshalPresJWSClaims(jws, otherProofChecker, nil)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "jwt proof check")
 		require.Nil(t, uc)

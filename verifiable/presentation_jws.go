@@ -17,7 +17,7 @@ func (jpc *JWTPresClaims) MarshalJWS(signatureAlg JWSAlgorithm, signer jwt.Proof
 	return strJWT, err
 }
 
-func unmarshalPresJWSClaims(vpJWT string, verifier jwt.ProofChecker) (*JWTPresClaims, error) {
+func unmarshalPresJWSClaims(vpJWT string, verifier jwt.ProofChecker, expectedProofIssuer *string) (*JWTPresClaims, error) {
 	var claims JWTPresClaims
 
 	_, err := unmarshalJWT(vpJWT, &claims)
@@ -26,7 +26,7 @@ func unmarshalPresJWSClaims(vpJWT string, verifier jwt.ProofChecker) (*JWTPresCl
 	}
 
 	if verifier != nil {
-		err = jwt.CheckProof(vpJWT, verifier, nil, nil)
+		err = jwt.CheckProof(vpJWT, verifier, expectedProofIssuer, nil)
 		if err != nil {
 			return nil, fmt.Errorf("jwt proof check: %w", err)
 		}
@@ -35,8 +35,8 @@ func unmarshalPresJWSClaims(vpJWT string, verifier jwt.ProofChecker) (*JWTPresCl
 	return &claims, err
 }
 
-func decodeVPFromJWS(vpJWT string, verifier jwt.ProofChecker) ([]byte, rawPresentation, error) {
+func decodeVPFromJWS(vpJWT string, verifier jwt.ProofChecker, expectedProofIssuer *string) ([]byte, rawPresentation, error) {
 	return decodePresJWT(vpJWT, func(vpJWT string) (*JWTPresClaims, error) {
-		return unmarshalPresJWSClaims(vpJWT, verifier)
+		return unmarshalPresJWSClaims(vpJWT, verifier, expectedProofIssuer)
 	})
 }

@@ -577,6 +577,7 @@ type presentationOpts struct {
 	requireProof        bool
 	disableJSONLDChecks bool
 	verifyDataIntegrity *verifyDataIntegrityOpts
+	expectedProofIssuer *string
 
 	jsonldCredentialOpts
 	checkHolder          bool
@@ -656,6 +657,13 @@ func WithPresExpectedDataIntegrityFields(purpose, domain, challenge string) Pres
 		opts.verifyDataIntegrity.Purpose = purpose
 		opts.verifyDataIntegrity.Domain = domain
 		opts.verifyDataIntegrity.Challenge = challenge
+	}
+}
+
+// WithPresExpectedIssuer validates that presentation proof was issued by issuer
+func WithPresExpectedProofIssuer(issuer string) PresentationOpt {
+	return func(opts *presentationOpts) {
+		opts.expectedProofIssuer = &issuer
 	}
 }
 
@@ -910,8 +918,7 @@ func decodeCredentials(rawCred interface{}, opts *presentationOpts) ([]*Credenti
 		}
 
 		if jsonCred, ok := cred.(JSONObject); ok {
-			//TODO: Previous implementation do not validate credentials, should we enable it?
-			return ParseCredentialJSON(jsonCred, append(credOpts, WithCredDisableValidation())...)
+			return ParseCredentialJSON(jsonCred, credOpts...)
 		}
 
 		return nil,

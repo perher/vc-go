@@ -49,7 +49,7 @@ func (p *PresentationJSONParser) parse(vpData []byte, vpOpts *presentationOpts) 
 			proofChecker = nil
 		}
 
-		vcDataFromJwt, rawCred, err := decodeVPFromJWS(vpStr, proofChecker)
+		vcDataFromJwt, rawCred, err := decodeVPFromJWS(vpStr, proofChecker, vpOpts.expectedProofIssuer)
 		if err != nil {
 			return nil, fmt.Errorf("decoding of Verifiable Presentation from JWS: %w", err)
 		}

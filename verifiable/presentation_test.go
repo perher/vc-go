@@ -82,7 +82,9 @@ const validPresentationV2 = `
         "assertion": "This VP is submitted by the subject as evidence of a legal right to drive"
       },
       "proof": {
-        "type": "RsaSignature2018"
+        "type": "RsaSignature2018",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:example:12345678#key1"
       }
     }
   ]
@@ -189,9 +191,13 @@ const v2ValidPresentation = `{
   "id": "urn:uuid:3978344f-8596-4c3a-a978-8fcaba3903c5",
   "type": ["VerifiablePresentation"],
   "verifiableCredential": [{
-    "@context": "https://www.w3.org/ns/credentials/v2",
+    "@context": [
+      "https://www.w3.org/ns/credentials/v2",
+      "https://www.w3.org/ns/credentials/examples/v2"
+    ],
     "id": "urn:uuid:1998343f-5597-2c3a-b979-2fcada3903c2",
     "type": "VerifiableCredential",
+    "issuer": "https://example.edu/issuers/14",
     "credentialSubject": {
 	  "id": "did:example:ebfeb1f712ebc6f1c276e12ec21",
       "validFrom": "2010-01-01T19:23:24Z",
@@ -250,7 +256,9 @@ const v2ValidPresentationWithCustomFields = `
         "alumniOf": "Example University"
       },
       "proof": {
-        "type": "RsaSignature2018"
+        "type": "RsaSignature2018",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:example:12345678#key1"
       }
     }
   ],

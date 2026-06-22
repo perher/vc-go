@@ -2080,7 +2080,7 @@ func (vc *Credential) CheckProof(opts ...CredentialOpt) error {
 
 func (vc *Credential) checkProof(vcOpts *credentialOpts) error {
 	if vc.credentialContents.Issuer == nil {
-		return errors.New("proof check failuer: issuer is missed")
+		return errors.New("proof check failure: issuer is missed")
 	}
 
 	issuerID := vc.credentialContents.Issuer.ID
