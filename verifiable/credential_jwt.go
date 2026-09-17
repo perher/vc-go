@@ -221,6 +221,28 @@ func (jcc *JWTCredClaims) refineFromJWTClaims() error {
 		}
 	}
 
+	if sub := claims.Subject; sub != "" {
+		subjectRaw, ok := vcMap[jsonFldSubject]
+		if !ok {
+			vcMap[jsonFldSubject] = sub
+		} else {
+			switch s := subjectRaw.(type) {
+			case map[string]any:
+				if _, found := s[jsonFldID]; !found {
+					s[jsonFldID] = sub
+				}
+			case []any:
+				if len(s) == 1 {
+					if m, isMap := s[0].(map[string]any); isMap {
+						if _, found := m[jsonFldID]; !found {
+							m[jsonFldID] = sub
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
