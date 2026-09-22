@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	jsonld "github.com/trustbloc/did-go/doc/ld/processor"
 
@@ -70,7 +71,17 @@ func checkEmbeddedProof(jsonldDoc map[string]interface{}, expectedProofIssuer *s
 				return err
 			}
 
-			return checkDataIntegrityProof(docBytes, opts.dataIntegrityOpts)
+			err = checkDataIntegrityProof(docBytes, opts.dataIntegrityOpts)
+			if err != nil {
+				return fmt.Errorf("check data integrity proof: %w", err)
+			}
+
+			err := checkDataIntegrityProofIssuer(proofs, expectedProofIssuer)
+			if err != nil {
+				return err
+			}
+
+			return nil
 		}
 	}
 
@@ -108,4 +119,27 @@ func getProofs(proofElement interface{}) ([]map[string]interface{}, error) {
 	}
 
 	return nil, errors.New("invalid proof type")
+}
+
+// checkDataIntegrityProofIssuer verifies that every data integrity proof was created with a
+// verification method controlled by expectedProofIssuer.
+func checkDataIntegrityProofIssuer(proofs []map[string]interface{}, expectedProofIssuer *string) error {
+	if expectedProofIssuer == nil {
+		return nil
+	}
+
+	for _, p := range proofs {
+		verificationMethod, ok := p["verificationMethod"].(string)
+		if !ok || verificationMethod == "" {
+			return errors.New("data integrity proof without verification method")
+		}
+
+		issuer, _, _ := strings.Cut(verificationMethod, "#")
+		if issuer != *expectedProofIssuer {
+			return fmt.Errorf("data integrity proof from unexpected issuer: %s, expected: %s",
+				issuer, *expectedProofIssuer)
+		}
+	}
+
+	return nil
 }

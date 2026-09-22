@@ -74,7 +74,7 @@ func (p *PresentationJSONParser) parse(vpData []byte, vpOpts *presentationOpts) 
 			return nil, fmt.Errorf("decoding of Verifiable Presentation from unsecured JWT: %w", err)
 		}
 
-		if err := checkEmbeddedProofBytes(rawBytes, nil, embeddedProofCheckOpts); err != nil {
+		if err := checkEmbeddedProofBytes(rawBytes, vpOpts.expectedProofIssuer, embeddedProofCheckOpts); err != nil {
 			return nil, err
 		}
 
@@ -90,7 +90,7 @@ func (p *PresentationJSONParser) parse(vpData []byte, vpOpts *presentationOpts) 
 		return nil, err
 	}
 
-	err = checkEmbeddedProofBytes(vpData, nil, embeddedProofCheckOpts)
+	err = checkEmbeddedProofBytes(vpData, vpOpts.expectedProofIssuer, embeddedProofCheckOpts)
 	if err != nil {
 		return nil, err
 	}
