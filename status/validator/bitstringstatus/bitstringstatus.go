@@ -11,6 +11,7 @@ package bitstringstatus
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/trustbloc/vc-go/verifiable"
@@ -125,14 +126,29 @@ func (v *Validator) GetStatusVCURI(vcStatus *verifiable.TypedID) (string, error)
 
 // GetStatusListIndex returns the bit position of the status value of the VC.
 func (v *Validator) GetStatusListIndex(vcStatus *verifiable.TypedID) (int, error) {
-	statusListIndex, ok := vcStatus.CustomFields[StatusListIndex].(string)
-	if !ok {
+	var idx int
+
+	switch statusListIndex := vcStatus.CustomFields[StatusListIndex].(type) {
+	case string:
+		var err error
+
+		idx, err = strconv.Atoi(statusListIndex)
+		if err != nil {
+			return -1, fmt.Errorf("unable to get statusListIndex: %w", err)
+		}
+	case float64:
+		// Workaround: the spec requires a string, but some issuers encode it as a number
+		if statusListIndex != math.Trunc(statusListIndex) || statusListIndex > math.MaxInt32 {
+			return -1, fmt.Errorf("%s must be an integer, got %v", StatusListIndex, statusListIndex)
+		}
+
+		idx = int(statusListIndex)
+	default:
 		return -1, fmt.Errorf("%s must be a string", StatusListIndex)
 	}
 
-	idx, err := strconv.Atoi(statusListIndex)
-	if err != nil {
-		return -1, fmt.Errorf("unable to get statusListIndex: %w", err)
+	if idx < 0 {
+		return -1, fmt.Errorf("%s must not be negative, got %d", StatusListIndex, idx)
 	}
 
 	return idx, nil
