@@ -4,69 +4,71 @@
 
 module github.com/trustbloc/vc-go
 
-go 1.25.3
+go 1.26.3
 
 require (
 	github.com/PaesslerAG/gval v1.2.4
 	github.com/PaesslerAG/jsonpath v0.1.2-0.20240726212847-3a740cf7976f
-	github.com/VictoriaMetrics/fastcache v1.13.2
-	github.com/btcsuite/btcd/btcec/v2 v2.3.6
+	github.com/VictoriaMetrics/fastcache v1.13.3
+	github.com/btcsuite/btcd/btcec/v2 v2.5.0
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
-	github.com/fxamacker/cbor/v2 v2.9.0
-	github.com/go-jose/go-jose/v3 v3.0.4
-	github.com/golang/mock v1.6.0
+	github.com/fxamacker/cbor/v2 v2.9.2
+	github.com/go-jose/go-jose/v3 v3.0.5
+	github.com/golang/mock v1.7.0-rc.1
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/kawamuray/jsonpath v0.0.0-20210127151053-2ab0d7f0a6ad
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/multiformats/go-multibase v0.2.0
-	github.com/piprate/json-gold v0.7.0
-	github.com/samber/lo v1.52.0
+	github.com/multiformats/go-multibase v0.3.0
+	github.com/piprate/json-gold v0.8.0
+	github.com/samber/lo v1.53.0
 	github.com/stretchr/testify v1.11.1
-	github.com/theory/jsonpath v0.10.2
-	github.com/tidwall/gjson v1.18.0
+	github.com/theory/jsonpath v0.12.0
+	github.com/tidwall/gjson v1.19.0
 	github.com/tidwall/sjson v1.2.5
 	github.com/trustbloc/bbs-signature-go v1.0.4
 	github.com/trustbloc/did-go v1.3.7
 	github.com/trustbloc/kms-go v1.2.3
 	github.com/veraison/go-cose v1.3.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
+	golang.org/x/exp v0.0.0-20260709172345-9ea1abe57597
 )
 
 require (
-	github.com/IBM/mathlib v0.0.3-0.20260123144934-21c357e3e46f // indirect
-	github.com/bits-and-blooms/bitset v1.24.4 // indirect
+	github.com/IBM/mathlib v0.3.0 // indirect
+	github.com/bits-and-blooms/bitset v1.24.6 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/consensys/gnark-crypto v0.19.2 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+	github.com/consensys/gnark-crypto v0.20.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/hyperledger/fabric-amcl v0.0.0-20230602173724-9e02669dceb2 // indirect
-	github.com/kilic/bls12-381 v0.1.1-0.20220929213557-ca162e8a70f4 // indirect
-	github.com/mr-tron/base58 v1.2.0 // indirect
+	github.com/mr-tron/base58 v1.3.0 // indirect
 	github.com/multiformats/go-base32 v0.1.0 // indirect
 	github.com/multiformats/go-base36 v0.2.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/pquerna/cachecontrol v0.2.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/teserakt-io/golang-ed25519 v0.0.0-20210104091850-3888c087a4c8 // indirect
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
-	github.com/tink-crypto/tink-go/v2 v2.2.0 // indirect
+	github.com/tink-crypto/tink-go/v2 v2.7.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
-	golang.org/x/crypto v0.48.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	golang.org/x/crypto v0.54.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
+	golang.org/x/text v0.40.0 // indirect
+	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 replace github.com/piprate/json-gold v0.5.1-0.20230111113000-6ddbe6e6f19f => github.com/trustbloc/json-gold v0.5.2-0.20241206130328-d2135d9f36a8
 
 replace github.com/trustbloc/kms-go => github.com/perher/kms-go v1.3.0-rc.1
+
+replace github.com/tink-crypto/tink-go/v2 => github.com/tink-crypto/tink-go/v2 v2.2.0
+
+replace github.com/piprate/json-gold => github.com/trustbloc/json-gold v0.5.2-0.20241206130328-d2135d9f36a8
