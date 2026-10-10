@@ -2623,7 +2623,7 @@ func typedIDsToRaw(typedIDs []TypedID) interface{} {
 
 // MarshalJSON converts Verifiable Credential to JSON bytes.
 func (vc *Credential) MarshalJSON() ([]byte, error) {
-	envelope := IsBaseContext(vc.credentialContents.Context, V1ContextURI)
+	envelope := !IsBaseContext(vc.credentialContents.Context, V1ContextURI)
 	obj, err := vc.ToUniversalForm(envelope)
 	if err != nil {
 		return nil, fmt.Errorf("object marshalling of verifiable credential: %w", err)
