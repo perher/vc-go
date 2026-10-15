@@ -73,12 +73,13 @@ func TestCreateSignedJWTVC(t *testing.T) {
 		name        string
 		context     string
 		minimize    bool
+		wantTyp     string
 		wantVCClaim bool
 	}{
 		{name: "Credentials V1", context: V1ContextURI, wantVCClaim: true},
 		{name: "Credentials V1 minimized", context: V1ContextURI, minimize: true, wantVCClaim: true},
-		{name: "Credentials V2", context: V2ContextURI},
-		{name: "Credentials V2 are never minimized", context: V2ContextURI, minimize: true},
+		{name: "Credentials V2", context: V2ContextURI, wantTyp: "vc+jwt"},
+		{name: "Credentials V2 are never minimized", context: V2ContextURI, minimize: true, wantTyp: "vc+jwt"},
 	}
 
 	for _, tc := range tests {
@@ -97,6 +98,9 @@ func TestCreateSignedJWTVC(t *testing.T) {
 
 			jwtVC, err := vc.CreateSignedJWTVC(tc.minimize, RS256, proofCreator, pubKeyID)
 			require.NoError(t, err)
+
+			typ, _ := jwtVC.JWTEnvelope.JWTHeaders.Type()
+			require.Equal(t, tc.wantTyp, typ)
 
 			payloadBytes, err := base64.RawURLEncoding.DecodeString(strings.Split(jwtVC.JWTEnvelope.JWT, ".")[1])
 			require.NoError(t, err)

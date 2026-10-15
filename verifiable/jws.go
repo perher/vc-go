@@ -15,15 +15,16 @@ import (
 
 // MarshalJWS serializes JWT presentation claims into signed form (JWS).
 func marshalJWS(jwtClaims interface{}, signatureAlg JWSAlgorithm,
-	signer jwt.ProofCreator, keyID string) (string, jose.Headers, error) {
+	signer jwt.ProofCreator, keyID string, headers jose.Headers) (string, jose.Headers, error) {
 	algName, err := signatureAlg.Name()
 	if err != nil {
 		return "", nil, err
 	}
 
 	signParameters := jwt.SignParameters{
-		KeyID:  keyID,
-		JWTAlg: algName,
+		KeyID:             keyID,
+		JWTAlg:            algName,
+		AdditionalHeaders: headers,
 	}
 
 	token, err := jwt.NewSigned(jwtClaims, signParameters, signer)

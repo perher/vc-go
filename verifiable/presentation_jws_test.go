@@ -8,6 +8,9 @@ package verifiable
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/base64"
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/go-jose/go-jose/v3"
@@ -48,6 +51,36 @@ func TestJWTPresClaimsV2_MarshalJWS(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, vp.stringJSON(t), jsonObjectToString(t, rawVC))
+}
+
+func TestJWTPresClaims_JWSHeaders(t *testing.T) {
+	proofCreator, _ := testsupport.NewKMSSigVerPair(t, kms.RSARS256Type, "did:123#key1")
+
+	tests := []struct {
+		name    string
+		vp      string
+		wantTyp interface{}
+	}{
+		{name: "Presentation V1 is not typed", vp: validPresentation},
+		{name: "Presentation V2 is typed vp+jwt", vp: validPresentationV2, wantTyp: "vp+jwt"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			vp, err := newTestPresentation(t, []byte(tc.vp), WithPresDisabledProofCheck())
+			require.NoError(t, err)
+
+			jws := createCredJWS(t, vp, proofCreator)
+
+			headerBytes, err := base64.RawURLEncoding.DecodeString(strings.Split(jws, ".")[0])
+			require.NoError(t, err)
+
+			var headers map[string]interface{}
+			err = json.Unmarshal(headerBytes, &headers)
+			require.NoError(t, err)
+			require.Equal(t, tc.wantTyp, headers["typ"])
+		})
+	}
 }
 
 type invalidPresClaims struct {
