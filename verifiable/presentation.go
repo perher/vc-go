@@ -449,9 +449,9 @@ func (vp *Presentation) MarshalCBOR() ([]byte, error) {
 }
 
 // JWTClaims converts Verifiable Presentation into JWT Presentation claims, which can be than serialized
-// e.g. into JWS.
-func (vp *Presentation) JWTClaims(audience []string, minimizeVP bool) (*JWTPresClaims, error) {
-	return newJWTPresClaims(vp, audience, minimizeVP)
+// e.g. into JWS. The claims are issued now and expire after DefaultPresentationJWTExpiry unless set by opts.
+func (vp *Presentation) JWTClaims(audience []string, minimizeVP bool, opts ...JWTPresClaimsOpt) (*JWTPresClaims, error) {
+	return newJWTPresClaims(vp, audience, minimizeVP, opts...)
 }
 
 // CWTClaims converts Verifiable Presentation into CWT Presentation claims, which can be than serialized

@@ -8,6 +8,7 @@ package verifiable
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -55,4 +56,48 @@ func TestNewJWTPresClaims(t *testing.T) {
 		require.Equal(t, vp.ID, claims.Presentation[vpFldID])
 		require.Equal(t, vp.Holder, claims.Presentation[vpFldHolder])
 	})
+}
+
+func TestNewJWTPresClaims_Validity(t *testing.T) {
+	vp, err := newTestPresentation(t, []byte(validPresentation), WithPresDisabledProofCheck())
+	require.NoError(t, err)
+
+	issuedAt := time.Date(2026, time.January, 2, 3, 4, 5, 0, time.UTC)
+
+	tests := []struct {
+		name       string
+		opts       []JWTPresClaimsOpt
+		wantIssued time.Time
+		wantExpiry time.Time
+	}{
+		{
+			name:       "issued now with default expiry",
+			wantIssued: time.Now(),
+			wantExpiry: time.Now().Add(DefaultPresentationJWTExpiry),
+		},
+		{
+			name:       "issued at the given time",
+			opts:       []JWTPresClaimsOpt{WithPresJWTIssuedAt(issuedAt)},
+			wantIssued: issuedAt,
+			wantExpiry: issuedAt.Add(DefaultPresentationJWTExpiry),
+		},
+		{
+			name:       "expires after the given duration",
+			opts:       []JWTPresClaimsOpt{WithPresJWTIssuedAt(issuedAt), WithPresJWTExpiry(time.Hour)},
+			wantIssued: issuedAt,
+			wantExpiry: issuedAt.Add(time.Hour),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			claims, err := vp.JWTClaims(nil, false, tc.opts...)
+			require.NoError(t, err)
+
+			require.NotNil(t, claims.IssuedAt)
+			require.NotNil(t, claims.Expiry)
+			require.WithinDuration(t, tc.wantIssued, claims.IssuedAt.Time(), time.Second)
+			require.WithinDuration(t, tc.wantExpiry, claims.Expiry.Time(), time.Second)
+		})
+	}
 }

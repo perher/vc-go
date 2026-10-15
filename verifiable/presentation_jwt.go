@@ -9,9 +9,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"maps"
+	"time"
+
+	josejwt "github.com/go-jose/go-jose/v3/jwt"
 
 	"github.com/trustbloc/vc-go/jwt"
 )
+
+// DefaultPresentationJWTExpiry is how long a presentation JWT is valid by default. A presentation is short-lived
+// since it is created for a single verifier which verifies it right away.
+const DefaultPresentationJWTExpiry = 5 * time.Minute
 
 var jwtClaims = []string{"iss", "sub", "aud", "exp", "nbf", "iat", "jti"}
 
@@ -35,12 +42,45 @@ func (jpc *JWTPresClaims) refineFromJWTClaims() {
 	}
 }
 
+// JWTPresClaimsOpt is an option for the JWT claims of a presentation.
+type JWTPresClaimsOpt func(opts *jwtPresClaimsOpts)
+
+type jwtPresClaimsOpts struct {
+	issuedAt time.Time
+	expiry   time.Duration
+}
+
+// WithPresJWTIssuedAt sets when the presentation JWT is issued instead of now.
+func WithPresJWTIssuedAt(issuedAt time.Time) JWTPresClaimsOpt {
+	return func(opts *jwtPresClaimsOpts) {
+		opts.issuedAt = issuedAt
+	}
+}
+
+// WithPresJWTExpiry sets how long the presentation JWT is valid instead of DefaultPresentationJWTExpiry.
+func WithPresJWTExpiry(expiry time.Duration) JWTPresClaimsOpt {
+	return func(opts *jwtPresClaimsOpts) {
+		opts.expiry = expiry
+	}
+}
+
 // newJWTPresClaims creates JWT Claims of VP with an option to minimize certain fields put into "vp" claim.
-func newJWTPresClaims(vp *Presentation, audience []string, minimizeVP bool) (*JWTPresClaims, error) {
+func newJWTPresClaims(vp *Presentation, audience []string, minimizeVP bool,
+	opts ...JWTPresClaimsOpt) (*JWTPresClaims, error) {
+	claimsOpts := &jwtPresClaimsOpts{
+		issuedAt: time.Now(),
+		expiry:   DefaultPresentationJWTExpiry,
+	}
+	for _, opt := range opts {
+		opt(claimsOpts)
+	}
+
 	// currently jwt encoding supports only single subject.([]Subject) (by the spec)
 	jwtClaims := &jwt.Claims{
-		Issuer: vp.Holder, // iss
-		ID:     vp.ID,     // jti
+		Issuer:   vp.Holder, // iss
+		ID:       vp.ID,     // jti
+		IssuedAt: josejwt.NewNumericDate(claimsOpts.issuedAt),
+		Expiry:   josejwt.NewNumericDate(claimsOpts.issuedAt.Add(claimsOpts.expiry)),
 	}
 	if len(audience) > 0 {
 		jwtClaims.Audience = audience
@@ -161,8 +201,9 @@ func (vp *Presentation) CreateJWTVP(
 	signer jwt.ProofCreator,
 	keyID string,
 	minimizeVP bool,
+	opts ...JWTPresClaimsOpt,
 ) (*Presentation, error) {
-	jwtClaims, err := vp.JWTClaims(aud, minimizeVP)
+	jwtClaims, err := vp.JWTClaims(aud, minimizeVP, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create JWT claims: %w", err)
 	}
