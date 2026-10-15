@@ -236,7 +236,8 @@ func TestRefineVcIssuerFromJwtClaims(t *testing.T) {
 		vcMap := map[string]interface{}{
 			"issuer": "id to override",
 		}
-		refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
+		err := refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
+		require.NoError(t, err)
 		require.Equal(t, "did:example:76e12ec712ebc6f1c221ebfeb1f", vcMap["issuer"])
 	})
 
@@ -245,7 +246,8 @@ func TestRefineVcIssuerFromJwtClaims(t *testing.T) {
 		vcMap := map[string]interface{}{
 			"issuer": issuerMap,
 		}
-		refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
+		err := refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
+		require.NoError(t, err)
 		// issuer id is refined
 		require.Equal(t, "did:example:76e12ec712ebc6f1c221ebfeb1f", issuerMap["id"])
 		// issuer name remains the same (i.e. not erased)
@@ -254,7 +256,8 @@ func TestRefineVcIssuerFromJwtClaims(t *testing.T) {
 
 	t.Run("refine not defined verifiable credential issuer", func(t *testing.T) {
 		vcMap := make(map[string]interface{})
-		refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
+		err := refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
+		require.NoError(t, err)
 		require.Equal(t, "did:example:76e12ec712ebc6f1c221ebfeb1f", vcMap["issuer"])
 	})
 }

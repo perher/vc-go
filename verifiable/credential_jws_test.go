@@ -12,10 +12,12 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-jose/go-jose/v3"
 	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/stretchr/testify/require"
+	afgotime "github.com/trustbloc/did-go/doc/util/time"
 
 	"github.com/trustbloc/vc-go/proof/testsupport"
 
@@ -60,6 +62,65 @@ func TestV2JWTCredClaimsMarshalJWS(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, vc.stringJSON(t), jsonObjectToString(t, jwtVC.ToRawJSON()))
 	})
+}
+
+func TestCreateSignedJWTVC(t *testing.T) {
+	const pubKeyID = "did:example:76e12ec712ebc6f1c221ebfeb1f#key1"
+
+	proofCreator, proofChecker := testsupport.NewKMSSigVerPair(t, kms.RSARS256Type, pubKeyID)
+
+	tests := []struct {
+		name        string
+		context     string
+		minimize    bool
+		wantVCClaim bool
+	}{
+		{name: "Credentials V1", context: V1ContextURI, wantVCClaim: true},
+		{name: "Credentials V1 minimized", context: V1ContextURI, minimize: true, wantVCClaim: true},
+		{name: "Credentials V2", context: V2ContextURI},
+		{name: "Credentials V2 are never minimized", context: V2ContextURI, minimize: true},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			issued := time.Date(2026, time.January, 2, 3, 4, 5, 0, time.UTC)
+			vc, err := CreateCredential(CredentialContents{
+				Context: []string{tc.context},
+				ID:      "urn:uuid:7f1d3c2e-0d1c-4b5e-9a57-0f6a1d2c3b4a",
+				Types:   []string{VCType},
+				Issuer:  &Issuer{ID: "did:example:76e12ec712ebc6f1c221ebfeb1f"},
+				Issued:  afgotime.NewTime(issued),
+				Expired: afgotime.NewTime(issued.Add(time.Hour)),
+				Subject: []Subject{{ID: "did:example:ebfeb1f712ebc6f1c276e12ec21"}},
+			}, nil)
+			require.NoError(t, err)
+
+			jwtVC, err := vc.CreateSignedJWTVC(tc.minimize, RS256, proofCreator, pubKeyID)
+			require.NoError(t, err)
+
+			payloadBytes, err := base64.RawURLEncoding.DecodeString(strings.Split(jwtVC.JWTEnvelope.JWT, ".")[1])
+			require.NoError(t, err)
+
+			var payload map[string]interface{}
+			err = json.Unmarshal(payloadBytes, &payload)
+			require.NoError(t, err)
+			require.Equal(t, tc.wantVCClaim, payload["vc"] != nil)
+
+			if !tc.wantVCClaim {
+				var credential map[string]interface{}
+				err = json.Unmarshal([]byte(vc.stringJSON(t)), &credential)
+				require.NoError(t, err)
+
+				for field, value := range credential {
+					require.Equal(t, value, payload[field], field)
+				}
+			}
+
+			parsed, err := parseTestCredential(t, []byte(jwtVC.JWTEnvelope.JWT), WithProofChecker(proofChecker))
+			require.NoError(t, err)
+			require.Equal(t, vc.stringJSON(t), jsonObjectToString(t, parsed.ToRawJSON()))
+		})
+	}
 }
 
 type invalidCredClaims struct {

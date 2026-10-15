@@ -2391,7 +2391,7 @@ func loadJSONSchema(url string, client *http.Client) ([]byte, error) {
 }
 
 // JWTClaims converts Verifiable Credential into JWT Credential claims, which can be than serialized
-// e.g. into JWS.
+// e.g. into JWS. minimizeVC is ignored for VCDM 2.0 credentials, which are serialized as the complete claims set.
 // TODO: review JWT and SDJWT implementation. Do not expose claims externally.
 // TODO: JWTClaims not take to account "sub" claim from jwt, should it?
 func (vc *Credential) JWTClaims(minimizeVC bool) (*JWTCredClaims, error) {

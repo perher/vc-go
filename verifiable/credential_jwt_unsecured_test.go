@@ -73,3 +73,40 @@ func TestCredUnsecuredJWTDecoderParseJWTClaims(t *testing.T) {
 		require.Nil(t, vcBytes)
 	})
 }
+
+func TestParseCredentialFromUnsecuredJWTClaimsSet(t *testing.T) {
+	credential := map[string]interface{}{
+		"@context":          []interface{}{V2ContextURI},
+		"id":                "urn:uuid:7f1d3c2e-0d1c-4b5e-9a57-0f6a1d2c3b4a",
+		"type":              []interface{}{"VerifiableCredential"},
+		"issuer":            "did:example:76e12ec712ebc6f1c221ebfeb1f",
+		"validFrom":         "2026-01-02T03:04:05Z",
+		"credentialSubject": map[string]interface{}{"id": "did:example:ebfeb1f712ebc6f1c276e12ec21"},
+	}
+
+	sJWT, err := marshalUnsecuredJWT(credential)
+	require.NoError(t, err)
+
+	envelope, err := json.Marshal(map[string]interface{}{
+		"@context": []string{V2ContextURI},
+		"type":     []string{VCEnvelopedType},
+		"id":       NewDataURL(VCMediaTypeJWT, "", sJWT),
+	})
+	require.NoError(t, err)
+
+	tests := []struct {
+		name string
+		data []byte
+	}{
+		{name: "JWT", data: []byte(sJWT)},
+		{name: "enveloped JWT", data: envelope},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			vc, err := parseTestCredential(t, tc.data, WithDisabledProofCheck())
+			require.NoError(t, err)
+			require.Equal(t, credential, vc.ToRawJSON())
+		})
+	}
+}

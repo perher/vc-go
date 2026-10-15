@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 	"time"
 
@@ -30,7 +31,8 @@ const (
 	vcValidUntil          = "validUntil"
 )
 
-// JWTCredClaims is JWT Claims extension by Verifiable Credential (with custom "vc" claim).
+// JWTCredClaims is JWT Claims extension by Verifiable Credential. VCDM 1.1 credentials are nested in the custom
+// "vc" claim, VCDM 2.0 credentials are the claims set (https://www.w3.org/TR/vc-jose-cose/#securing-with-jose).
 type JWTCredClaims struct {
 	*jwt.Claims
 	VC map[string]interface{} `json:"vc,omitempty"`
@@ -76,12 +78,51 @@ func (jcc *JWTCredClaims) ToSDJWTV5CredentialPayload() ([]byte, error) {
 	return data, nil
 }
 
+// MarshalJSON defines custom marshalling of JWTCredClaims to JSON.
+// VCDM 2.0 credentials are marshalled as the claims set instead of the "vc" claim.
+func (jcc JWTCredClaims) MarshalJSON() ([]byte, error) {
+	claimMap := map[string]interface{}{}
+
+	if jcc.Claims != nil {
+		b, err := json.Marshal(jcc.Claims)
+		if err != nil {
+			return nil, fmt.Errorf("marshal jwt claims: %w", err)
+		}
+
+		if err := json.Unmarshal(b, &claimMap); err != nil {
+			return nil, fmt.Errorf("unmarshal jwt claims: %w", err)
+		}
+	}
+
+	if len(jcc.VC) > 0 {
+		if HasBaseContext(jcc.VC, V2ContextURI) {
+			maps.Copy(claimMap, jcc.VC)
+		} else {
+			claimMap["vc"] = jcc.VC
+		}
+	}
+
+	return json.Marshal(claimMap)
+}
+
+// marshalVCClaim marshals the claims with the credential nested in the "vc" claim regardless of VCDM version.
+func (jcc *JWTCredClaims) marshalVCClaim() ([]byte, error) {
+	type Alias JWTCredClaims
+
+	return json.Marshal((*Alias)(jcc))
+}
+
 // UnmarshalJSON defines custom unmarshalling of JWTCredClaims from JSON.
+// The credential is read from the "vc" claim or, when it is missing, from the remaining claims.
 // For SD-JWT case, it supports both v2 and v5 formats.
 func (jcc *JWTCredClaims) UnmarshalJSON(data []byte) error {
 	type Alias JWTCredClaims
 
 	alias := (*Alias)(jcc)
+
+	if alias.Claims == nil {
+		alias.Claims = &jwt.Claims{}
+	}
 
 	customFields := make(CustomFields)
 
@@ -98,7 +139,7 @@ func (jcc *JWTCredClaims) UnmarshalJSON(data []byte) error {
 }
 
 // newJWTCredClaims creates JWT Claims of VC with an option to minimize certain fields of VC
-// which is put into "vc" claim.
+// which is put into "vc" claim. VCDM 2.0 credentials are never minimized since the claims set must be the credential.
 func newJWTCredClaims(vc *Credential, minimizeVC bool) (*JWTCredClaims, error) {
 	vcc := &vc.credentialContents
 
@@ -125,7 +166,7 @@ func newJWTCredClaims(vc *Credential, minimizeVC bool) (*JWTCredClaims, error) {
 
 	credentialJSONCopy := jsonutil.ShallowCopyObj(vc.credentialJSON)
 
-	if minimizeVC {
+	if minimizeVC && !IsBaseContext(vcc.Context, V2ContextURI) {
 		delete(credentialJSONCopy, jsonFldExpired)
 		delete(credentialJSONCopy, jsonFldIssued)
 		delete(credentialJSONCopy, jsonFldValidUntil)
@@ -182,6 +223,14 @@ func decodeCredJWT(rawJWT string) (jose.Headers, []byte, error) {
 func (jcc *JWTCredClaims) refineFromJWTClaims() error {
 	vcMap := jcc.VC
 	claims := jcc.Claims
+
+	if vcMap == nil {
+		return errors.New("missing credential claims")
+	}
+
+	if claims == nil {
+		return nil
+	}
 
 	if iss := claims.Issuer; iss != "" {
 		err := refineVCIssuerFromJWTClaims(vcMap, iss)

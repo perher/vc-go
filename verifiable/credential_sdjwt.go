@@ -380,7 +380,7 @@ func makeSDJWT( //nolint:funlen,gocyclo
 	if opts.version == common.SDJWTVersionV5 {
 		claimBytes, err = claims.ToSDJWTV5CredentialPayload()
 	} else {
-		claimBytes, err = json.Marshal(claims)
+		claimBytes, err = claims.marshalVCClaim()
 	}
 
 	if err != nil {
