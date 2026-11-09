@@ -224,7 +224,7 @@ func getMatchedCreds( //nolint:gocyclo,funlen
 
 			passed, fltErr := filterSchema(inputDescriptor.Schema, []*verifiable.Credential{vc}, contextLoader)
 			if fltErr != nil {
-				return nil, err
+				return nil, fltErr
 			}
 
 			if len(passed) == 0 && !opts.DisableSchemaValidation {

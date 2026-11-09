@@ -71,20 +71,20 @@ func testCombinations(t *testing.T, n, m int) {
 	validateCombinations(t, n, m, combs)
 }
 
-func testCombinationSequence(t *testing.T, min, max, listLength int) {
-	combs := allCombinationsInLengthRange(min, max, listLength)
+func testCombinationSequence(t *testing.T, minLen, maxLen, listLength int) {
+	combs := allCombinationsInLengthRange(minLen, maxLen, listLength)
 
-	validateCombinationSequence(t, min, max, listLength, combs)
+	validateCombinationSequence(t, minLen, maxLen, listLength, combs)
 }
 
-func validateCombinationSequence(t *testing.T, min, max, n int, combs [][]int) {
-	if max > n {
-		max = n
+func validateCombinationSequence(t *testing.T, minLen, maxLen, n int, combs [][]int) {
+	if maxLen > n {
+		maxLen = n
 	}
 
 	currIdx := 0
 
-	for m := min; m <= max; m++ {
+	for m := minLen; m <= maxLen; m++ {
 		nextIdx := currIdx + nChooseM(n, m)
 
 		require.Less(t, nextIdx, len(combs)+1)

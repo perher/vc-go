@@ -10,20 +10,20 @@ package requirementlogic
 
 // allCombinationsInLengthRange returns a list of all k-combinations over an arbitrary list of length listLength,
 // for all k where min <= k <= max. Combinations are formatted as ordered lists of indices.
-func allCombinationsInLengthRange(min, max, listLength int) [][]int {
+func allCombinationsInLengthRange(minLen, maxLen, listLength int) [][]int {
 	totalSize := 0
 
-	if max > listLength {
-		max = listLength
+	if maxLen > listLength {
+		maxLen = listLength
 	}
 
-	for i := min; i <= max; i++ {
+	for i := minLen; i <= maxLen; i++ {
 		totalSize += nChooseM(listLength, i)
 	}
 
 	resultCombinations := make([][]int, 0, totalSize)
 
-	for k := min; k <= max; k++ {
+	for k := minLen; k <= maxLen; k++ {
 		kCombinations := getMCombinationsOfN(k, listLength)
 
 		resultCombinations = append(resultCombinations, kCombinations...)

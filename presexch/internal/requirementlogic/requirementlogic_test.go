@@ -279,18 +279,18 @@ func exhaustiveFindSolutions(req *RequirementLogic) SolutionSet {
 		descList = append(descList, s)
 	}
 
-	min := 1
-	max := len(descList)
+	minLen := 1
+	maxLen := len(descList)
 
 	if len(req.Nested) == 0 {
-		min, max = req.acceptInterval()
+		minLen, maxLen = req.acceptInterval()
 
-		if max == 0 {
-			max = len(descList)
+		if maxLen == 0 {
+			maxLen = len(descList)
 		}
 	}
 
-	subsets := allCombinationsInLengthRange(min, max, len(descList))
+	subsets := allCombinationsInLengthRange(minLen, maxLen, len(descList))
 
 	out := SolutionSet{}
 

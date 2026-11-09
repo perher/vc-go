@@ -12,6 +12,7 @@ import (
 	"crypto"
 	"crypto/sha256"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 
@@ -23,6 +24,7 @@ import (
 	"github.com/PaesslerAG/gval"
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/google/uuid"
+	"github.com/piprate/json-gold/ld"
 	"github.com/stretchr/testify/require"
 	"github.com/trustbloc/bbs-signature-go/bbs12381g2pub"
 	ldcontext "github.com/trustbloc/did-go/doc/ld/context"
@@ -3324,6 +3326,70 @@ func TestPresentationDefinition_Match_cwt(t *testing.T) {
 
 	require.Equal(t, "https://example.context.jsonld/account", matchedContext)
 	require.Equal(t, "banking", matchedDescriptor)
+}
+
+// failingDocumentLoader is an ld.DocumentLoader whose every load fails with err.
+type failingDocumentLoader struct {
+	err error
+}
+
+func (l *failingDocumentLoader) LoadDocument(string) (*ld.RemoteDocument, error) {
+	return nil, l.err
+}
+
+// Regression test: a schema filtering failure inside Match must be returned to the caller,
+// not swallowed into a (nil, nil) result.
+func TestPresentationDefinition_Match_SchemaFilterError(t *testing.T) {
+	verifierDefinitions := &PresentationDefinition{
+		InputDescriptors: []*InputDescriptor{
+			{
+				ID: "banking",
+				Schema: []*Schema{{
+					URI: "https://example.org/examples#Customer",
+				}},
+			},
+		},
+	}
+
+	vp, err := newPresentationSubmission(
+		&PresentationSubmission{DescriptorMap: []*InputDescriptorMapping{
+			{
+				ID:   "banking",
+				Path: "$.verifiableCredential[0]",
+			},
+		}},
+		fetchVC([]string{"https://example.context.jsonld/account"}, []string{"Customer"}),
+	)
+	require.NoError(t, err)
+
+	vpBytes, err := json.Marshal(vp)
+	require.NoError(t, err)
+
+	loader, err := ldtestutil.DocumentLoader(
+		ldcontext.Document{
+			URL:     "https://example.context.jsonld/account",
+			Content: []byte(exampleJSONLDContext),
+		},
+	)
+	require.NoError(t, err)
+
+	receivedVP, err := verifiable.ParsePresentation(vpBytes,
+		verifiable.WithPresDisabledProofCheck(),
+		verifiable.WithPresJSONLDDocumentLoader(loader),
+	)
+	require.NoError(t, err)
+
+	errLoad := errors.New("context loading failed")
+
+	// Credentials parse with the working loader, but the loader used for schema filtering fails.
+	matched, err := verifierDefinitions.Match(
+		[]*verifiable.Presentation{receivedVP}, &failingDocumentLoader{err: errLoad},
+		WithCredentialOptions(
+			verifiable.WithDisabledProofCheck(),
+			verifiable.WithJSONLDDocumentLoader(loader)),
+	)
+	require.ErrorIs(t, err, errLoad)
+	require.Nil(t, matched)
 }
 
 func getTestVCWithContext(t *testing.T, issuerID string, ctx []string) *verifiable.Credential {

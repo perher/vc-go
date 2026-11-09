@@ -231,10 +231,10 @@ func (b *BitsetSolutionIterator) excludeDescriptors(excludeIdx map[int]struct{})
 	excludeBit := &big.Int{}
 	excludeBit.SetBit(excludeBit, largestExcludeIdx, 1)
 
-	clear := &big.Int{}
-	clear.Sub(excludeBit, big.NewInt(1))
+	clearMask := &big.Int{}
+	clearMask.Sub(excludeBit, big.NewInt(1))
 
-	b.state.AndNot(b.state, clear)
+	b.state.AndNot(b.state, clearMask)
 
 	// add 1 << largestExcludeIdx
 	b.state.Add(b.state, excludeBit)
