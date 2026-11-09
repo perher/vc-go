@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/trustbloc/did-go/doc/ld/processor"
@@ -197,7 +198,7 @@ func buildVerificationData(blsProof map[string]any, docVerData *docVerificationD
 		revealIndexes[i+numberOfProofStatements] = numberOfProofStatements + docVerData.revealIndexes[i]
 	}
 
-	allInputStatements := append(proofStatements, docVerData.documentStatements...)
+	allInputStatements := slices.Concat(proofStatements, docVerData.documentStatements)
 	blsMessages := toArrayOfBytes(allInputStatements)
 
 	return &verificationData{
@@ -213,7 +214,7 @@ func buildDocVerificationData(docCompacted, revealDoc map[string]any,
 		return nil, fmt.Errorf("create verify document data: %w", err)
 	}
 
-	optionsWithBlankFrames := append(opts, processor.WithFrameBlankNodes())
+	optionsWithBlankFrames := append(slices.Clone(opts), processor.WithFrameBlankNodes())
 
 	revealDocumentResult, err := processor.Default().Frame(docCompacted, revealDoc, optionsWithBlankFrames...)
 	if err != nil {
