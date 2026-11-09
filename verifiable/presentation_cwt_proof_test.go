@@ -7,7 +7,6 @@ package verifiable
 
 import (
 	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,7 +37,7 @@ func TestParsePresentationFromCWS_EdDSA(t *testing.T) {
 	assert.NotNil(t, msg)
 
 	hexStr := hex.EncodeToString(cwtBytes)
-	fmt.Println(hexStr)
+	t.Log(hexStr)
 	// unmarshal presentation from JWS
 	vpFromJWS, err := newTestPresentation(t,
 		cwtBytes,

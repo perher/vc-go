@@ -140,9 +140,7 @@ func TestParse(t *testing.T) {
 
 	t.Run("error - applySDJWTV5Validation key binding supplied", func(t *testing.T) {
 		holderSigner, _, err := setUpHolderBinding()
-		if err != nil {
-			fmt.Println("failed to set-up test: %w", err.Error())
-		}
+		require.NoError(t, err)
 
 		holderVerification, err := CreateHolderVerification(&BindingInfo{
 			Payload: BindingPayload{

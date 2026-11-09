@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -153,7 +154,7 @@ func (r *Resolver) sendHTTPRequest(req *http.Request, status int, token string) 
 	defer func() {
 		e := resp.Body.Close()
 		if e != nil {
-			fmt.Printf("failed to close message body: %v", e)
+			log.Printf("vc-go/status/resolver: failed to close response body: %v", e)
 		}
 	}()
 

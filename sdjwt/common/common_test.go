@@ -1013,8 +1013,7 @@ func printObject(t *testing.T, name string, obj any) {
 	prettyJSON, err := prettyPrint(objBytes)
 	require.NoError(t, err)
 
-	fmt.Println(name + ":")
-	fmt.Println(prettyJSON)
+	t.Logf("%s:\n%s", name, prettyJSON)
 }
 
 func prettyPrint(msg []byte) (string, error) {

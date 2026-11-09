@@ -8,7 +8,6 @@ package dataintegrity
 
 import (
 	_ "embed"
-	"fmt"
 	"testing"
 	"time"
 
@@ -71,7 +70,7 @@ func TestIntegration(t *testing.T) {
 			return makeMockDIDResolution(id, p384VM, did.AssertionMethod), nil
 		}
 
-		fmt.Printf("DID: '%s'", id)
+		t.Logf("DID: '%s'", id)
 
 		return nil, ErrVMResolution
 	})

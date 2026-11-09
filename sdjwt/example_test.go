@@ -277,7 +277,7 @@ func setUpHolderBinding() (*testutil.Ed25519Signer, *jwk.JWK, error) {
 func marshalObj(obj any) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
-		fmt.Println("failed to marshal object: %w", err.Error())
+		return "", fmt.Errorf("failed to marshal object: %w", err)
 	}
 
 	return prettyPrint(objBytes)
