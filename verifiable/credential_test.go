@@ -1583,6 +1583,8 @@ func TestDownloadCustomSchema(t *testing.T) {
 	}}
 
 	t.Run("HTTP GET request to download custom credentialSchema successes", func(t *testing.T) {
+		t.Parallel()
+
 		testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			res.WriteHeader(http.StatusOK)
 			_, err := res.Write([]byte("custom schema"))
@@ -1597,6 +1599,8 @@ func TestDownloadCustomSchema(t *testing.T) {
 	})
 
 	t.Run("Check custom schema caching", func(t *testing.T) {
+		t.Parallel()
+
 		loadsCount := 0
 		testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			res.WriteHeader(http.StatusOK)
@@ -1618,24 +1622,26 @@ func TestDownloadCustomSchema(t *testing.T) {
 		require.Equal(t, 1, loadsCount)
 
 		// Check for cache expiration.
-		withCacheOpts = &credentialOpts{schemaLoader: &CredentialSchemaLoader{
+		expiringCacheOpts := &credentialOpts{schemaLoader: &CredentialSchemaLoader{
 			schemaDownloadClient: httpClient,
 			jsonLoader:           gojsonschema.NewStringLoader(JSONSchemaLoaderV1()),
 			cache:                NewExpirableSchemaCache(32*1024*1024, time.Second),
 		}}
 		loadsCount = 0
-		customSchema4, err := getJSONSchema(testServer.URL, withCacheOpts)
+		customSchema4, err := getJSONSchema(testServer.URL, expiringCacheOpts)
 		require.NoError(t, err)
 		require.Equal(t, []byte("custom schema"), customSchema4)
 
 		time.Sleep(2 * time.Second)
-		customSchema5, err := getJSONSchema(testServer.URL, withCacheOpts)
+		customSchema5, err := getJSONSchema(testServer.URL, expiringCacheOpts)
 		require.NoError(t, err)
 		require.Equal(t, []byte("custom schema"), customSchema5)
 		require.Equal(t, 2, loadsCount)
 	})
 
 	t.Run("HTTP GET request to download custom credentialSchema fails", func(t *testing.T) {
+		t.Parallel()
+
 		testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			res.WriteHeader(http.StatusSeeOther)
 		}))
@@ -1649,6 +1655,8 @@ func TestDownloadCustomSchema(t *testing.T) {
 	})
 
 	t.Run("HTTP GET request to download custom credentialSchema returns not OK", func(t *testing.T) {
+		t.Parallel()
+
 		// HTTP GET failed
 		testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			res.WriteHeader(http.StatusNotFound)
@@ -2141,9 +2149,11 @@ func TestParseCredentialFromRaw_PreserveDates(t *testing.T) {
 func TestCredential_validateCredential(t *testing.T) {
 	t.Parallel()
 
-	r := require.New(t)
-
 	t.Run("test jsonldValidation constraint", func(t *testing.T) {
+		t.Parallel()
+
+		r := require.New(t)
+
 		vc, err := parseTestCredential(t, []byte(v1ValidCredential), WithDisabledProofCheck())
 		r.NoError(err)
 
@@ -2178,6 +2188,10 @@ func TestCredential_validateCredential(t *testing.T) {
 	})
 
 	t.Run("test baseContextValidation constraint", func(t *testing.T) {
+		t.Parallel()
+
+		r := require.New(t)
+
 		vc, err := parseTestCredential(t, []byte(v1ValidCredential), WithDisabledProofCheck())
 		require.NoError(t, err)
 
@@ -2215,6 +2229,10 @@ func TestCredential_validateCredential(t *testing.T) {
 	})
 
 	t.Run("test baseContextExtendedValidation constraint", func(t *testing.T) {
+		t.Parallel()
+
+		r := require.New(t)
+
 		vc, err := parseTestCredential(t, []byte(v1ValidCredential), WithDisabledProofCheck())
 		require.NoError(t, err)
 
