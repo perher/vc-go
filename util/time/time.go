@@ -107,7 +107,7 @@ func (tm *TimeWrapper) FormatToString() string {
 		return tm.timeStr
 	}
 
-	return tm.Time.Format(time.RFC3339Nano)
+	return tm.Format(time.RFC3339Nano)
 }
 
 // ParseTimeWithTrailingZeroMsec parses a formatted string and returns the time value it represents.

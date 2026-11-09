@@ -1041,7 +1041,7 @@ func limitDisclosure(filterResults []constraintsFilterResult,
 		}
 
 		if constraints.LimitDisclosure.isRequired() &&
-			!(predicate || supportsSelectiveDisclosure(credential) || subjectIsIssuer(&credentialContents)) {
+			(!predicate && !supportsSelectiveDisclosure(credential) && !subjectIsIssuer(&credentialContents)) {
 			continue
 		}
 

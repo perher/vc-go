@@ -35,7 +35,7 @@ type UniversityDegreeCredential struct {
 }
 
 func (udc *UniversityDegreeCredential) MarshalJSON() ([]byte, error) {
-	raw := udc.Credential.ToRawJSON()
+	raw := udc.ToRawJSON()
 	raw["referenceNumber"] = udc.ReferenceNumber
 
 	vc, err := verifiable.ParseCredentialJSON(raw,

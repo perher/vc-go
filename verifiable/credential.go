@@ -1678,8 +1678,8 @@ func validateJSONLD(vcJSON JSONObject, vcc *CredentialContents, vcOpts *credenti
 
 	// TODO: docjsonld.ValidateJSONLDMap has bug that it modify contexts of input vcJSON. Fix in did-go
 	validateOpts := []docjsonld.ValidateOpts{
-		docjsonld.WithDocumentLoader(vcOpts.jsonldCredentialOpts.jsonldDocumentLoader),
-		docjsonld.WithExternalContext(vcOpts.jsonldCredentialOpts.externalContext),
+		docjsonld.WithDocumentLoader(vcOpts.jsonldDocumentLoader),
+		docjsonld.WithExternalContext(vcOpts.externalContext),
 		docjsonld.WithStrictValidation(vcOpts.strictValidation),
 		docjsonld.WithStrictContextURIPosition(baseContext),
 	}
