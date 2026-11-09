@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/go-jose/go-jose/v3/jwt"
@@ -18,13 +17,18 @@ import (
 )
 
 // JSONNumberToJwtNumericDate hook for mapstructure library to decode json.Number to jwt.NumericDate.
+// Both jwt.NumericDate and *jwt.NumericDate targets are supported. The source is matched by type name, so both
+// encoding/json.Number and go-jose's json.Number (used for parsed JWT payloads) are handled.
 func JSONNumberToJwtNumericDate() mapstructure.DecodeHookFuncType {
+	numericDateType := reflect.TypeFor[jwt.NumericDate]()
+	numericDatePtrType := reflect.TypeFor[*jwt.NumericDate]()
+
 	return func(
 		f reflect.Type,
 		t reflect.Type,
 		data any,
 	) (any, error) {
-		if f.String() != "json.Number" || !strings.Contains("jwt.NumericDate", t.String()) {
+		if f.String() != "json.Number" || (t != numericDateType && t != numericDatePtrType) {
 			return data, nil
 		}
 
@@ -35,10 +39,10 @@ func JSONNumberToJwtNumericDate() mapstructure.DecodeHookFuncType {
 
 		date := jwt.NewNumericDate(time.Unix(int64(parsedFloat), 0))
 
-		if t.String() == "jwt.NumericDate" {
-			return date, nil
+		if t == numericDateType {
+			return *date, nil
 		}
 
-		return &date, nil
+		return date, nil
 	}
 }
