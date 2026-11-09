@@ -227,9 +227,11 @@ linters:
         linters:
           - bodyclose
           - dupl
+          - errcheck
           - funlen
           - goconst
           - gosec
+          - mnd
           - noctx
           - wrapcheck
 issues:

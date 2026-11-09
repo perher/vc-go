@@ -129,7 +129,7 @@ func (es *ECDSASigner) Sign(msg []byte) ([]byte, error) {
 	return signEcdsa(msg, es.privateKey, es.hash)
 }
 
-//nolint:gomnd
+//nolint:mnd
 func signEcdsa(msg []byte, privateKey *ecdsa.PrivateKey, hash crypto.Hash) ([]byte, error) {
 	hasher := hash.New()
 	_, _ = hasher.Write(msg)
