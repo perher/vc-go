@@ -582,7 +582,7 @@ const (
 	// https://www.w3.org/TR/vc-json-schema/#jsonschema
 	jsonSchemaType = "JsonSchema"
 	// https://www.w3.org/TR/vc-json-schema/#jsonschemacredential
-	jsonSchemaCredentialType = "JsonSchemaCredential"
+	jsonSchemaCredentialType = "JsonSchemaCredential" //nolint:gosec // G101 false positive: a VC type name
 )
 
 const (
@@ -731,7 +731,7 @@ func (sc *ExpirableSchemaCache) Put(k string, v []byte) {
 	const numBytesTime = 8
 
 	b := make([]byte, numBytesTime)
-	binary.LittleEndian.PutUint64(b, uint64(expires))
+	binary.LittleEndian.PutUint64(b, uint64(expires)) //nolint:gosec // G115: reversed losslessly in Get
 
 	ve := make([]byte, numBytesTime+len(v))
 	copy(ve[:numBytesTime], b)
@@ -750,7 +750,7 @@ func (sc *ExpirableSchemaCache) Get(k string) ([]byte, bool) {
 
 	const numBytesTime = 8
 
-	expires := int64(binary.LittleEndian.Uint64(b[:numBytesTime]))
+	expires := int64(binary.LittleEndian.Uint64(b[:numBytesTime])) //nolint:gosec // G115: written from an int64 in Put
 	if expires < time.Now().Unix() {
 		// cache expires
 		sc.cache.Del([]byte(k))

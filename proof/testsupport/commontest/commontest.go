@@ -32,6 +32,7 @@ import (
 	cwt2 "github.com/trustbloc/vc-go/verifiable/cwt"
 )
 
+//nolint:gosec // G101 false positive: a test credential document, not a secret
 const testCredential = `
 {
 	"@context": [

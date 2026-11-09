@@ -28,11 +28,11 @@ const (
 	PresentationSubmissionJSONLDContextIRI = "https://identity.foundation/presentation-exchange/submission/v1"
 	// CredentialApplicationJSONLDContextIRI is the JSONLD context of credential application
 	// which also contains presentation submission details.
-	CredentialApplicationJSONLDContextIRI = "https://identity.foundation/credential-manifest/application/v1"
+	CredentialApplicationJSONLDContextIRI = "https://identity.foundation/credential-manifest/application/v1" //nolint:gosec // G101 false positive
 	// PresentationSubmissionJSONLDType is the JSONLD type of presentation submissions.
 	PresentationSubmissionJSONLDType = "PresentationSubmission"
 	// CredentialApplicationJSONLDType is the JSONLD type of credential application.
-	CredentialApplicationJSONLDType = "CredentialApplication"
+	CredentialApplicationJSONLDType = "CredentialApplication" //nolint:gosec // G101 false positive
 
 	submissionProperty    = "presentation_submission"
 	descriptorMapProperty = "descriptor_map"

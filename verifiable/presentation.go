@@ -555,7 +555,7 @@ const (
 	vpFldContext    = "@context"
 	vpFldID         = "id"
 	vpFldType       = "type"
-	vpFldCredential = "verifiableCredential"
+	vpFldCredential = "verifiableCredential" //nolint:gosec // G101 false positive: a JSON field name
 	vpFldHolder     = "holder"
 	vpFldProof      = "proof"
 )
