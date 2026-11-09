@@ -209,8 +209,8 @@ func (r *RelatedResourceValidator) validateHash(
 		return fmt.Errorf("unsupported hash algorithm: %s", hashAlgo)
 	}
 
-	hasHeader := enc == multibase.Base64url && decodedDigest[0] == multihashSHA256Code &&
-		decodedDigest[1] == sha256.Size
+	hasHeader := enc == multibase.Base64url && len(decodedDigest) >= multihashHeaderLen &&
+		decodedDigest[0] == multihashSHA256Code && decodedDigest[1] == sha256.Size
 	if hasHeader { // skip header
 		decodedDigest = decodedDigest[multihashHeaderLen:]
 	}

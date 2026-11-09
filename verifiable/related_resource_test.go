@@ -167,6 +167,32 @@ func TestValidateRelatedResources(t *testing.T) {
 		assert.ErrorContains(t, err, "selected encoding not supported")
 	})
 
+	t.Run("multibase digest shorter than a multihash header", func(t *testing.T) {
+		for _, digest := range []string{"u", "uEg"} { // decode to 0 and 1 bytes
+			cred, err := verifiable.CreateCredential(verifiable.CredentialContents{
+				RelatedResources: []verifiable.RelatedResource{
+					{
+						Id:              "https://www.w3.org/ns/credentials/examples/v2",
+						DigestMultiBase: digest,
+					},
+				},
+			}, nil)
+			assert.NoError(t, err)
+
+			cl := NewMockhttpClient(gomock.NewController(t))
+			cl.EXPECT().Do(gomock.Any()).DoAndReturn(contentFn).Times(1)
+
+			validator := verifiable.NewRelatedResourceValidator(
+				verifiable.WithHTTPClient(cl),
+			)
+
+			assert.NotPanics(t, func() {
+				err = validator.Validate([]*verifiable.Credential{cred})
+			}, digest)
+			assert.ErrorContains(t, err, "hash mismatch", digest)
+		}
+	})
+
 	t.Run("invalid unsupported hash", func(t *testing.T) {
 		cred, err := verifiable.CreateCredential(verifiable.CredentialContents{
 			RelatedResources: []verifiable.RelatedResource{
