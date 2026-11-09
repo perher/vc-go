@@ -1054,16 +1054,7 @@ func limitDisclosure(filterResults []constraintsFilterResult,
 			template := credentialSrc
 
 			if constraints.LimitDisclosure.isRequired() {
-				var (
-					contexts []any
-					err      error
-				)
-
-				for _, ctx := range credentialContents.Context {
-					contexts = append(contexts, ctx)
-				}
-
-				contexts = append(contexts, credentialContents.CustomContext...)
+				var err error
 
 				templateObj := jsonutil.Select(credential.ToRawJSON(),
 					"id",
@@ -1533,7 +1524,7 @@ func checkPathValue(
 		}
 	}
 
-	if !strings.HasPrefix(path, "$") && !strings.HasPrefix("@", path) {
+	if !strings.HasPrefix(path, "$") && !strings.HasPrefix(path, "@") {
 		return errors.New("expected $ or @ at start of path")
 	}
 
