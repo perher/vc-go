@@ -133,8 +133,13 @@ func GetDisclosureClaims(
 		return nil, err
 	}
 
+	claimsByDigest := make(map[string]*DisclosureClaim, len(disclosureClaims))
+	for _, claim := range disclosureClaims {
+		claimsByDigest[claim.Digest] = claim
+	}
+
 	recData := &recursiveData{
-		disclosures:          disclosureClaims,
+		disclosures:          claimsByDigest,
 		cleanupDigestsClaims: true,
 	}
 
@@ -144,13 +149,7 @@ func GetDisclosureClaims(
 		}
 	}
 
-	final := make([]*DisclosureClaim, 0, len(disclosureClaims))
-
-	for _, disclosureClaim := range recData.disclosures {
-		final = append(final, disclosureClaim)
-	}
-
-	return final, nil
+	return disclosureClaims, nil
 }
 
 // ParseCombinedFormatForIssuance parses combined format for issuance into CombinedFormatForIssuance parts.

@@ -109,8 +109,13 @@ func VerifyDisclosuresInSDJWT(
 		return err
 	}
 
+	claimsByDigest := make(map[string]*DisclosureClaim, len(parsedDisclosureClaims))
+	for _, claim := range parsedDisclosureClaims {
+		claimsByDigest[claim.Digest] = claim
+	}
+
 	recData := &recursiveData{
-		disclosures:          parsedDisclosureClaims,
+		disclosures:          claimsByDigest,
 		cleanupDigestsClaims: false,
 	}
 
@@ -289,10 +294,11 @@ func discloseClaimValue(claim any, recData *recursiveData) (any, error) { // nol
 	}
 }
 
-// getDisclosureClaims parses disclosures and returns map[string]*DisclosureClaim,
-// where the key is disclosure digest calculated using provided hash.
-func getDisclosureClaims(disclosures []string, hash crypto.Hash) (map[string]*DisclosureClaim, error) {
-	wrappedClaims := make(map[string]*DisclosureClaim, len(disclosures))
+// getDisclosureClaims parses disclosures and returns them in input order, with each claim's digest
+// calculated using provided hash. A disclosure repeated in the input is returned once, at its first position.
+func getDisclosureClaims(disclosures []string, hash crypto.Hash) ([]*DisclosureClaim, error) {
+	claims := make([]*DisclosureClaim, 0, len(disclosures))
+	seen := make(map[string]struct{}, len(disclosures))
 
 	for _, disclosure := range disclosures {
 		claim, err := getDisclosureClaim(disclosure, hash)
@@ -300,10 +306,15 @@ func getDisclosureClaims(disclosures []string, hash crypto.Hash) (map[string]*Di
 			return nil, err
 		}
 
-		wrappedClaims[claim.Digest] = claim
+		if _, ok := seen[claim.Digest]; ok {
+			continue
+		}
+
+		seen[claim.Digest] = struct{}{}
+		claims = append(claims, claim)
 	}
 
-	return wrappedClaims, nil
+	return claims, nil
 }
 
 // getDisclosureClaim parses disclosure and returns *DisclosureClaim.

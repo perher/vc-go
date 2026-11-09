@@ -194,6 +194,41 @@ func TestGetDisclosureClaims(t *testing.T) {
 		}, address.Value)
 	})
 
+	t.Run("preserves input order", func(t *testing.T) {
+		rq := require.New(t)
+
+		var disData []string
+		rq.NoError(json.Unmarshal(fullDisclosuresV5TestData, &disData))
+
+		reversed := make([]string, len(disData))
+		for i, d := range disData {
+			reversed[len(disData)-1-i] = d
+		}
+
+		withDuplicate := append(append([]string{}, disData...), disData[0])
+
+		for name, input := range map[string][]string{
+			"original": disData,
+			"reversed": reversed,
+		} {
+			parsed, err := GetDisclosureClaims(input, crypto.SHA256)
+			rq.NoError(err, name)
+			rq.Len(parsed, len(input), name)
+
+			for i := range input {
+				rq.Equal(input[i], parsed[i].Disclosure, "%s: disclosure %d out of order", name, i)
+			}
+		}
+
+		parsed, err := GetDisclosureClaims(withDuplicate, crypto.SHA256)
+		rq.NoError(err)
+		rq.Len(parsed, len(disData), "duplicate disclosure must be returned once")
+
+		for i := range disData {
+			rq.Equal(disData[i], parsed[i].Disclosure)
+		}
+	})
+
 	t.Run("array element and one value missing V5", func(t *testing.T) {
 		// - 	"WyJ5WElBaTZSb1Y1eDV2X3lsVm1wXzhBIiwibG9jYWxpdHkiLCJTY2h1bHBmb3J0YSJd" locality
 		// - 	"WyJURWtwSjJkYWxraGltUUVLd25Cblp3IiwiVUEiXQ", UA
