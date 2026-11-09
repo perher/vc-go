@@ -47,9 +47,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	mathrand "math/rand"
+	"math/big"
 	"strings"
-	"time"
 
 	"github.com/go-jose/go-jose/v3/jwt"
 
@@ -71,8 +70,6 @@ const (
 	credentialSubjectKey = "credentialSubject"
 	vcKey                = "vc"
 )
-
-var mr = mathrand.New(mathrand.NewSource(time.Now().Unix())) // nolint:gochecknoglobals
 
 // Claims defines JSON Web Token Claims (https://tools.ietf.org/html/rfc7519#section-4)
 type Claims jwt.Claims
@@ -504,11 +501,36 @@ func createDigests(disclosures []*DisclosureEntity, nOpts *newOpts) ([]string, e
 		digests = append(digests, digest)
 	}
 
-	mr.Shuffle(len(digests), func(i, j int) {
-		digests[i], digests[j] = digests[j], digests[i]
-	})
+	if err := shuffle(digests); err != nil {
+		return nil, fmt.Errorf("shuffle digests: %w", err)
+	}
 
 	return digests, nil
+}
+
+// shuffle randomly permutes s in place (Fisher-Yates) using crypto/rand, so the order of
+// digests does not reveal the order of the original claims.
+func shuffle(s []string) error {
+	for i := len(s) - 1; i > 0; i-- {
+		j, err := randomInt(i + 1)
+		if err != nil {
+			return err
+		}
+
+		s[i], s[j] = s[j], s[i]
+	}
+
+	return nil
+}
+
+// randomInt returns a uniformly distributed random int in [0, n) using crypto/rand.
+func randomInt(n int) (int, error) {
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(n)))
+	if err != nil {
+		return 0, fmt.Errorf("generate random number: %w", err)
+	}
+
+	return int(v.Int64()), nil
 }
 
 func createDigest(disclosure *DisclosureEntity, nOpts *newOpts) (string, error) {
@@ -527,7 +549,12 @@ func createDecoyDisclosures(opts *newOpts) ([]*DisclosureEntity, error) {
 		return nil, nil
 	}
 
-	n := mr.Intn(decoyMaxElements-decoyMinElements+1) + decoyMinElements
+	n, err := randomInt(decoyMaxElements - decoyMinElements + 1)
+	if err != nil {
+		return nil, fmt.Errorf("decoy digests count: %w", err)
+	}
+
+	n += decoyMinElements
 
 	var decoyDisclosures []*DisclosureEntity
 
