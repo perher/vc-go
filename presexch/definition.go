@@ -1473,7 +1473,9 @@ func filterField(f *Field, credential map[string]any, isJWTCredential bool) erro
 	return lastErr
 }
 
-// deprecated: convertToRFC9535Format converts path to RFC 9535 format.
+// convertToRFC9535Format converts path to RFC 9535 format.
+//
+// Deprecated: kept for pre-RFC 9535 paths; remove once profile presentations use RFC 9535 format.
 func convertToRFC9535Format(path string) string {
 	var builder strings.Builder
 
@@ -1514,12 +1516,9 @@ func checkPathValue(
 			path = strings.Replace(path, old, newVal, 1)
 		}
 
-		if strings.EqualFold(path, "$.issuer") {
-			switch issuerFld := credential["issuer"].(type) {
-			case map[string]any:
-				if _, ok := issuerFld["id"]; ok {
-					path = "$.issuer.id"
-				}
+		if issuerFld, isMap := credential["issuer"].(map[string]any); isMap && strings.EqualFold(path, "$.issuer") {
+			if _, ok := issuerFld["id"]; ok {
+				path = "$.issuer.id"
 			}
 		}
 	}

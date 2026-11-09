@@ -332,8 +332,7 @@ func GetDisclosureDigests(claims map[string]any) (map[string]bool, error) {
 
 	// Find all array elements that are objects with one key, that key being ... and referring to a string.
 	for _, v := range claims {
-		switch t := v.(type) {
-		case []any:
+		if t, isArray := v.([]any); isArray {
 			for _, vv := range t {
 				valueMapped, ok := vv.(map[string]any)
 				if !ok {

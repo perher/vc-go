@@ -317,8 +317,7 @@ func findAndAppendSDElementDigest(claimsMap map[string]any, additionalDigest ...
 	}
 
 	for _, v := range claimsMap {
-		switch t := v.(type) {
-		case map[string]any:
+		if t, isMap := v.(map[string]any); isMap {
 			if ok := findAndAppendSDElementDigest(t, additionalDigest...); ok {
 				return ok
 			}

@@ -205,11 +205,12 @@ func getMatchedCreds( //nolint:gocyclo,funlen
 				selectErr error
 			)
 
-			if descriptorMappingExpectsVPList(mapping) {
+			switch {
+			case descriptorMappingExpectsVPList(mapping):
 				vc, selectErr = selectVC(rawVPs, mapping, opts)
-			} else if len(vpList) == 1 || !useMergedSubmission {
+			case len(vpList) == 1 || !useMergedSubmission:
 				vc, selectErr = selectVC(typelessVP, mapping, opts)
-			} else {
+			default:
 				return nil, errors.New("presentation submission has invalid path for matching a list of presentations")
 			}
 

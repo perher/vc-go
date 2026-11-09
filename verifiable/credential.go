@@ -2732,9 +2732,10 @@ func (vc *Credential) WithModifiedStatus(status ...*TypedID) *Credential {
 
 	newContents.Status = statuses
 
-	if len(statuses) == 1 {
+	switch {
+	case len(statuses) == 1:
 		newCredJSON[jsonFldStatus] = serializeTypedIDObj(*statuses[0])
-	} else if len(statuses) > 1 {
+	case len(statuses) > 1:
 		statusObjects := make([]any, len(statuses))
 
 		for i, s := range statuses {
@@ -2742,7 +2743,7 @@ func (vc *Credential) WithModifiedStatus(status ...*TypedID) *Credential {
 		}
 
 		newCredJSON[jsonFldStatus] = statusObjects
-	} else {
+	default:
 		delete(newCredJSON, jsonFldStatus)
 	}
 
