@@ -75,7 +75,7 @@ func deterministicBinaryString(data cbor.RawMessage) (cbor.RawMessage, error) { 
 	}
 
 	// fast path: return immediately if bstr is already deterministic
-	if err := decModeWithTagsForbidden.Valid(data); err != nil {
+	if err := decModeWithTagsForbidden.Wellformed(data); err != nil {
 		return nil, err
 	}
 

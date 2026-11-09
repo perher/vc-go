@@ -222,7 +222,7 @@ func TestAllCWTSignersVerifiers(t *testing.T) {
 	proofCreators, proofChecker := testsupport.NewKMSSignersAndVerifier(t, allKeyTypes)
 
 	testCases := []cwtTestCase{
-		{Alg: verifiable.EdDSA, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], CborAlg: cose.AlgorithmEd25519},
+		{Alg: verifiable.EdDSA, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], CborAlg: cose.AlgorithmEdDSA},
 		{Alg: verifiable.ECDSASecp256r1, proofCreator: proofCreators[1], signingKey: allKeyTypes[1], CborAlg: cose.AlgorithmES256},
 		{Alg: verifiable.ECDSASecp384r1, proofCreator: proofCreators[3], signingKey: allKeyTypes[3], CborAlg: cose.AlgorithmES384},
 	}
