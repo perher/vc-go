@@ -169,6 +169,9 @@ func TestAllJWTSignersVerifiers(t *testing.T) {
 
 	proofCreators, proofChecker := testsupport.NewKMSSignersAndVerifier(t, allKeyTypes)
 
+	// unsupportedJWSAlg is outside the range of defined verifiable.JWSAlgorithm values.
+	const unsupportedJWSAlg verifiable.JWSAlgorithm = 10
+
 	testCases := []jwtTestCase{
 		{Alg: verifiable.EdDSA, proofCreator: proofCreators[0], signingKey: allKeyTypes[0]},
 		{Alg: verifiable.ECDSASecp256r1, proofCreator: proofCreators[1], signingKey: allKeyTypes[1]},
@@ -178,7 +181,7 @@ func TestAllJWTSignersVerifiers(t *testing.T) {
 		{Alg: verifiable.RS256, proofCreator: proofCreators[5], signingKey: allKeyTypes[5]},
 
 		{Alg: verifiable.ECDSASecp256r1, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], verFail: true},
-		{Alg: verifiable.JWSAlgorithm(10), proofCreator: proofCreators[0], signingKey: allKeyTypes[0], fail: true},
+		{Alg: unsupportedJWSAlg, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], fail: true},
 	}
 
 	for _, testCase := range testCases {

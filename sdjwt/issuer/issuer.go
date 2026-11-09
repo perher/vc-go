@@ -67,6 +67,8 @@ const (
 	decoyMinElements = 1
 	decoyMaxElements = 4
 
+	saltSizeBytes = 128 / 8 // 128-bit salt, as recommended by the SD-JWT spec
+
 	credentialSubjectKey = "credentialSubject"
 	vcKey                = "vc"
 )

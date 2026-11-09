@@ -48,7 +48,7 @@ func (s *SDJWTBuilderV2) GenerateSalt() (string, error) {
 // NewSDJWTBuilderV2 returns new instance of SDJWTBuilderV2.
 func NewSDJWTBuilderV2() *SDJWTBuilderV2 {
 	return &SDJWTBuilderV2{
-		defaultSaltSize: 128 / 8,
+		defaultSaltSize: saltSizeBytes,
 	}
 }
 

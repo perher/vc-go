@@ -45,6 +45,10 @@ const (
 	arrayDigestValuePosition = 1
 	sdDigestNamePosition     = 1
 	sdDigestValuePosition    = 2
+
+	// sdJWTAndHolderBindingParts is the number of combined format for presentation parts that are not disclosures:
+	// the SD-JWT itself and the trailing holder binding.
+	sdJWTAndHolderBindingParts = 2
 )
 
 // DisclosureClaimType disclosure claim type, used for sd-jwt v5+.
@@ -168,7 +172,7 @@ func ParseCombinedFormatForPresentation(combinedFormatForPresentation string) *C
 	parts := strings.Split(combinedFormatForPresentation, CombinedFormatSeparator)
 
 	var disclosures []string
-	if len(parts) > 2 {
+	if len(parts) > sdJWTAndHolderBindingParts {
 		disclosures = parts[1 : len(parts)-1]
 	}
 

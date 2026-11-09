@@ -29,7 +29,7 @@ func (s *SDJWTBuilderV5) GenerateSalt() (string, error) {
 // NewSDJWTBuilderV5 returns new instance of SDJWTBuilderV5.
 func NewSDJWTBuilderV5() *SDJWTBuilderV5 {
 	return &SDJWTBuilderV5{
-		saltSize: 128 / 8,
+		saltSize: saltSizeBytes,
 	}
 }
 

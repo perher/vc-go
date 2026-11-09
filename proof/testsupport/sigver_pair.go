@@ -51,6 +51,8 @@ import (
 const (
 	// AnyPubKeyID indicated that proof checker should ignore pub key id when looking for verification method.
 	AnyPubKeyID = "anyID"
+
+	rsaKeyBits = 2048
 )
 
 // VMResolver mock verification method resolver.
@@ -333,7 +335,7 @@ func NewKMSSignersAndVerifierErr(signingKeys []*SigningKey) (
 }
 
 func rsa256PairDesc(publicKeyID *SigningKey) (*creator.ProofCreator, mockedVerificationMethod, error) {
-	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privKey, err := rsa.GenerateKey(rand.Reader, rsaKeyBits)
 	if err != nil {
 		return nil, mockedVerificationMethod{}, err
 	}

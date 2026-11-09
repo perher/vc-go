@@ -322,7 +322,7 @@ func getDisclosureClaim(disclosure string, hash crypto.Hash) (*DisclosureClaim, 
 
 	if len(disclosureArr) < disclosureElementsAmountForArrayDigest {
 		return nil, fmt.Errorf("disclosure array size[%d] must be greater %d", len(disclosureArr),
-			2)
+			disclosureElementsAmountForArrayDigest)
 	}
 
 	salt, ok := disclosureArr[saltPosition].(string)

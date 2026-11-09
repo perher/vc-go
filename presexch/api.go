@@ -448,13 +448,12 @@ func rootIndex(jsonPathStr string) int {
 		return -1
 	}
 
-	split := strings.SplitN(jsonPathStr[2:], "]", 2)
-
-	if len(split) == 0 || split[0] == "" {
+	index, _, _ := strings.Cut(jsonPathStr[2:], "]")
+	if index == "" {
 		return -1
 	}
 
-	result, err := strconv.Atoi(split[0])
+	result, err := strconv.Atoi(index)
 	if err != nil {
 		return -1
 	}

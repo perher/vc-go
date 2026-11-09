@@ -1922,7 +1922,7 @@ func typeFoundInContext(typ string, ctxObj *ld.Context) ([]string, error) {
 }
 
 func getContext(contextURI string, documentLoader ld.DocumentLoader) (*ld.Context, error) {
-	contextURI = strings.SplitN(contextURI, "#", 2)[0]
+	contextURI, _, _ = strings.Cut(contextURI, "#")
 
 	remoteDoc, err := documentLoader.LoadDocument(contextURI)
 	if err != nil {

@@ -23,6 +23,18 @@ import (
 // nolint:gochecknoglobals
 var DefaultRelatedResourceValidator = NewRelatedResourceValidator()
 
+const (
+	defaultCacheSize = 100
+	defaultCacheTTL  = time.Minute
+
+	// sriParts is the number of parts in a digestSRI value: "<hash algorithm>-<digest>".
+	sriParts = 2
+
+	// A multihash SHA2-256 digest starts with a 2-byte header: the function code and the digest length.
+	multihashSHA256Code = 0x12
+	multihashHeaderLen  = 2
+)
+
 type RelatedResourceValidator struct {
 	cfg *RelatedResourceValidatorOptions
 }
@@ -55,7 +67,7 @@ func NewRelatedResourceValidator(
 ) *RelatedResourceValidator {
 	option := &RelatedResourceValidatorOptions{
 		HTTPClient: http.DefaultClient,
-		Cache:      expirable.NewLRU[string, *CachedResource](100, nil, 1*time.Minute),
+		Cache:      expirable.NewLRU[string, *CachedResource](defaultCacheSize, nil, defaultCacheTTL),
 	}
 	for _, o := range opts {
 		o(option)
@@ -159,7 +171,7 @@ func (r *RelatedResourceValidator) validateSingleResource(
 	if res.DigestSRI != "" {
 		sp := strings.Split(res.DigestSRI, "-")
 
-		if len(sp) != 2 {
+		if len(sp) != sriParts {
 			return fmt.Errorf("invalid digest SRI format: %s", res.DigestSRI)
 		}
 
@@ -197,9 +209,10 @@ func (r *RelatedResourceValidator) validateHash(
 		return fmt.Errorf("unsupported hash algorithm: %s", hashAlgo)
 	}
 
-	hasHeader := enc == multibase.Base64url && decodedDigest[0] == 0x12 && decodedDigest[1] == 0x20
+	hasHeader := enc == multibase.Base64url && decodedDigest[0] == multihashSHA256Code &&
+		decodedDigest[1] == sha256.Size
 	if hasHeader { // skip header
-		decodedDigest = decodedDigest[2:]
+		decodedDigest = decodedDigest[multihashHeaderLen:]
 	}
 
 	if !bytes.Equal(rawHash, decodedDigest) {
