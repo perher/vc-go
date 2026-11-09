@@ -4,7 +4,7 @@
 
 module github.com/trustbloc/vc-go
 
-go 1.25.3
+go 1.26
 
 require (
 	github.com/PaesslerAG/gval v1.2.4
