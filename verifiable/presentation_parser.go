@@ -148,10 +148,8 @@ func (p *PresentationCWTParser) parse(vpData []byte, _ *presentationOpts) (*pars
 
 	convertedMap := convertToStringMap(vpMap)
 
-	vpContent, ok := convertedMap["vp"].(map[string]any)
-	if !ok {
-		// do nothing
-	}
+	// A missing or non-object "vp" claim leaves VPRaw nil; ParsePresentation then rejects it during validation.
+	vpContent, _ := convertedMap["vp"].(map[string]any)
 
 	return &parsePresentationResponse{
 		VPDataDecoded: vpData,
