@@ -387,14 +387,14 @@ func makeSDJWT( //nolint:funlen,gocyclo
 		return nil, err
 	}
 
-	claimMap := map[string]interface{}{}
+	claimMap := map[string]any{}
 
 	err = json.Unmarshal(claimBytes, &claimMap)
 	if err != nil {
 		return nil, err
 	}
 
-	headers := map[string]interface{}{
+	headers := map[string]any{
 		jose.HeaderKeyID: signingKeyID,
 	}
 
@@ -503,7 +503,7 @@ func (vc *Credential) CreateDisplayCredential( // nolint:funlen,gocyclo
 		return nil, fmt.Errorf("assembling disclosed claims into vc: %w", err)
 	}
 
-	if subj, ok := newVCObj["credentialSubject"].(map[string]interface{}); ok {
+	if subj, ok := newVCObj["credentialSubject"].(map[string]any); ok {
 		clearEmpty(subj)
 	}
 
@@ -531,7 +531,7 @@ func (vc *Credential) CreateDisplayCredential( // nolint:funlen,gocyclo
 // If the calling Credential is not an SD-JWT credential, this method returns the credential itself.
 func (vc *Credential) CreateDisplayCredentialMap( // nolint:funlen,gocyclo
 	opts ...DisplayCredentialOption,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	options := &displayCredOpts{}
 
 	for _, opt := range opts {
@@ -565,7 +565,7 @@ func (vc *Credential) CreateDisplayCredentialMap( // nolint:funlen,gocyclo
 		return nil, fmt.Errorf("assembling disclosed claims into vc: %w", err)
 	}
 
-	if subj, ok := newVCObj["credentialSubject"].(map[string]interface{}); ok {
+	if subj, ok := newVCObj["credentialSubject"].(map[string]any); ok {
 		clearEmpty(subj)
 	}
 
@@ -594,9 +594,9 @@ func filterDisclosureList(disclosures []*common.DisclosureClaim, options *displa
 	return out
 }
 
-func clearEmpty(claims map[string]interface{}) {
+func clearEmpty(claims map[string]any) {
 	for name, value := range claims {
-		if valueObj, ok := value.(map[string]interface{}); ok {
+		if valueObj, ok := value.(map[string]any); ok {
 			clearEmpty(valueObj)
 
 			if len(valueObj) == 0 {

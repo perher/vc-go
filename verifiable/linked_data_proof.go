@@ -40,10 +40,10 @@ type LinkedDataProofContext struct {
 	Domain                  string                  // optional
 	Purpose                 string                  // optional
 	// CapabilityChain must be an array. Each element is either a string or an object.
-	CapabilityChain []interface{}
+	CapabilityChain []any
 }
 
-func checkLinkedDataProof(jsonldBytes map[string]interface{},
+func checkLinkedDataProof(jsonldBytes map[string]any,
 	proofChecker lddocument.ProofChecker, expectedProofIssuer *string, jsonldOpts *jsonldCredentialOpts) error {
 	documentVerifier := lddocument.NewDocumentVerifier(proofChecker)
 

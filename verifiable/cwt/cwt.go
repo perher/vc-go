@@ -25,7 +25,7 @@ func GetProofValue(message *cose.Sign1Message) ([]byte, error) {
 		return nil, err
 	}
 
-	sigStructure := []interface{}{
+	sigStructure := []any{
 		"Signature1",      // context
 		cborProtectedData, // body_protected
 		[]byte{},          // external_aad

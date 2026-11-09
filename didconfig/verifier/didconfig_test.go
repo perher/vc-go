@@ -202,7 +202,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 			Expired: afgotime.NewTime(time.Now().Add(time.Hour)),
 			Context: []string{verifiable.V1ContextURI, ContextV1},
 			Types:   []string{verifiable.VCType, domainLinkageCredentialType},
-			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]interface{}{"origin": testJWTDomain}}},
+			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]any{"origin": testJWTDomain}}},
 			Issuer:  &verifiable.Issuer{ID: testDID},
 		}, nil)
 		require.NoError(t, err)
@@ -243,7 +243,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 			Expired: afgotime.NewTime(time.Now().Add(time.Hour)),
 			Context: []string{verifiable.V1ContextURI, ContextV1},
 			Types:   []string{verifiable.VCType, domainLinkageCredentialType},
-			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]interface{}{"origin": testJWTDomain}}},
+			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]any{"origin": testJWTDomain}}},
 			Issuer:  &verifiable.Issuer{ID: testDID},
 		}, nil)
 		require.NoError(t, err)
@@ -268,7 +268,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 		token, err = afgjwt.NewSigned(jwtClaims, afgjwt.SignParameters{
 			KeyID:             testKID,
 			JWTAlg:            "EdDSA",
-			AdditionalHeaders: map[string]interface{}{"typ": "whatever"},
+			AdditionalHeaders: map[string]any{"typ": "whatever"},
 		}, ed25519ProofCreator)
 		require.NoError(t, err)
 
@@ -288,7 +288,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 			Expired: afgotime.NewTime(time.Now().Add(time.Hour)),
 			Context: []string{verifiable.V1ContextURI, ContextV1},
 			Types:   []string{verifiable.VCType, domainLinkageCredentialType},
-			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]interface{}{"origin": testJWTDomain}}},
+			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]any{"origin": testJWTDomain}}},
 			Issuer:  &verifiable.Issuer{ID: testDID},
 		}, nil)
 		require.NoError(t, err)
@@ -313,7 +313,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 		joseSig, err := afgjwt.NewJOSESigner(afgjwt.SignParameters{JWTAlg: "EdDSA"}, ed25519ProofCreator)
 		require.NoError(t, err)
 
-		token, err = afgjwt.NewJoseSigned(jwtClaims, map[string]interface{}{"alg": nil}, joseSig)
+		token, err = afgjwt.NewJoseSigned(jwtClaims, map[string]any{"alg": nil}, joseSig)
 		require.NoError(t, err)
 
 		jwt, err = token.Serialize(false)
@@ -332,7 +332,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 			Expired: afgotime.NewTime(time.Now().Add(time.Hour)),
 			Context: []string{verifiable.V1ContextURI, ContextV1},
 			Types:   []string{verifiable.VCType, domainLinkageCredentialType},
-			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]interface{}{"origin": testJWTDomain}}},
+			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]any{"origin": testJWTDomain}}},
 			Issuer:  &verifiable.Issuer{ID: testDID},
 		}, nil)
 		require.NoError(t, err)
@@ -367,7 +367,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 			Expired: afgotime.NewTime(time.Now().Add(time.Hour)),
 			Context: []string{verifiable.V1ContextURI, ContextV1},
 			Types:   []string{verifiable.VCType, domainLinkageCredentialType},
-			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]interface{}{"origin": testJWTDomain}}},
+			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]any{"origin": testJWTDomain}}},
 			Issuer:  &verifiable.Issuer{ID: testDID},
 		}, nil)
 		require.NoError(t, err)
@@ -380,7 +380,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 		token, err := afgjwt.NewSigned(jwtClaims, afgjwt.SignParameters{
 			KeyID:             testKID,
 			JWTAlg:            "EdDSA",
-			AdditionalHeaders: map[string]interface{}{"extra": "value"},
+			AdditionalHeaders: map[string]any{"extra": "value"},
 		}, ed25519ProofCreator)
 		require.NoError(t, err)
 
@@ -442,7 +442,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 			Expired: afgotime.NewTime(time.Now().Add(time.Hour)),
 			Context: []string{verifiable.V1ContextURI, ContextV1},
 			Types:   []string{verifiable.VCType, domainLinkageCredentialType},
-			Subject: []verifiable.Subject{{ID: "did:key:different", CustomFields: map[string]interface{}{"origin": testJWTDomain}}}, // nolint:lll
+			Subject: []verifiable.Subject{{ID: "did:key:different", CustomFields: map[string]any{"origin": testJWTDomain}}}, // nolint:lll
 			Issuer:  &verifiable.Issuer{ID: testDID},
 		}, nil)
 		require.NoError(t, err)
@@ -463,7 +463,7 @@ func TestIsValidDomainCredentialJWT(t *testing.T) {
 			Expired: afgotime.NewTime(time.Now().Add(time.Hour)),
 			Context: []string{verifiable.V1ContextURI, ContextV1},
 			Types:   []string{verifiable.VCType, domainLinkageCredentialType},
-			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]interface{}{"origin": testJWTDomain}}},
+			Subject: []verifiable.Subject{{ID: testDID, CustomFields: map[string]any{"origin": testJWTDomain}}},
 			Issuer:  &verifiable.Issuer{ID: testDID},
 		}, nil)
 		require.NoError(t, err)

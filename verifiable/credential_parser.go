@@ -114,9 +114,9 @@ func (p *CredentialJSONParser) Parse( //nolint:funlen,gocyclo // Old function
 type CredentialCBORParser struct{}
 
 func convertToStringMap(
-	input map[interface{}]interface{},
-) map[string]interface{} {
-	out := map[string]interface{}{}
+	input map[any]any,
+) map[string]any {
+	out := map[string]any{}
 
 	for k, v := range input {
 		key := fmt.Sprintf("%v", k)
@@ -127,11 +127,11 @@ func convertToStringMap(
 	return out
 }
 
-func convertElement(element interface{}) interface{} {
+func convertElement(element any) any {
 	switch elem := element.(type) {
-	case map[interface{}]interface{}:
+	case map[any]any:
 		return convertToStringMap(elem)
-	case []interface{}:
+	case []any:
 		for i, v := range elem {
 			elem[i] = convertElement(v)
 		}
@@ -180,12 +180,12 @@ func (p *CredentialCBORParser) Parse( //nolint:funlen,gocyclo // Old function
 			hexErr)
 	}
 
-	var vcJSON map[string]interface{}
+	var vcJSON map[string]any
 	if err := cbor.Unmarshal(message.Payload, &vcJSON); err != nil {
 		return nil, fmt.Errorf("unmarshal cbor credential payload: %w", err)
 	}
 
-	vcDataMap, ok := vcJSON["vc"].(map[interface{}]interface{})
+	vcDataMap, ok := vcJSON["vc"].(map[any]any)
 	if !ok {
 		return nil, errors.New("vc field not found in cbor credential")
 	}

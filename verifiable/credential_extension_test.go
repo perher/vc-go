@@ -28,7 +28,7 @@ type UniversityDegreeSubject struct {
 	Name   string `json:"name,omitempty"`
 	Spouse string `json:"spouse,omitempty"`
 
-	Degree UniversityDegree `json:"degree,omitempty"`
+	Degree UniversityDegree `json:"degree"`
 }
 
 func mapUniversityDegreeSubject(subjects []Subject) *UniversityDegreeSubject {
@@ -49,7 +49,7 @@ func mapUniversityDegreeSubject(subjects []Subject) *UniversityDegreeSubject {
 		return udSubject
 	}
 
-	degreeMap, ok := degreeValue.(map[string]interface{})
+	degreeMap, ok := degreeValue.(map[string]any)
 	if !ok {
 		return udSubject
 	}

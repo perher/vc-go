@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package mem_test
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -197,11 +198,5 @@ func TestMemStore_Query(t *testing.T) {
 }
 
 func containsKey(key string, expectedKey ...string) bool {
-	for _, k := range expectedKey {
-		if k == key {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(expectedKey, key)
 }

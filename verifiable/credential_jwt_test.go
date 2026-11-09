@@ -42,7 +42,7 @@ func TestRefineVcFromJwtClaims(t *testing.T) {
 	}
 
 	t.Run("Credentials V1", func(t *testing.T) {
-		vcMap := map[string]interface{}{
+		vcMap := map[string]any{
 			"issuer": "unknown",
 		}
 		jwtCredClaims := &JWTCredClaims{
@@ -57,7 +57,7 @@ func TestRefineVcFromJwtClaims(t *testing.T) {
 	})
 
 	t.Run("Credentials V2", func(t *testing.T) {
-		vcMap := map[string]interface{}{
+		vcMap := map[string]any{
 			"@context": []string{V2ContextURI},
 			"issuer":   "unknown",
 		}
@@ -82,22 +82,22 @@ func TestJWTCredClaims_ToSDJWTCredentialPayload(t *testing.T) {
 			NotBefore: josejwt.NewNumericDate(time.Date(2016, 1, 1, 0, 0, 0, 0, time.UTC)),
 			ID:        "http://example.edu/credentials/3732",
 		},
-		VC: map[string]interface{}{
-			"@context": []interface{}{
+		VC: map[string]any{
+			"@context": []any{
 				"https://www.w3.org/2018/credentials/v1",
 				"https://trustbloc.github.io/context/vc/examples-v1.jsonld",
 			},
 			"id":   "http://example.edu/credentials/1989",
 			"type": "VerifiableCredential",
-			"credentialSubject": map[string]interface{}{
+			"credentialSubject": map[string]any{
 				"id": "did:example:iuajk1f712ebc6f1c276e12ec21",
 			},
-			"issuer": map[string]interface{}{
+			"issuer": map[string]any{
 				"id":   "did:example:09s12ec712ebc6f1c671ebfeb1f",
 				"name": "Example University",
 			},
 			"issuanceDate": "2020-01-01T10:54:01Z",
-			"credentialStatus": map[string]interface{}{
+			"credentialStatus": map[string]any{
 				"id":   "https://example.gov/status/65",
 				"type": "CredentialStatusList2017",
 			},

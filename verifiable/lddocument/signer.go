@@ -24,7 +24,7 @@ type ProofCreator interface {
 	SignLinkedDocument(proof *proof.Proof, keyType kms.KeyType, doc []byte) ([]byte, error)
 
 	// GetLDPCanonicalDocument will return normalized/canonical version of the document
-	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]interface{}, opts ...processor.Opts) ([]byte, error)
+	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]any, opts ...processor.Opts) ([]byte, error)
 
 	// GetLDPDigest returns document digest
 	GetLDPDigest(proof *proof.Proof, doc []byte) ([]byte, error)
@@ -50,7 +50,7 @@ type SigningContext struct {
 	VerificationMethod      string                        // optional
 	Challenge               string                        // optional
 	Purpose                 string                        // optional
-	CapabilityChain         []interface{}                 // optional
+	CapabilityChain         []any                         // optional
 }
 
 // NewDocumentSigner returns new instance of document signer.
@@ -61,14 +61,14 @@ func NewDocumentSigner(signer ProofCreator) *DocumentSigner {
 // Sign  will sign JSON LD document.
 func (ds *DocumentSigner) Sign(
 	context *SigningContext,
-	jsonLdObject map[string]interface{},
+	jsonLdObject map[string]any,
 	opts ...processor.Opts,
 ) error {
 	return ds.signObject(context, jsonLdObject, opts)
 }
 
 // signObject is a helper method that operates on JSON LD objects.
-func (ds *DocumentSigner) signObject(context *SigningContext, jsonLdObject map[string]interface{},
+func (ds *DocumentSigner) signObject(context *SigningContext, jsonLdObject map[string]any,
 	opts []processor.Opts) error {
 	if err := isValidContext(context); err != nil {
 		return err

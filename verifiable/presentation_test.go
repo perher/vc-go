@@ -233,10 +233,10 @@ func TestParseCwtPresentation(t *testing.T) {
 		verify := func(t *testing.T, vp *Presentation) {
 			require.Len(t, vp.CustomFields, 1)
 			require.Len(t, vp.CustomFields["presentation_submission"], 1)
-			submission, ok := vp.CustomFields["presentation_submission"].(map[string]interface{})
+			submission, ok := vp.CustomFields["presentation_submission"].(map[string]any)
 			require.True(t, ok)
 			require.Len(t, submission, 1)
-			descrMap, ok := submission["descriptor_map"].([]interface{})
+			descrMap, ok := submission["descriptor_map"].([]any)
 			require.True(t, ok)
 			require.Len(t, descrMap, 2)
 		}
@@ -331,10 +331,10 @@ func TestParsePresentation(t *testing.T) {
 		verify := func(t *testing.T, vp *Presentation) {
 			require.Len(t, vp.CustomFields, 1)
 			require.Len(t, vp.CustomFields["presentation_submission"], 1)
-			submission, ok := vp.CustomFields["presentation_submission"].(map[string]interface{})
+			submission, ok := vp.CustomFields["presentation_submission"].(map[string]any)
 			require.True(t, ok)
 			require.Len(t, submission, 1)
-			descrMap, ok := submission["descriptor_map"].([]interface{})
+			descrMap, ok := submission["descriptor_map"].([]any)
 			require.True(t, ok)
 			require.Len(t, descrMap, 2)
 		}
@@ -377,7 +377,7 @@ func TestParsePresentation(t *testing.T) {
 	})
 
 	t.Run("strict VP validation fails because of invalid field in VP", func(t *testing.T) {
-		var vpMap map[string]interface{}
+		var vpMap map[string]any
 
 		err := json.Unmarshal([]byte(validPresentation), &vpMap)
 		require.NoError(t, err)
@@ -582,10 +582,10 @@ func TestV2ParsePresentation(t *testing.T) {
 		verify := func(t *testing.T, vp *Presentation) {
 			require.Len(t, vp.CustomFields, 1)
 			require.Len(t, vp.CustomFields["presentation_submission"], 1)
-			submission, ok := vp.CustomFields["presentation_submission"].(map[string]interface{})
+			submission, ok := vp.CustomFields["presentation_submission"].(map[string]any)
 			require.True(t, ok)
 			require.Len(t, submission, 1)
-			descrMap, ok := submission["descriptor_map"].([]interface{})
+			descrMap, ok := submission["descriptor_map"].([]any)
 			require.True(t, ok)
 			require.Len(t, descrMap, 2)
 		}
@@ -825,7 +825,7 @@ func TestPresentation_decodeCredentials(t *testing.T) {
 	dCreds, err = decodeCredentials(nil, opts)
 	r.NoError(err)
 	r.Len(dCreds, 0)
-	dCreds, err = decodeCredentials([]interface{}{}, opts)
+	dCreds, err = decodeCredentials([]any{}, opts)
 	r.NoError(err)
 	r.Len(dCreds, 0)
 
@@ -856,7 +856,7 @@ func TestParseUnverifiedPresentation(t *testing.T) {
 	require.NotNil(t, vp)
 
 	// delete the embedded proof and check the VP decoding once again
-	var vpJSON map[string]interface{}
+	var vpJSON map[string]any
 
 	err = json.Unmarshal([]byte(validPresentation), &vpJSON)
 	require.NoError(t, err)

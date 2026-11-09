@@ -70,7 +70,7 @@ type DisclosureClaim struct {
 	Type          DisclosureClaimType
 	Version       SDJWTVersion
 	Name          string
-	Value         interface{}
+	Value         any
 	IsValueParsed bool
 }
 
@@ -82,12 +82,13 @@ type CombinedFormatForIssuance struct {
 
 // Serialize will assemble combined format for issuance.
 func (cf *CombinedFormatForIssuance) Serialize() string {
-	presentation := cf.SDJWT
+	var presentation strings.Builder
+	presentation.WriteString(cf.SDJWT)
 	for _, disclosure := range cf.Disclosures {
-		presentation += CombinedFormatSeparator + disclosure
+		presentation.WriteString(CombinedFormatSeparator + disclosure)
 	}
 
-	return presentation
+	return presentation.String()
 }
 
 // CombinedFormatForPresentation holds SD-JWT, disclosures and optional holder binding info.
@@ -103,18 +104,19 @@ type CombinedFormatForPresentation struct {
 
 // Serialize will assemble combined format for presentation.
 func (cf *CombinedFormatForPresentation) Serialize() string {
-	presentation := cf.SDJWT
+	var presentation strings.Builder
+	presentation.WriteString(cf.SDJWT)
 	for _, disclosure := range cf.Disclosures {
-		presentation += CombinedFormatSeparator + disclosure
+		presentation.WriteString(CombinedFormatSeparator + disclosure)
 	}
 
 	if len(cf.Disclosures) > 0 || cf.HolderVerification != "" {
-		presentation += CombinedFormatSeparator
+		presentation.WriteString(CombinedFormatSeparator)
 	}
 
-	presentation += cf.HolderVerification
+	presentation.WriteString(cf.HolderVerification)
 
-	return presentation
+	return presentation.String()
 }
 
 // GetDisclosureClaims de-codes disclosures.
@@ -198,7 +200,7 @@ func GetHash(hash crypto.Hash, value string) (string, error) {
 }
 
 // GetCryptoHashFromClaims returns crypto hash from claims.
-func GetCryptoHashFromClaims(claims map[string]interface{}) (crypto.Hash, error) {
+func GetCryptoHashFromClaims(claims map[string]any) (crypto.Hash, error) {
 	var cryptoHash crypto.Hash
 
 	// check that the _sd_alg claim is present
@@ -249,7 +251,7 @@ func FormatCryptoHashAlg(sdAlg crypto.Hash) (string, error) {
 }
 
 // GetSDAlg returns SD algorithm from claims.
-func GetSDAlg(claims map[string]interface{}) (string, error) {
+func GetSDAlg(claims map[string]any) (string, error) {
 	var alg string
 
 	obj, ok := claims[SDAlgorithmKey]
@@ -270,7 +272,7 @@ func GetSDAlg(claims map[string]interface{}) (string, error) {
 }
 
 // GetKeyFromVC returns key value from VC.
-func GetKeyFromVC(key string, claims map[string]interface{}) (interface{}, bool) {
+func GetKeyFromVC(key string, claims map[string]any) (any, bool) {
 	if obj, ok := claims[key]; ok {
 		return obj, true
 	}
@@ -280,7 +282,7 @@ func GetKeyFromVC(key string, claims map[string]interface{}) (interface{}, bool)
 		return nil, false
 	}
 
-	vc, ok := vcObj.(map[string]interface{})
+	vc, ok := vcObj.(map[string]any)
 	if !ok {
 		return nil, false
 	}
@@ -294,7 +296,7 @@ func GetKeyFromVC(key string, claims map[string]interface{}) (interface{}, bool)
 }
 
 // GetCNF returns confirmation claim 'cnf'.
-func GetCNF(claims map[string]interface{}) (map[string]interface{}, error) {
+func GetCNF(claims map[string]any) (map[string]any, error) {
 	obj, ok := claims[CNFKey]
 	if !ok {
 		obj, ok = GetKeyFromVC(CNFKey, claims)
@@ -303,7 +305,7 @@ func GetCNF(claims map[string]interface{}) (map[string]interface{}, error) {
 		}
 	}
 
-	cnf, ok := obj.(map[string]interface{})
+	cnf, ok := obj.(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("%s must be an object", CNFKey)
 	}
@@ -313,7 +315,7 @@ func GetCNF(claims map[string]interface{}) (map[string]interface{}, error) {
 
 // GetDisclosureDigests returns digests from claims map considering
 // either SDKey and array elements that are objects with one key, that key being ... and referring to a string.
-func GetDisclosureDigests(claims map[string]interface{}) (map[string]bool, error) {
+func GetDisclosureDigests(claims map[string]any) (map[string]bool, error) {
 	var (
 		digests []string
 		err     error
@@ -331,9 +333,9 @@ func GetDisclosureDigests(claims map[string]interface{}) (map[string]bool, error
 	// Find all array elements that are objects with one key, that key being ... and referring to a string.
 	for _, v := range claims {
 		switch t := v.(type) {
-		case []interface{}:
+		case []any:
 			for _, vv := range t {
-				valueMapped, ok := vv.(map[string]interface{})
+				valueMapped, ok := vv.(map[string]any)
 				if !ok {
 					continue
 				}
@@ -351,7 +353,7 @@ func GetDisclosureDigests(claims map[string]interface{}) (map[string]bool, error
 }
 
 // GetDisclosedClaims returns disclosed claims only.
-func GetDisclosedClaims(disclosureClaims []*DisclosureClaim, claims map[string]interface{}) (map[string]interface{}, error) { // nolint:lll
+func GetDisclosedClaims(disclosureClaims []*DisclosureClaim, claims map[string]any) (map[string]any, error) { // nolint:lll
 	_, err := GetCryptoHashFromClaims(claims)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get crypto hash from claims: %w", err)
@@ -373,7 +375,7 @@ func GetDisclosedClaims(disclosureClaims []*DisclosureClaim, claims map[string]i
 		return nil, fmt.Errorf("failed to process disclosed claims: %w", err)
 	}
 
-	outputMapped, ok := output.(map[string]interface{})
+	outputMapped, ok := output.(map[string]any)
 	if !ok {
 		return nil, errors.New("unexpected output type")
 	}
@@ -381,13 +383,13 @@ func GetDisclosedClaims(disclosureClaims []*DisclosureClaim, claims map[string]i
 	return outputMapped, nil
 }
 
-func getMap(value interface{}) (map[string]interface{}, bool) {
-	val, ok := value.(map[string]interface{})
+func getMap(value any) (map[string]any, bool) {
+	val, ok := value.(map[string]any)
 
 	return val, ok
 }
 
-func stringArray(entry interface{}) ([]string, error) {
+func stringArray(entry any) ([]string, error) {
 	if entry == nil {
 		return nil, nil
 	}
@@ -426,13 +428,13 @@ func SliceToMap(ids []string) map[string]bool {
 }
 
 // KeyExistsInMap checks if key exists in map.
-func KeyExistsInMap(key string, m map[string]interface{}) bool {
+func KeyExistsInMap(key string, m map[string]any) bool {
 	for k, v := range m {
 		if k == key {
 			return true
 		}
 
-		if obj, ok := v.(map[string]interface{}); ok {
+		if obj, ok := v.(map[string]any); ok {
 			exists := KeyExistsInMap(key, obj)
 			if exists {
 				return true

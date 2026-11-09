@@ -1091,7 +1091,7 @@ func TestCredential_AddLinkedDataProof(t *testing.T) {
 
 		r.Contains(vcMap, "proof")
 		vcProof := vcMap["proof"]
-		vcProofMap, ok := vcProof.(map[string]interface{})
+		vcProofMap, ok := vcProof.(map[string]any)
 		r.True(ok)
 		r.Contains(vcProofMap, "created")
 		r.Contains(vcProofMap, "jws")
@@ -1134,7 +1134,7 @@ func TestCredential_AddLinkedDataProof(t *testing.T) {
 			Challenge:               uuid.New().String(),
 			Domain:                  "issuer.service.com",
 			Purpose:                 "capabilityDelegation",
-			CapabilityChain:         []interface{}{rootCapability},
+			CapabilityChain:         []any{rootCapability},
 		}, jsonldsig.WithDocumentLoader(createTestDocumentLoader(t)))
 		r.NoError(err)
 
@@ -1143,7 +1143,7 @@ func TestCredential_AddLinkedDataProof(t *testing.T) {
 		r.Contains(proof, "proofPurpose")
 		r.Equal("capabilityDelegation", proof["proofPurpose"])
 		r.Contains(proof, "capabilityChain")
-		chain, ok := proof["capabilityChain"].([]interface{})
+		chain, ok := proof["capabilityChain"].([]any)
 		r.True(ok)
 		r.Len(chain, 1)
 		r.Equal(rootCapability, chain[0])
@@ -1161,7 +1161,7 @@ func TestCredential_AddLinkedDataProof(t *testing.T) {
 		r.Contains(proof, "proofPurpose")
 		r.Equal("capabilityDelegation", proof["proofPurpose"])
 		r.Contains(proof, "capabilityChain")
-		capabilities, ok := proof["capabilityChain"].([]interface{})
+		capabilities, ok := proof["capabilityChain"].([]any)
 		r.True(ok)
 		r.Len(capabilities, 1)
 		r.Equal(rootCapability, capabilities[0])

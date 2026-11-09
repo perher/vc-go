@@ -95,7 +95,7 @@ func TestSigner_AddProof(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		expectProof := []byte(fmt.Sprintf(`{
+		expectProof := fmt.Appendf(nil, `{
 			"type": "mock-suite-2023",
 			"proofPurpose": "%s",
 			"verificationMethod":"mock-vm",
@@ -104,7 +104,7 @@ func TestSigner_AddProof(t *testing.T) {
 			"expires": "%s",
 			"domain": "mock-domain",
 			"challenge":"mock-challenge"
-		}`, Authentication, createdTime, expiresTime))
+		}`, Authentication, createdTime, expiresTime)
 
 		proofBytes, unsignedDoc := extractProof(t, signedDoc)
 

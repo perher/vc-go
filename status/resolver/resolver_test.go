@@ -70,7 +70,7 @@ func TestResolve(t *testing.T) { //nolint:maintidx
 				{
 					Entries: []identityhub.Message{
 						{
-							Descriptor: map[string]interface{}{
+							Descriptor: map[string]any{
 								objectIDKey: objectID,
 							},
 							Data: base64.StdEncoding.EncodeToString(srcVCBytes),
@@ -357,7 +357,7 @@ func TestResolve(t *testing.T) { //nolint:maintidx
 				{
 					Entries: []identityhub.Message{
 						{
-							Descriptor: map[string]interface{}{
+							Descriptor: map[string]any{
 								objectIDKey: objectID,
 							},
 							Data: "$%^ not base64 data $%^",
@@ -422,7 +422,7 @@ func TestResolve(t *testing.T) { //nolint:maintidx
 func mockDIDQueryString(t *testing.T, objectID string) string {
 	t.Helper()
 
-	messageDescriptorList := []map[string]interface{}{
+	messageDescriptorList := []map[string]any{
 		{
 			methodKey:   methodCollectionsQuery,
 			objectIDKey: objectID,

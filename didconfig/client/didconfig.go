@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
+
 	"log"
 	"net/http"
 	"os"
@@ -96,7 +96,7 @@ func (c *Client) VerifyDIDAndDomain(did, domain string) error {
 
 	defer closeResponseBody(resp.Body)
 
-	responseBytes, err := ioutil.ReadAll(resp.Body)
+	responseBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response: %w", err)
 	}

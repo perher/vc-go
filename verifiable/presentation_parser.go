@@ -110,7 +110,7 @@ func (p *PresentationJSONParser) parse(vpData []byte, vpOpts *presentationOpts) 
 type VpCWT struct {
 	Raw     []byte
 	Message *cose.Sign1Message
-	VPMap   map[string]interface{}
+	VPMap   map[string]any
 }
 
 // PresentationCWTParser is a parser for CWT presentations.
@@ -141,14 +141,14 @@ func (p *PresentationCWTParser) parse(vpData []byte, _ *presentationOpts) (*pars
 		return nil, errors.Join(errors.New("parsed vp cbor message is nil"), rawErr, hexRawErr, hexErr)
 	}
 
-	var vpMap map[interface{}]interface{}
+	var vpMap map[any]any
 	if err := cbor.Unmarshal(message.Payload, &vpMap); err != nil {
 		return nil, fmt.Errorf("unmarshal cbor vp payload: %w", err)
 	}
 
 	convertedMap := convertToStringMap(vpMap)
 
-	vpContent, ok := convertedMap["vp"].(map[string]interface{})
+	vpContent, ok := convertedMap["vp"].(map[string]any)
 	if !ok {
 		// do nothing
 	}

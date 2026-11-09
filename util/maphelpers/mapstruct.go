@@ -22,8 +22,8 @@ func JSONNumberToJwtNumericDate() mapstructure.DecodeHookFuncType {
 	return func(
 		f reflect.Type,
 		t reflect.Type,
-		data interface{},
-	) (interface{}, error) {
+		data any,
+	) (any, error) {
 		if f.String() != "json.Number" || !strings.Contains("jwt.NumericDate", t.String()) {
 			return data, nil
 		}

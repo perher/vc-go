@@ -12,6 +12,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 	"time"
 
@@ -33,7 +34,7 @@ func ExampleParse() {
 		fmt.Println("failed to set-up test: %w", err.Error())
 	}
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"given_name": "Albert",
 		"last_name":  "Smith",
 	}
@@ -96,7 +97,7 @@ func ExampleCreatePresentation() {
 		fmt.Println("failed to set-up test: %w", err.Error())
 	}
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"given_name": "Albert",
 		"last_name":  "Smith",
 	}
@@ -173,7 +174,7 @@ func setUpHolderBinding() (*testutil.Ed25519Signer, *jwk.JWK, error) {
 	return holderSigner, holderPublicJWK, nil
 }
 
-func marshalObj(obj interface{}) (string, error) {
+func marshalObj(obj any) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
 		fmt.Println("failed to marshal object: %w", err.Error())
@@ -206,11 +207,5 @@ func getDisclosuresFromClaimNames(selectedClaimNames []string, claims []*Claim) 
 }
 
 func contains(values []string, val string) bool {
-	for _, v := range values {
-		if v == val {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(values, val)
 }

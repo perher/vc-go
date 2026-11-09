@@ -50,7 +50,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 			Status: []*verifiable.TypedID{{
 				ID:   "foo-bar",
 				Type: statuslist2021.StatusList2021Type,
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					statuslist2021.StatusPurpose:        "foo",
 					statuslist2021.StatusListCredential: statusServer.URL,
 					statuslist2021.StatusListIndex:      "0",
@@ -68,7 +68,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 			Status: []*verifiable.TypedID{{
 				ID:   "foo-bar",
 				Type: statuslist2021.StatusList2021Type,
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					statuslist2021.StatusPurpose:        StatusPurposeRevocation,
 					statuslist2021.StatusListCredential: statusServer.URL,
 					statuslist2021.StatusListIndex:      "1",
@@ -98,7 +98,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 				{
 					ID:   "id1",
 					Type: statuslist2021.StatusList2021Type,
-					CustomFields: map[string]interface{}{
+					CustomFields: map[string]any{
 						statuslist2021.StatusPurpose:        StatusPurposeRevocation,
 						statuslist2021.StatusListCredential: statusServer.URL + "/revoked",
 						statuslist2021.StatusListIndex:      "0",
@@ -107,7 +107,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 				{
 					ID:   "id2",
 					Type: statuslist2021.StatusList2021Type,
-					CustomFields: map[string]interface{}{
+					CustomFields: map[string]any{
 						statuslist2021.StatusPurpose:        StatusPurposeSuspension,
 						statuslist2021.StatusListCredential: statusServer.URL + "/suspended",
 						statuslist2021.StatusListIndex:      "0",
@@ -126,7 +126,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 					{
 						ID:   "id1",
 						Type: statuslist2021.StatusList2021Type,
-						CustomFields: map[string]interface{}{
+						CustomFields: map[string]any{
 							statuslist2021.StatusPurpose:        StatusPurposeRevocation,
 							statuslist2021.StatusListCredential: statusServer.URL + "/revoked",
 							statuslist2021.StatusListIndex:      "1",
@@ -135,7 +135,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 					{
 						ID:   "id2",
 						Type: statuslist2021.StatusList2021Type,
-						CustomFields: map[string]interface{}{
+						CustomFields: map[string]any{
 							statuslist2021.StatusPurpose:        StatusPurposeSuspension,
 							statuslist2021.StatusListCredential: statusServer.URL + "/suspended",
 							statuslist2021.StatusListIndex:      "0",
@@ -155,7 +155,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 					{
 						ID:   "id1",
 						Type: statuslist2021.StatusList2021Type,
-						CustomFields: map[string]interface{}{
+						CustomFields: map[string]any{
 							statuslist2021.StatusPurpose:        StatusPurposeRevocation,
 							statuslist2021.StatusListCredential: statusServer.URL + "/revoked",
 							statuslist2021.StatusListIndex:      "0",
@@ -164,7 +164,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 					{
 						ID:   "id2",
 						Type: statuslist2021.StatusList2021Type,
-						CustomFields: map[string]interface{}{
+						CustomFields: map[string]any{
 							statuslist2021.StatusPurpose:        StatusPurposeSuspension,
 							statuslist2021.StatusListCredential: statusServer.URL + "/suspended",
 							statuslist2021.StatusListIndex:      "1",
@@ -303,7 +303,7 @@ func TestClient_VerifyStatus(t *testing.T) {
 						},
 						Subject: []verifiable.Subject{
 							{
-								CustomFields: map[string]interface{}{
+								CustomFields: map[string]any{
 									"encodedList": ":( this is not base-64 data",
 								},
 							},
@@ -398,7 +398,7 @@ func mockStatusVC(t *testing.T, issuerID string, vcStatus isRevoked) *verifiable
 		},
 		Subject: []verifiable.Subject{
 			{
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"encodedList": statusEncoded,
 				},
 			},

@@ -12,9 +12,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"time"
-
-	"golang.org/x/exp/slices"
 
 	"github.com/go-jose/go-jose/v3/jwt"
 	"github.com/mitchellh/mapstructure"
@@ -45,13 +44,7 @@ func VerifySigningAlg(joseHeaders jose.Headers, secureAlgs []string) error {
 }
 
 func contains(values []string, val string) bool {
-	for _, v := range values {
-		if v == val {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(values, val)
 }
 
 // VerifyJWT checks that the JWT is valid using nbf, iat, and exp claims (if provided in the JWT).
@@ -153,10 +146,10 @@ func setDisclosureClaimValue(recData *recursiveData, disclosureClaim *Disclosure
 }
 
 // discloseClaimValue returns new value of claim, resolving dependencies on other disclosures.
-func discloseClaimValue(claim interface{}, recData *recursiveData) (interface{}, error) { // nolint:funlen,gocyclo
+func discloseClaimValue(claim any, recData *recursiveData) (any, error) { // nolint:funlen,gocyclo
 	switch disclosureValue := claim.(type) {
-	case []interface{}:
-		var newValues []interface{}
+	case []any:
+		var newValues []any
 
 		for _, value := range disclosureValue {
 			parsedMap, ok := getMap(value)
@@ -217,8 +210,8 @@ func discloseClaimValue(claim interface{}, recData *recursiveData) (interface{},
 		}
 
 		return newValues, nil
-	case map[string]interface{}:
-		newValues := make(map[string]interface{}, len(disclosureValue))
+	case map[string]any:
+		newValues := make(map[string]any, len(disclosureValue))
 
 		// If there is nested digests.
 		if nestedSDListIface, ok := disclosureValue[SDKey]; ok { // nolint:nestif
@@ -227,7 +220,7 @@ func discloseClaimValue(claim interface{}, recData *recursiveData) (interface{},
 				return nil, fmt.Errorf("get disclosure digests: %w", err)
 			}
 
-			var missingSDs []interface{}
+			var missingSDs []any
 
 			for _, digest := range nestedSDList {
 				if slices.Contains(recData.nestedSD, digest) {
@@ -320,7 +313,7 @@ func getDisclosureClaim(disclosure string, hash crypto.Hash) (*DisclosureClaim, 
 		return nil, fmt.Errorf("failed to decode disclosure: %w", err)
 	}
 
-	var disclosureArr []interface{}
+	var disclosureArr []any
 
 	err = json.Unmarshal(decoded, &disclosureArr)
 	if err != nil {
@@ -363,13 +356,13 @@ func getDisclosureClaim(disclosure string, hash crypto.Hash) (*DisclosureClaim, 
 	return claim, nil
 }
 
-func enrichWithArrayElement(claim *DisclosureClaim, disclosureElementsArr []interface{}) {
+func enrichWithArrayElement(claim *DisclosureClaim, disclosureElementsArr []any) {
 	claim.Value = disclosureElementsArr[arrayDigestValuePosition]
 	claim.Type = DisclosureClaimTypeArrayElement
 	claim.Version = SDJWTVersionV5
 }
 
-func enrichWithSDElement(claim *DisclosureClaim, disclosureElementsArr []interface{}) error {
+func enrichWithSDElement(claim *DisclosureClaim, disclosureElementsArr []any) error {
 	name, ok := disclosureElementsArr[sdDigestNamePosition].(string)
 	if !ok {
 		return fmt.Errorf("disclosure name type[%T] must be string", disclosureElementsArr[1])
@@ -379,7 +372,7 @@ func enrichWithSDElement(claim *DisclosureClaim, disclosureElementsArr []interfa
 	claim.Value = disclosureElementsArr[sdDigestValuePosition]
 
 	switch t := disclosureElementsArr[sdDigestValuePosition].(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		claim.Type = DisclosureClaimTypeObject
 		if KeyExistsInMap(SDKey, t) {
 			claim.Version = SDJWTVersionV5

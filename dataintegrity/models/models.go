@@ -24,7 +24,7 @@ type KeyManager interface { // TODO note: only used by deprecated function
 	// Returns:
 	//  - handle instance (to private key)
 	//  - error if failure
-	Get(keyID string) (interface{}, error)
+	Get(keyID string) (any, error)
 }
 
 // VerificationMethod implements the data integrity verification method model:
@@ -58,7 +58,7 @@ type ProofOptions struct {
 	Challenge            string
 	Created              time.Time
 	Expires              time.Time // During verification process the value must be taken from Proof.Expires.
-	CustomFields         map[string]interface{}
+	CustomFields         map[string]any
 }
 
 // DateTimeFormat is the date-time format used by the data integrity

@@ -41,7 +41,7 @@ func ParseAndCheckProof(
 	var expectedProofIssuer *string
 
 	if checkIssuer {
-		payload := map[int]interface{}{}
+		payload := map[int]any{}
 		if err = cbor.Unmarshal(cwtParsed.Payload, &payload); err != nil {
 			return nil, nil, err
 		}

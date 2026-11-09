@@ -125,11 +125,11 @@ type jsonldCredentialOpts struct {
 }
 
 // Proof defines embedded proof of Verifiable Credential.
-type Proof map[string]interface{}
+type Proof map[string]any
 
 // CustomFields is a map of extra fields of struct build when unmarshalling JSON which are not
 // mapped to the struct fields.
-type CustomFields map[string]interface{}
+type CustomFields map[string]any
 
 const (
 	jsonFldTypedIDID    = "id"
@@ -175,7 +175,7 @@ func serializeTypedIDObj(typedID TypedID) JSONObject {
 	return json
 }
 
-func newTypedIDArray(v interface{}) ([]*TypedID, error) {
+func newTypedIDArray(v any) ([]*TypedID, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -194,7 +194,7 @@ func newTypedIDArray(v interface{}) ([]*TypedID, error) {
 	// array of objects
 	arr, ok := v.([]JSONObject)
 	if !ok {
-		rawArray, ok := v.([]interface{})
+		rawArray, ok := v.([]any)
 		if !ok {
 			return nil, fmt.Errorf("should be array of json objects but got %v", v)
 		}
@@ -226,15 +226,16 @@ func newTypedIDArray(v interface{}) ([]*TypedID, error) {
 }
 
 func describeSchemaValidationError(result *gojsonschema.Result, what string) string {
-	errMsg := what + " is not valid:\n"
+	var errMsg strings.Builder
+	errMsg.WriteString(what + " is not valid:\n")
 	for _, desc := range result.Errors() {
-		errMsg += fmt.Sprintf("- %s\n", desc)
+		errMsg.WriteString(fmt.Sprintf("- %s\n", desc))
 	}
 
-	return errMsg
+	return errMsg.String()
 }
 
-func stringSlice(values []interface{}) ([]string, error) {
+func stringSlice(values []any) ([]string, error) {
 	s := make([]string, len(values))
 
 	for i := range values {
@@ -252,11 +253,11 @@ func stringSlice(values []interface{}) ([]string, error) {
 // decodeType decodes raw type(s).
 //
 // type can be defined as a single string value or array of strings.
-func decodeType(t interface{}) ([]string, error) {
+func decodeType(t any) ([]string, error) {
 	switch rType := t.(type) {
 	case string:
 		return []string{rType}, nil
-	case []interface{}:
+	case []any:
 		types, err := stringSlice(rType)
 		if err != nil {
 			return nil, fmt.Errorf("vc types: %w", err)
@@ -276,11 +277,11 @@ func decodeType(t interface{}) ([]string, error) {
 // at the second case, the array can be a mix of string and object types
 // (objects can express context information); object context are
 // defined at the tail of the array.
-func decodeContext(c interface{}) ([]string, []interface{}, error) {
+func decodeContext(c any) ([]string, []any, error) {
 	switch rContext := c.(type) {
 	case string:
 		return []string{rContext}, nil, nil
-	case []interface{}:
+	case []any:
 		s := make([]string, 0)
 
 		for i := range rContext {
@@ -301,7 +302,7 @@ func decodeContext(c interface{}) ([]string, []interface{}, error) {
 	}
 }
 
-func safeStringValue(v interface{}) string {
+func safeStringValue(v any) string {
 	if v == nil {
 		return ""
 	}
@@ -314,30 +315,30 @@ func safeStringValue(v interface{}) string {
 	return value
 }
 
-func proofsToRaw(proofs []Proof) interface{} {
+func proofsToRaw(proofs []Proof) any {
 	switch len(proofs) {
 	case 0:
 		return nil
 	case 1:
-		return map[string]interface{}(proofs[0])
+		return map[string]any(proofs[0])
 	default:
-		return mapSlice(proofs, func(p Proof) interface{} {
-			return map[string]interface{}(p)
+		return mapSlice(proofs, func(p Proof) any {
+			return map[string]any(p)
 		})
 	}
 }
 
-func parseLDProof(proofJSON interface{}) ([]Proof, error) {
+func parseLDProof(proofJSON any) ([]Proof, error) {
 	if proofJSON == nil {
 		return nil, nil
 	}
 
 	switch proof := proofJSON.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return []Proof{proof}, nil
-	case []interface{}:
-		return mapSlice2(proof, func(raw interface{}) (Proof, error) {
-			p, ok := raw.(map[string]interface{})
+	case []any:
+		return mapSlice2(proof, func(raw any) (Proof, error) {
+			p, ok := raw.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("unsupported proof value '%v'", proofJSON)
 			}
@@ -437,25 +438,22 @@ func ParseDataURL(url string) (MediaType, Encoding, string, error) {
 
 	url = url[5:] // Remove "data:" prefix
 
-	commaIndex := strings.Index(url, ",")
-	if commaIndex == -1 {
+	fullMediaType, data, ok := strings.Cut(url, ",")
+	if !ok {
 		return "", "", "", fmt.Errorf("invalid data URL format: %s", url)
 	}
 
-	fullMediaType := url[:commaIndex]
 	if fullMediaType == "" {
 		return "", "", "", errors.New("media type is required")
 	}
 
-	data := url[commaIndex+1:]
-
-	semicolonIndex := strings.Index(fullMediaType, ";")
-	if semicolonIndex == -1 {
+	mediaTypeStr, encodingStr, ok := strings.Cut(fullMediaType, ";")
+	if !ok {
 		return MediaType(fullMediaType), "", data, nil
 	}
 
-	mediaType := MediaType(fullMediaType[:semicolonIndex])
-	encoding := Encoding(fullMediaType[semicolonIndex+1:])
+	mediaType := MediaType(mediaTypeStr)
+	encoding := Encoding(encodingStr)
 
 	return mediaType, encoding, data, nil
 }

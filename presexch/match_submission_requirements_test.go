@@ -196,10 +196,10 @@ func TestInstanceGetSubmissionRequirements(t *testing.T) {
 			},
 			Subject: []verifiable.Subject{{
 				ID: "did:example:b34ca6cd37bbf23",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"name":   "Jayden Doe",
 					"spouse": "did:example:c276e12ec21ebfeb1f712ebc6f1",
-					"degree": map[string]interface{}{
+					"degree": map[string]any{
 						"degree":       "MIT",
 						"degreeSchool": "MIT school",
 						"type":         "BachelorDegree",
@@ -215,7 +215,7 @@ func TestInstanceGetSubmissionRequirements(t *testing.T) {
 			Issuer: &verifiable.Issuer{
 				ID: "did:example:489398593",
 			},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"identifier":  "83627465",
 				"name":        "Permanent Resident Card",
 				"description": "Government of Example Permanent Resident Card.",
@@ -264,7 +264,7 @@ func TestInstanceGetSubmissionRequirements(t *testing.T) {
 		degree := subject.CustomFields["degree"]
 		require.NotNil(t, degree)
 
-		degreeMap, ok := degree.(map[string]interface{})
+		degreeMap, ok := degree.(map[string]any)
 		require.True(t, ok)
 
 		require.Equal(t, "MIT school", degreeMap["degreeSchool"])
@@ -327,7 +327,7 @@ func TestInstanceGetSubmissionRequirements(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}), createTestCredential(t, credentialProto{
@@ -335,7 +335,7 @@ func TestInstanceGetSubmissionRequirements(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 					"age":        17,

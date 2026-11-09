@@ -13,7 +13,8 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
+
 	"os"
 	"strings"
 	"testing"
@@ -22,7 +23,6 @@ import (
 	"github.com/PaesslerAG/gval"
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"github.com/trustbloc/bbs-signature-go/bbs12381g2pub"
 	ldcontext "github.com/trustbloc/did-go/doc/ld/context"
@@ -98,7 +98,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			ID:      "http://example.edu/credentials/1872",
 			Subject: []verifiable.Subject{{ID: issuerID}},
 			Issuer:  &verifiable.Issuer{ID: issuerID},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Travis",
 				"age":        17,
@@ -120,7 +120,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      "http://example.edu/credentials/1872",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 				Proofs: []verifiable.Proof{{"type": "JsonWebSignature2020"}},
@@ -131,7 +131,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      "http://example.edu/credentials/1872",
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 					"age":        17,
@@ -144,7 +144,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      "http://example.edu/credentials/1872",
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 					"age":        2,
@@ -369,7 +369,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}), createTestCredential(t, credentialProto{
@@ -377,7 +377,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 					"age":        17,
@@ -419,7 +419,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 		makeCredential := func(claims ...string) *verifiable.Credential {
 			selfIssuedID := uuid.NewString()
 
-			customFields := map[string]interface{}{}
+			customFields := map[string]any{}
 
 			for _, claim := range claims {
 				customFields[claim] = "foo"
@@ -500,7 +500,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Issuer: &verifiable.Issuer{
 					ID: "did:example:76e12ec712ebc6f1c221ebfeb1f",
 				},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "First name",
 					"last_name":  "Last name",
 					"info":       "Info",
@@ -536,17 +536,17 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 							Path: []string{"$['@context']"},
 							Filter: &Filter{
 								FilterItem: FilterItem{
-									Type: lo.ToPtr("array"),
+									Type: new("array"),
 								},
 								AllOf: []*FilterItem{
 									{
-										Contains: map[string]interface{}{
+										Contains: map[string]any{
 											"type":  "string",
 											"const": verifiable.V1ContextURI,
 										},
 									},
 									{
-										Contains: map[string]interface{}{
+										Contains: map[string]any{
 											"type":  "string",
 											"const": "https://www.w3.org/2018/credentials/examples/v1",
 										},
@@ -558,11 +558,11 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 							Path: []string{"$['type']"},
 							Filter: &Filter{
 								FilterItem: FilterItem{
-									Type: lo.ToPtr("array"),
+									Type: new("array"),
 								},
 								AllOf: []*FilterItem{
 									{
-										Contains: map[string]interface{}{
+										Contains: map[string]any{
 											"type":  "string",
 											"const": "SuperType",
 										},
@@ -574,11 +574,11 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 							Path: []string{"$.first_name"},
 							Filter: &Filter{
 								FilterItem: FilterItem{
-									Type: lo.ToPtr("array"),
+									Type: new("array"),
 								},
 								AllOf: []*FilterItem{
 									{
-										Type:  lo.ToPtr("string"),
+										Type:  new("string"),
 										Const: "First name",
 									},
 								},
@@ -588,11 +588,11 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 							Path: []string{"$.last_name"},
 							Filter: &Filter{
 								FilterItem: FilterItem{
-									Type: lo.ToPtr("array"),
+									Type: new("array"),
 								},
 								AllOf: []*FilterItem{
 									{
-										Type:  lo.ToPtr("string"),
+										Type:  new("string"),
 										Const: "Last name",
 									},
 								},
@@ -618,7 +618,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Issuer: &verifiable.Issuer{
 					ID: "did:example:76e12ec712ebc6f1c221ebfeb1f",
 				},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "First name",
 					"last_name":  "Last name",
 					"info":       "Info",
@@ -654,17 +654,17 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 							Path: []string{"$['@context']"},
 							Filter: &Filter{
 								FilterItem: FilterItem{
-									Type: lo.ToPtr("array"),
+									Type: new("array"),
 								},
 								AllOf: []*FilterItem{
 									{
-										Contains: map[string]interface{}{
+										Contains: map[string]any{
 											"type":  "string",
 											"const": verifiable.V1ContextURI,
 										},
 									},
 									{
-										Contains: map[string]interface{}{
+										Contains: map[string]any{
 											"type":  "string",
 											"const": "https://404",
 										},
@@ -676,11 +676,11 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 							Path: []string{"$.first_name"},
 							Filter: &Filter{
 								FilterItem: FilterItem{
-									Type: lo.ToPtr("array"),
+									Type: new("array"),
 								},
 								AllOf: []*FilterItem{
 									{
-										Type:  lo.ToPtr("string"),
+										Type:  new("string"),
 										Const: "First name",
 									},
 								},
@@ -690,11 +690,11 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 							Path: []string{"$.last_name"},
 							Filter: &Filter{
 								FilterItem: FilterItem{
-									Type: lo.ToPtr("array"),
+									Type: new("array"),
 								},
 								AllOf: []*FilterItem{
 									{
-										Type:  lo.ToPtr("string"),
+										Type:  new("string"),
 										Const: "Last name",
 									},
 								},
@@ -720,7 +720,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Issuer: &verifiable.Issuer{
 					ID: "did:example:76e12ec712ebc6f1c221ebfeb1f",
 				},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "First name",
 					"last_name":  "Last name",
 					"info":       "Info",
@@ -773,7 +773,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Issuer: &verifiable.Issuer{
 					ID: "did:example:76e12ec712ebc6f1c221ebfeb1f",
 				},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "First name",
 					"last_name":  "Last name",
 					"info":       "Info",
@@ -831,7 +831,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Issuer: &verifiable.Issuer{
 					ID: "did:example:76e12ec712ebc6f1c221ebfeb1f",
 				},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "First name",
 					"last_name":  "Last name",
 					"info":       "Info",
@@ -884,7 +884,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Issuer: &verifiable.Issuer{
 					ID: "did:example:76e12ec712ebc6f1c221ebfeb1f",
 				},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "First name",
 					"last_name":  "Last name",
 					"info":       "Info",
@@ -945,7 +945,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			Issuer: &verifiable.Issuer{
 				ID: "did:example:76e12ec712ebc6f1c221ebfeb1f",
 			},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "First name",
 				"last_name":  "Last name",
 				"info":       "Info",
@@ -1032,7 +1032,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 
 		require.Len(t, vc.SDJWTDisclosures(), 3)
 
-		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]interface{}), 6)
+		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]any), 6)
 		require.NotNil(t, vcc.Subject[0].CustomFields["address"])
 
 		_, ok := vcc.Subject[0].CustomFields["email"]
@@ -1103,7 +1103,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 
 		require.Len(t, vc.SDJWTDisclosures(), 3)
 
-		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]interface{}), 6)
+		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]any), 6)
 		require.NotNil(t, vcc.Subject[0].CustomFields["address"])
 
 		_, ok := vcc.Subject[0].CustomFields["email"]
@@ -1161,7 +1161,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 		// there is only one non-SD claim path is in the fields array - hence no selective disclosures
 		require.Len(t, vc.SDJWTDisclosures(), 0)
 
-		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]interface{}), 6)
+		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]any), 6)
 
 		displayVC, err := vc.CreateDisplayCredential(verifiable.DisplayAllDisclosures())
 		require.NoError(t, err)
@@ -1219,7 +1219,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 
 		require.Len(t, vc.SDJWTDisclosures(), 10)
 
-		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]interface{}), 6)
+		require.Len(t, vcc.Subject[0].CustomFields["_sd"].([]any), 6)
 		require.NotNil(t, vcc.Subject[0].CustomFields["address"])
 
 		_, ok := vcc.Subject[0].CustomFields["email"]
@@ -1459,10 +1459,10 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			},
 			Subject: []verifiable.Subject{{
 				ID: "did:example:b34ca6cd37bbf23",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"name":   "Jayden Doe",
 					"spouse": "did:example:c276e12ec21ebfeb1f712ebc6f1",
-					"degree": map[string]interface{}{
+					"degree": map[string]any{
 						"degree":       "MIT",
 						"degreeSchool": "MIT school",
 						"type":         "BachelorDegree",
@@ -1478,7 +1478,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			Issuer: &verifiable.Issuer{
 				ID: "did:example:489398593",
 			},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"identifier":  "83627465",
 				"name":        "Permanent Resident Card",
 				"description": "Government of Example Permanent Resident Card.",
@@ -1522,7 +1522,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 		degree := subject.CustomFields["degree"]
 		require.NotNil(t, degree)
 
-		degreeMap, ok := degree.(map[string]interface{})
+		degreeMap, ok := degree.(map[string]any)
 		require.True(t, ok)
 
 		require.Equal(t, "MIT school", degreeMap["degreeSchool"])
@@ -1583,8 +1583,8 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			},
 			Subject: []verifiable.Subject{{
 				ID: "did:example:b34ca6cd37bbf23",
-				CustomFields: map[string]interface{}{
-					"type": []interface{}{
+				CustomFields: map[string]any{
+					"type": []any{
 						"PermanentResident",
 						"Person",
 					},
@@ -1609,7 +1609,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			Issuer: &verifiable.Issuer{
 				ID: "did:example:489398593",
 			},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"identifier":  "83627465",
 				"name":        "Permanent Resident Card",
 				"description": "Government of Example Permanent Resident Card.",
@@ -1681,7 +1681,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": make(chan struct{}),
 					"last_name":  "Jon",
 				},
@@ -1713,14 +1713,14 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}),
 			createTestCredential(t, credentialProto{
 				Context: []string{verifiable.V1ContextURI},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"last_name": "Travis",
 				},
 			}),
@@ -1753,14 +1753,14 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}),
 			createTestCredential(t, credentialProto{
 				Context: []string{verifiable.V1ContextURI},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"last_name": "Travis",
 				},
 			}),
@@ -1807,7 +1807,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}), createTestCredential(t, credentialProto{
@@ -1816,7 +1816,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 				},
@@ -1878,7 +1878,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{}},
 				Issuer:  &verifiable.Issuer{ID: uuid.New().String()},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"last_name": "Travis",
 				},
 			}),
@@ -1891,30 +1891,30 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Issued: &utiltime.TimeWrapper{
 					Time: time.Now(),
 				},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"ssn":        "000-00-000",
 					"last_name":  "Travis",
-					"all": []interface{}{
-						map[string]interface{}{
-							"authors": []interface{}{map[string]interface{}{
+					"all": []any{
+						map[string]any{
+							"authors": []any{map[string]any{
 								"name":    "Andrew",
 								"license": "yes",
-							}, map[string]interface{}{
+							}, map[string]any{
 								"name":    "Jessy",
 								"license": "no",
 							}},
 						},
-						map[string]interface{}{
-							"authors": []interface{}{map[string]interface{}{
+						map[string]any{
+							"authors": []any{map[string]any{
 								"license": "unknown",
 							}},
 						},
-						map[string]interface{}{
-							"authors": []interface{}{map[string]interface{}{
+						map[string]any{
+							"authors": []any{map[string]any{
 								"name":    "Bob",
 								"license": "yes",
-							}, map[string]interface{}{
+							}, map[string]any{
 								"name":    "Carol",
 								"license": "no",
 							}},
@@ -1931,18 +1931,18 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 		cred := vp.Credentials()[0]
 		require.NotEmpty(t, cred.Contents().Issuer)
 
-		require.EqualValues(t, []interface{}{
-			map[string]interface{}{
-				"authors": []interface{}{map[string]interface{}{
+		require.EqualValues(t, []any{
+			map[string]any{
+				"authors": []any{map[string]any{
 					"name": "Andrew",
-				}, map[string]interface{}{
+				}, map[string]any{
 					"name": "Jessy",
 				}},
 			},
-			map[string]interface{}{
-				"authors": []interface{}{map[string]interface{}{
+			map[string]any{
+				"authors": []any{map[string]any{
 					"name": "Bob",
-				}, map[string]interface{}{
+				}, map[string]any{
 					"name": "Carol",
 				}},
 			},
@@ -1983,8 +1983,8 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				Issuer:  &verifiable.Issuer{CustomFields: map[string]interface{}{"k": "v"}},
-				CustomFields: map[string]interface{}{
+				Issuer:  &verifiable.Issuer{CustomFields: map[string]any{"k": "v"}},
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}),
@@ -2027,7 +2027,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}),
@@ -2036,7 +2036,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: "123"}},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Travis",
 					"last_name":  "Jesse",
 				},
@@ -2075,7 +2075,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}),
@@ -2085,7 +2085,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 				},
@@ -2140,7 +2140,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}),
@@ -2150,7 +2150,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				ID:      uuid.New().String(),
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 				},
@@ -2186,7 +2186,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 			}),
@@ -2194,7 +2194,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 				Context: []string{verifiable.V1ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      uuid.New().String(),
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 				},
@@ -2627,7 +2627,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 		makeCredential := func(baseContext string, claims ...string) *verifiable.Credential {
 			selfIssuedID := uuid.NewString()
 
-			customFields := map[string]interface{}{}
+			customFields := map[string]any{}
 
 			for _, claim := range claims {
 				customFields[claim] = "foo"
@@ -2709,12 +2709,12 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 					ID:      uuid.New().String(),
 					Subject: []verifiable.Subject{{ID: issuerDID}},
 					Issuer:  &verifiable.Issuer{ID: issuerDID},
-					CustomFields: map[string]interface{}{
+					CustomFields: map[string]any{
 						"first_name": "Jesse",
 						"last_name":  "Travis",
-						"some_object": map[string]interface{}{
+						"some_object": map[string]any{
 							"hash-algo": "xx",
-							"hash-key": map[string]interface{}{
+							"hash-key": map[string]any{
 								"hash-value": "yy",
 							},
 						},
@@ -2755,7 +2755,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			ID:      uuid.New().String(),
 			Subject: []verifiable.Subject{{ID: issuerDID}},
 			Issuer:  &verifiable.Issuer{ID: issuerDID},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Travis",
 				"age":        17,
@@ -2799,7 +2799,7 @@ func TestPresentationDefinition_CreateVP_V1Credential(t *testing.T) {
 			ID:      uuid.New().String(),
 			Subject: []verifiable.Subject{{ID: issuerDID}},
 			Issuer:  &verifiable.Issuer{ID: issuerDID},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Travis",
 				"age":        17,
@@ -2828,7 +2828,7 @@ func TestPresentationDefinition_CreateVP_V2Credential(t *testing.T) {
 			ID:      "http://example.edu/credentials/1872",
 			Subject: []verifiable.Subject{{ID: issuerID}},
 			Issuer:  &verifiable.Issuer{ID: issuerID},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Travis",
 				"age":        17,
@@ -2849,7 +2849,7 @@ func TestPresentationDefinition_CreateVP_V2Credential(t *testing.T) {
 				Context: []string{verifiable.V2ContextURI},
 				Types:   []string{verifiable.VCType},
 				ID:      "http://example.edu/credentials/1872",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 				},
 				Proofs: []verifiable.Proof{{"type": "JsonWebSignature2020"}},
@@ -2860,7 +2860,7 @@ func TestPresentationDefinition_CreateVP_V2Credential(t *testing.T) {
 				ID:      "http://example.edu/credentials/1872",
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 					"age":        17,
@@ -2873,7 +2873,7 @@ func TestPresentationDefinition_CreateVP_V2Credential(t *testing.T) {
 				ID:      "http://example.edu/credentials/1872",
 				Subject: []verifiable.Subject{{ID: issuerID}},
 				Issuer:  &verifiable.Issuer{ID: issuerID},
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"first_name": "Jesse",
 					"last_name":  "Travis",
 					"age":        2,
@@ -3198,21 +3198,21 @@ func TestPresentationDefinition_CreateVPArray(t *testing.T) {
 }
 
 func TestExtractExtraFields(t *testing.T) {
-	results := ExtractArrayValuesForSDJWTV5(map[string]interface{}{
-		"_sd": []interface{}{
+	results := ExtractArrayValuesForSDJWTV5(map[string]any{
+		"_sd": []any{
 			"k1NxQSAyCCHlGw-93hxPzOFqUY4Ye7gLqLiKMkSZfHLa48Sevxr5zGHS6Yrb3arK",
 			"wu3GHwpa1pJaIv2U71-Y_9kdzjBxlZYRVOG03SIqrOMuytclBPOAU1FSlAnEgOzh",
 		},
-		"type": []interface{}{
-			map[string]interface{}{
+		"type": []any{
+			map[string]any{
 				"...": "mhV9Kt70m-8slbu1TgIpdr6_AWO-kG51Q2amF3w9qQyyxM-aXsTn77uxMBAnFM67",
 			},
 		},
-		"someObject": map[string]interface{}{
-			"nested": map[string]interface{}{
-				"nested2": map[string]interface{}{
-					"type": []interface{}{
-						map[string]interface{}{
+		"someObject": map[string]any{
+			"nested": map[string]any{
+				"nested2": map[string]any{
+					"type": []any{
+						map[string]any{
 							"...": "xxx",
 						},
 					},
@@ -3268,7 +3268,7 @@ func TestPresentationDefinition_Match_cwt(t *testing.T) {
 	vp.Context = append(vp.Context, "https://identity.foundation/presentation-exchange/submission/v1")
 	vp.Type = append(vp.Type, "PresentationSubmission")
 
-	vp.CustomFields = make(map[string]interface{})
+	vp.CustomFields = make(map[string]any)
 	vp.CustomFields["presentation_submission"] = toExampleMap(&PresentationSubmission{DescriptorMap: []*InputDescriptorMapping{
 		{
 			ID:   "banking",
@@ -3327,7 +3327,7 @@ func TestPresentationDefinition_Match_cwt(t *testing.T) {
 }
 
 func getTestVCWithContext(t *testing.T, issuerID string, ctx []string) *verifiable.Credential {
-	subjectJSON := map[string]interface{}{
+	subjectJSON := map[string]any{
 		"id":           uuid.New().String(),
 		"sub":          "john_doe_42",
 		"given_name":   "John",
@@ -3335,7 +3335,7 @@ func getTestVCWithContext(t *testing.T, issuerID string, ctx []string) *verifiab
 		"email":        "johndoe@example.com",
 		"phone_number": "+1-202-555-0101",
 		"birthdate":    "1940-01-01",
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street_address": "123 Main St",
 			"locality":       "Anytown",
 			"region":         "Anystate",
@@ -3440,7 +3440,7 @@ func checkExternalSubmission(
 	require.NotEmpty(t, ps.ID)
 	require.Equal(t, ps.DefinitionID, pd.ID)
 
-	var rawVPList []interface{}
+	var rawVPList []any
 
 	for _, vp := range vpList {
 		rawVPList = append(rawVPList, vpToMap(t, vp))
@@ -3459,10 +3459,10 @@ func checkExternalSubmission(
 	}
 }
 
-func vpToMap(t *testing.T, vp *verifiable.Presentation) map[string]interface{} {
+func vpToMap(t *testing.T, vp *verifiable.Presentation) map[string]any {
 	t.Helper()
 
-	var m map[string]interface{}
+	var m map[string]any
 
 	if vp.JWT != "" {
 		_, _, err := jwt.Parse(vp.JWT,
@@ -3484,7 +3484,7 @@ type pathEvaluator struct {
 	builder gval.Language
 }
 
-func (p *pathEvaluator) Evaluate(t *testing.T, data interface{}, descriptor *InputDescriptorMapping) interface{} {
+func (p *pathEvaluator) Evaluate(t *testing.T, data any, descriptor *InputDescriptorMapping) any {
 	evaluable, err := p.builder.NewEvaluable(descriptor.Path)
 	require.NoError(t, err)
 
@@ -3517,10 +3517,10 @@ func checkVPEx(
 	require.NoError(t, err)
 
 	if format != FormatJWTVP || expectedBaseContext == verifiable.V2ContextURI {
-		var doc map[string]interface{}
+		var doc map[string]any
 		require.NoError(t, json.Unmarshal(b, &doc))
 		require.True(t, verifiable.HasBaseContext(doc, expectedBaseContext))
-		require.Contains(t, doc["type"].([]interface{}), expectedType)
+		require.Contains(t, doc["type"].([]any), expectedType)
 
 		if expectedType == verifiable.VPEnvelopedType && expectedMediaType != "" {
 			mediaType, _, data, parseErr := verifiable.ParseDataURL(doc["id"].(string))
@@ -3536,7 +3536,7 @@ func checkVPEx(
 	require.NoError(t, err)
 }
 
-func parseJSONFile(t *testing.T, name string, v interface{}) {
+func parseJSONFile(t *testing.T, name string, v any) {
 	t.Helper()
 
 	jf, err := os.Open(name) // nolint: gosec
@@ -3550,7 +3550,7 @@ func parseJSONFile(t *testing.T, name string, v interface{}) {
 		}
 	}()
 
-	byteValue, err := ioutil.ReadAll(jf)
+	byteValue, err := io.ReadAll(jf)
 	if err != nil {
 		t.Error(err)
 	}
@@ -3562,7 +3562,7 @@ func parseJSONFile(t *testing.T, name string, v interface{}) {
 
 type credentialProto struct {
 	Context        []string
-	CustomContext  []interface{}
+	CustomContext  []any
 	ID             string
 	Types          []string
 	Subject        []verifiable.Subject
@@ -3628,7 +3628,7 @@ func prettyPrint(msg []byte) (string, error) {
 	return prettyJSON.String(), nil
 }
 
-func printObject(t *testing.T, name string, obj interface{}) {
+func printObject(t *testing.T, name string, obj any) {
 	t.Helper()
 
 	objBytes, err := json.Marshal(obj)

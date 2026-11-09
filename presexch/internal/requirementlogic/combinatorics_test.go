@@ -144,11 +144,7 @@ func validateSingleCombination(comb []int, n, m int) (bool, string) {
 }
 
 func isCoLexOrdered(smaller, larger []int) bool {
-	shorter := len(smaller)
-
-	if shorter > len(larger) {
-		shorter = len(larger)
-	}
+	shorter := min(len(smaller), len(larger))
 
 	for i := shorter - 1; i >= 0; i-- {
 		if smaller[i] < larger[i] {

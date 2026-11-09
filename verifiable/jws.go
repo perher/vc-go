@@ -14,7 +14,7 @@ import (
 )
 
 // MarshalJWS serializes JWT presentation claims into signed form (JWS).
-func marshalJWS(jwtClaims interface{}, signatureAlg JWSAlgorithm,
+func marshalJWS(jwtClaims any, signatureAlg JWSAlgorithm,
 	signer jwt.ProofCreator, keyID string) (string, jose.Headers, error) {
 	algName, err := signatureAlg.Name()
 	if err != nil {
@@ -39,7 +39,7 @@ func marshalJWS(jwtClaims interface{}, signatureAlg JWSAlgorithm,
 	return jwtStr, token.Headers, nil
 }
 
-func unmarshalJWT(rawJwt string, claims interface{}) (jose.Headers, error) {
+func unmarshalJWT(rawJwt string, claims any) (jose.Headers, error) {
 	jsonWebToken, _, err := jwt.Parse(rawJwt,
 		jwt.DecodeClaimsTo(claims),
 		jwt.WithIgnoreClaimsMapDecoding(true),

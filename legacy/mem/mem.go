@@ -9,6 +9,7 @@ package mem
 import (
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"sync"
 
@@ -237,10 +238,8 @@ func (m *memStore) GetBulk(keys ...string) ([][]byte, error) {
 		return nil, errors.New("keys slice must contain at least one key")
 	}
 
-	for _, key := range keys {
-		if key == "" {
-			return nil, errEmptyKey
-		}
+	if slices.Contains(keys, "") {
+		return nil, errEmptyKey
 	}
 
 	values := make([][]byte, len(keys))
@@ -279,7 +278,7 @@ func (m *memStore) Query(expression string, options ...spi.QueryOption) (spi.Ite
 
 	queryResults := make(map[string]*queryResult)
 
-	for _, exp := range strings.Split(expression, "&&") {
+	for exp := range strings.SplitSeq(expression, "&&") {
 		expressionSplit := strings.Split(exp, ":")
 		switch len(expressionSplit) {
 		case expressionTagNameOnlyLength:

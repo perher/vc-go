@@ -50,7 +50,7 @@ func TestParse(t *testing.T) {
 	r.NoError(e)
 
 	signer := testutil.NewEd25519Signer(privKey)
-	selectiveClaims := map[string]interface{}{"given_name": "Albert"}
+	selectiveClaims := map[string]any{"given_name": "Albert"}
 
 	now := time.Now()
 
@@ -89,7 +89,7 @@ func TestParse(t *testing.T) {
 		token, _, err := afjwt.Parse(vcSDJWT)
 		r.NoError(err)
 
-		var payload map[string]interface{}
+		var payload map[string]any
 		err = token.DecodeClaims(&payload)
 		r.NoError(err)
 
@@ -274,7 +274,7 @@ func TestHolderVerification(t *testing.T) {
 
 	signatureVerifier := testsupport.NewEd25519Verifier(issuerPubKey)
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"given_name": "Albert",
 		"last_name":  "Smith",
 	}
@@ -311,7 +311,7 @@ func TestHolderVerification(t *testing.T) {
 		},
 		{
 			name: "key binding",
-			headers: map[string]interface{}{
+			headers: map[string]any{
 				afjose.HeaderType: "kb+jwt",
 			},
 		},
@@ -600,7 +600,7 @@ func TestHolderVerification(t *testing.T) {
 
 				cfp := common.ParseCombinedFormatForPresentation(combinedFormatForPresentation)
 
-				claims := make(map[string]interface{})
+				claims := make(map[string]any)
 				claims["cnf"] = "abc"
 				claims["_sd_alg"] = testSDAlg
 				claims["iss"] = "https://example.com/issuer"
@@ -633,10 +633,10 @@ func TestHolderVerification(t *testing.T) {
 
 				cfp := common.ParseCombinedFormatForPresentation(combinedFormatForPresentation)
 
-				cnf := make(map[string]interface{})
+				cnf := make(map[string]any)
 				cnf["test"] = "test"
 
-				claims := make(map[string]interface{})
+				claims := make(map[string]any)
 				claims["cnf"] = cnf
 				claims["_sd_alg"] = testSDAlg
 				claims["iss"] = "https://example.com/issuer"
@@ -669,10 +669,10 @@ func TestHolderVerification(t *testing.T) {
 
 				cfp := common.ParseCombinedFormatForPresentation(combinedFormatForPresentation)
 
-				cnf := make(map[string]interface{})
-				cnf["jwk"] = make(map[string]interface{})
+				cnf := make(map[string]any)
+				cnf["jwk"] = make(map[string]any)
 
-				claims := make(map[string]interface{})
+				claims := make(map[string]any)
 				claims["cnf"] = cnf
 				claims["_sd_alg"] = testSDAlg
 				claims["iss"] = "https://example.com/issuer"
@@ -705,10 +705,10 @@ func TestHolderVerification(t *testing.T) {
 
 				cfp := common.ParseCombinedFormatForPresentation(combinedFormatForPresentation)
 
-				cnf := make(map[string]interface{})
-				cnf["jwk"] = make(map[string]interface{})
+				cnf := make(map[string]any)
+				cnf["jwk"] = make(map[string]any)
 
-				claims := make(map[string]interface{})
+				claims := make(map[string]any)
 				claims["cnf"] = cnf
 				claims["_sd_alg"] = testSDAlg
 				claims["iss"] = "https://example.com/issuer"
@@ -741,9 +741,9 @@ func TestHolderVerification(t *testing.T) {
 
 				cfp := common.ParseCombinedFormatForPresentation(combinedFormatForPresentation)
 
-				claims := make(map[string]interface{})
-				claims["cnf"] = map[string]interface{}{
-					"jwk": map[string]interface{}{
+				claims := make(map[string]any)
+				claims["cnf"] = map[string]any{
+					"jwk": map[string]any{
 						"kty": "RSA",
 						"e":   "AQAB",
 						"n":   "pm4bOHBg-oYhAyPWzR56AWX3rUIXp11",
@@ -776,7 +776,7 @@ func TestGetVerifiedPayload(t *testing.T) {
 	r.NoError(e)
 
 	signer := testutil.NewEd25519Signer(privKey)
-	selectiveClaims := map[string]interface{}{"given_name": "Albert"}
+	selectiveClaims := map[string]any{"given_name": "Albert"}
 
 	now := time.Now()
 
@@ -825,7 +825,7 @@ func TestWithJWTDetachedPayload(t *testing.T) {
 	require.Equal(t, []byte("payload"), opts.detachedPayload)
 }
 
-func buildJWS(signer afjose.Signer, claims interface{}) (string, error) {
+func buildJWS(signer afjose.Signer, claims any) (string, error) {
 	claimsBytes, err := json.Marshal(claims)
 	if err != nil {
 		return "", err
@@ -839,7 +839,7 @@ func buildJWS(signer afjose.Signer, claims interface{}) (string, error) {
 	return jws.SerializeCompact(false)
 }
 
-func printObject(t *testing.T, name string, obj interface{}) {
+func printObject(t *testing.T, name string, obj any) {
 	t.Helper()
 
 	objBytes, err := json.Marshal(obj)

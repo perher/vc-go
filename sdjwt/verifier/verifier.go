@@ -159,7 +159,7 @@ func WithExpectedTypHeader(typ string) ParseOpt {
 // V5 https://www.ietf.org/archive/id/draft-ietf-oauth-selective-disclosure-jwt-05.html#name-verification-by-the-verifier
 //
 // The Verifier will not, however, learn any claim values not disclosed in the Disclosures.
-func Parse(combinedFormatForPresentation string, opts ...ParseOpt) (map[string]interface{}, error) {
+func Parse(combinedFormatForPresentation string, opts ...ParseOpt) (map[string]any, error) {
 	defaultSigningAlgorithms := []string{"EdDSA", "RS256"}
 	pOpts := &parseOpts{
 		issuerSigningAlgorithms:   defaultSigningAlgorithms,
@@ -260,7 +260,7 @@ func checkForDuplicates(values []string) error {
 	return nil
 }
 
-func getSignatureVerifier(claims map[string]interface{}) (afgjwt.ProofChecker, error) {
+func getSignatureVerifier(claims map[string]any) (afgjwt.ProofChecker, error) {
 	cnf, err := common.GetCNF(claims)
 	if err != nil {
 		return nil, err
@@ -275,7 +275,7 @@ func getSignatureVerifier(claims map[string]interface{}) (afgjwt.ProofChecker, e
 }
 
 // getSignatureVerifierFromCNF will evolve over time as we support more cnf modes and algorithms.
-func getSignatureVerifierFromCNF(cnf map[string]interface{}) (afgjwt.ProofChecker, error) {
+func getSignatureVerifierFromCNF(cnf map[string]any) (afgjwt.ProofChecker, error) {
 	jwkObj, ok := cnf["jwk"]
 	if !ok {
 		return nil, errors.New("jwk must be present in cnf")
@@ -309,7 +309,7 @@ func getDisclosedClaims(
 	disclosures []string,
 	signedJWT *afgjwt.JSONWebToken,
 	hash crypto.Hash,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	disclosureClaims, err := common.GetDisclosureClaims(disclosures, hash)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get verified payload: %w", err)

@@ -39,7 +39,7 @@ func TestParse(t *testing.T) {
 	r.NoError(e)
 
 	signer := testutil.NewEd25519Signer(privKey)
-	claims := map[string]interface{}{"given_name": "Albert"}
+	claims := map[string]any{"given_name": "Albert"}
 
 	token, e := issuer.New(testIssuer, claims, nil, signer)
 	r.NoError(e)
@@ -168,7 +168,7 @@ func TestParse(t *testing.T) {
 	t.Run("error - applySDJWTV5Validation unexpected typ header", func(t *testing.T) {
 		complexClaims := createComplexClaims()
 
-		token, e := issuer.New(testIssuer, complexClaims, map[string]interface{}{
+		token, e := issuer.New(testIssuer, complexClaims, map[string]any{
 			jose.HeaderType: "JWT",
 		}, signer,
 			issuer.WithStructuredClaims(true))
@@ -213,7 +213,7 @@ func TestCreatePresentation(t *testing.T) {
 	r.NoError(e)
 
 	signer := testutil.NewEd25519Signer(privKey)
-	claims := map[string]interface{}{"given_name": "Albert"}
+	claims := map[string]any{"given_name": "Albert"}
 
 	token, e := issuer.New(testIssuer, claims, nil, signer)
 	r.NoError(e)
@@ -309,7 +309,7 @@ func TestWithJWTDetachedPayload(t *testing.T) {
 	require.Equal(t, []byte("payload"), opts.detachedPayload)
 }
 
-func buildJWS(signer jose.Signer, claims interface{}) (string, error) {
+func buildJWS(signer jose.Signer, claims any) (string, error) {
 	claimsBytes, err := json.Marshal(claims)
 	if err != nil {
 		return "", err
@@ -345,15 +345,15 @@ func (m *mockSigner) Headers() jose.Headers {
 	return headers
 }
 
-func createComplexClaims() map[string]interface{} {
-	claims := map[string]interface{}{
+func createComplexClaims() map[string]any {
+	claims := map[string]any{
 		"sub":          "john_doe_42",
 		"given_name":   "John",
 		"family_name":  "Doe",
 		"email":        "johndoe@example.com",
 		"phone_number": "+1-202-555-0101",
 		"birthdate":    "1940-01-01",
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street_address": "123 Main St",
 			"locality":       "Anytown",
 			"region":         "Anystate",

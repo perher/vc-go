@@ -32,7 +32,7 @@ type SupportedVerificationMethod struct {
 // LDProofDescriptor describes ld proof.
 type LDProofDescriptor interface {
 	// GetCanonicalDocument will return normalized/canonical version of the document
-	GetCanonicalDocument(doc map[string]interface{}, opts ...processor.Opts) ([]byte, error)
+	GetCanonicalDocument(doc map[string]any, opts ...processor.Opts) ([]byte, error)
 
 	// GetDigest returns document digest.
 	GetDigest(doc []byte) []byte

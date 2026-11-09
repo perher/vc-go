@@ -92,7 +92,7 @@ func TestV1CredJWSDecoderUnmarshal(t *testing.T) {
 	t.Run("JWS with 'iss' and issuer.id miss match", func(t *testing.T) {
 		original := strings.Split(string(validJWS), ".")
 
-		var claims map[string]interface{}
+		var claims map[string]any
 		claimsBytes, err := base64.RawURLEncoding.DecodeString(original[1])
 		require.NoError(t, err)
 

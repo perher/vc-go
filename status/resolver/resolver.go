@@ -169,7 +169,7 @@ func (r *Resolver) sendHTTPRequest(req *http.Request, status int, token string) 
 	return body, nil
 }
 
-func getQueries(didRelativeURL string) ([]map[string]interface{}, error) {
+func getQueries(didRelativeURL string) ([]map[string]any, error) {
 	chunks := strings.Split(didRelativeURL, "?")
 	if len(chunks) <= 1 {
 		return nil, errors.New("missing query")
@@ -190,7 +190,7 @@ func getQueries(didRelativeURL string) ([]map[string]interface{}, error) {
 		return nil, fmt.Errorf("unable to decode \"queries\" key: %w", err)
 	}
 
-	queryMaps := []map[string]interface{}{}
+	queryMaps := []map[string]any{}
 
 	err = json.Unmarshal(queriesVal, &queryMaps)
 	if err != nil {

@@ -262,7 +262,7 @@ type SigningKey struct {
 	Type        kmsapi.KeyType
 	PublicKeyID string
 	VMType      string
-	PublicKey   interface{} // TODO
+	PublicKey   any // TODO
 }
 
 // NewKMSSignersAndVerifier returns a pair of proof creator and checker.

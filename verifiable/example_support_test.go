@@ -25,7 +25,7 @@ type UniversityDegreeSubject struct {
 	ID     string           `json:"id,omitempty"`
 	Name   string           `json:"name,omitempty"`
 	Spouse string           `json:"spouse,omitempty"`
-	Degree UniversityDegree `json:"degree,omitempty"`
+	Degree UniversityDegree `json:"degree"`
 }
 
 type UniversityDegreeCredential struct {

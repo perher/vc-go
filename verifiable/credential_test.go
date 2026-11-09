@@ -65,7 +65,7 @@ const issuerAsObject = `
 //nolint:gochecknoglobals
 var subjectProto = Subject{
 	ID: "did:example:ebfeb1f712ebc6f1c276e12ec21",
-	CustomFields: map[string]interface{}{
+	CustomFields: map[string]any{
 		"name":   "Jayden Doe",
 		"spouse": "did:example:c276e12ec21ebfeb1f712ebc6f1",
 	},
@@ -95,8 +95,8 @@ var vccProto = CredentialContents{
 //nolint:gochecknoglobals
 var subjectProtoV2 = Subject{
 	ID: "did:example:123",
-	CustomFields: map[string]interface{}{
-		"degree": map[string]interface{}{
+	CustomFields: map[string]any{
+		"degree": map[string]any{
 			"type": "BachelorDegree",
 			"name": "Bachelor of Science and Arts",
 		},
@@ -310,7 +310,7 @@ func TestValidateV1VerCredContext(t *testing.T) {
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
 
-		raw[jsonFldContext] = []interface{}{"https://www.w3.org/2018/credentials/examples/v1", map[string]interface{}{
+		raw[jsonFldContext] = []any{"https://www.w3.org/2018/credentials/examples/v1", map[string]any{
 			"image": map[string]string{
 				"@id": "schema:image", "@type": "@id",
 			},
@@ -425,7 +425,7 @@ func TestValidateVerCredCredentialSubject(t *testing.T) {
 
 	t.Run("test verifiable credential with single credential subject", func(t *testing.T) {
 		var raw JSONObject
-		var subject interface{}
+		var subject any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
 		require.NoError(t, json.Unmarshal([]byte(singleCredentialSubject), &subject))
@@ -447,7 +447,7 @@ func TestValidateVerCredCredentialSubject(t *testing.T) {
 
 	t.Run("test verifiable credential with several credential subjects", func(t *testing.T) {
 		var raw JSONObject
-		var subject interface{}
+		var subject any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
 		require.NoError(t, json.Unmarshal([]byte(multipleCredentialSubjects), &subject))
@@ -495,7 +495,7 @@ func TestValidateVerCredIssuer(t *testing.T) {
 
 	t.Run("test verifiable credential with issuer as an object", func(t *testing.T) {
 		var raw JSONObject
-		var issuer interface{}
+		var issuer any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
 		require.NoError(t, json.Unmarshal([]byte(issuerAsObject), &issuer))
@@ -537,7 +537,7 @@ func TestValidateVerCredIssuer(t *testing.T) {
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
 
-		issuerRaw := map[string]interface{}{
+		issuerRaw := map[string]any{
 			"id":   "not-a-uri-issuer-id",
 			"name": "University",
 		}
@@ -563,7 +563,7 @@ func TestValidateVerCredIssuanceDate(t *testing.T) {
 	})
 
 	t.Run("test verifiable credential with wrong format of issuance date", func(t *testing.T) {
-		var vcMap map[string]interface{}
+		var vcMap map[string]any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &vcMap))
 		vcMap["issuanceDate"] = "not a valid date time"
@@ -574,7 +574,7 @@ func TestValidateVerCredIssuanceDate(t *testing.T) {
 	})
 
 	for _, timeStr := range []string{"2010-01-01T19:23:24Z", "2010-01-01T19:23:24.385Z"} {
-		var vcMap map[string]interface{}
+		var vcMap map[string]any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &vcMap))
 		vcMap["issuanceDate"] = timeStr
@@ -626,7 +626,7 @@ func TestValidateVerCredExpirationDate(t *testing.T) {
 	})
 
 	t.Run("test verifiable credential with wrong format of expiration date", func(t *testing.T) {
-		var vcMap map[string]interface{}
+		var vcMap map[string]any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &vcMap))
 		vcMap["expirationDate"] = "not a valid date time"
@@ -637,7 +637,7 @@ func TestValidateVerCredExpirationDate(t *testing.T) {
 	})
 
 	for _, timeStr := range []string{"2010-01-01T19:23:24Z", "2010-01-01T19:23:24.385Z"} {
-		var vcMap map[string]interface{}
+		var vcMap map[string]any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &vcMap))
 		vcMap["expirationDate"] = timeStr
@@ -684,7 +684,7 @@ func TestValidateVerCredStatus(t *testing.T) {
 		var raw JSONObject
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
-		raw[jsonFldStatus] = map[string]interface{}{"id": "invalid URL", "type": "CredentialStatusList2017"}
+		raw[jsonFldStatus] = map[string]any{"id": "invalid URL", "type": "CredentialStatusList2017"}
 
 		err := validateCredentialUsingJSONSchema(raw, &CredentialContents{Context: []string{"https://www.w3.org/2018/credentials/v1"}}, &credentialOpts{})
 		require.Error(t, err)
@@ -759,7 +759,7 @@ func TestValidateVerCredSchema(t *testing.T) {
 		var raw JSONObject
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
-		raw[jsonFldSchema] = map[string]interface{}{"id": "invalid URL", "type": "JsonSchemaValidator2018"}
+		raw[jsonFldSchema] = map[string]any{"id": "invalid URL", "type": "JsonSchemaValidator2018"}
 
 		err := validateCredentialUsingJSONSchema(raw, &CredentialContents{Context: []string{"https://www.w3.org/2018/credentials/v1"}}, &credentialOpts{})
 		require.Error(t, err)
@@ -784,7 +784,7 @@ func TestValidateVerCredRefreshService(t *testing.T) {
 
 		raw := vc.ToRawJSON()
 
-		raw[jsonFldRefreshService] = map[string]interface{}{"type": "ManualRefreshService2018"}
+		raw[jsonFldRefreshService] = map[string]any{"type": "ManualRefreshService2018"}
 
 		err = validateCredentialUsingJSONSchema(raw, &CredentialContents{Context: []string{"https://www.w3.org/2018/credentials/v1"}}, &credentialOpts{})
 		require.Error(t, err)
@@ -797,7 +797,7 @@ func TestValidateVerCredRefreshService(t *testing.T) {
 
 		raw := vc.ToRawJSON()
 
-		raw[jsonFldRefreshService] = map[string]interface{}{"id": "https://example.edu/refresh/3732"}
+		raw[jsonFldRefreshService] = map[string]any{"id": "https://example.edu/refresh/3732"}
 
 		err = validateCredentialUsingJSONSchema(raw, &CredentialContents{Context: []string{"https://www.w3.org/2018/credentials/v1"}}, &credentialOpts{})
 		require.Error(t, err)
@@ -810,7 +810,7 @@ func TestValidateVerCredRefreshService(t *testing.T) {
 
 		raw := vc.ToRawJSON()
 
-		raw[jsonFldRefreshService] = map[string]interface{}{"id": "invalid URL", "type": "ManualRefreshService2018"}
+		raw[jsonFldRefreshService] = map[string]any{"id": "invalid URL", "type": "ManualRefreshService2018"}
 
 		err = validateCredentialUsingJSONSchema(raw, &CredentialContents{Context: []string{"https://www.w3.org/2018/credentials/v1"}}, &credentialOpts{})
 		require.Error(t, err)
@@ -917,7 +917,7 @@ func TestCredential_MarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Failure in cf marshalling", func(t *testing.T) {
-		vc, err := CreateCredential(CredentialContents{Context: []string{V1ContextURI}}, map[string]interface{}{
+		vc, err := CreateCredential(CredentialContents{Context: []string{V1ContextURI}}, map[string]any{
 			"invalid field": make(chan int),
 		})
 		require.NoError(t, err)
@@ -930,7 +930,7 @@ func TestCredential_MarshalJSON(t *testing.T) {
 	t.Run("Failure in TermsOfUse marshalling", func(t *testing.T) {
 		vc, err := CreateCredential(CredentialContents{
 			Context: []string{V1ContextURI},
-			TermsOfUse: []TypedID{{CustomFields: map[string]interface{}{
+			TermsOfUse: []TypedID{{CustomFields: map[string]any{
 				"invalidField": make(chan int),
 			}}},
 		}, nil)
@@ -967,9 +967,9 @@ func TestCredential_CreateAndParseSignedCOSEVC(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, jsonLdBytes)
 
-		var parsedMap map[string]interface{}
+		var parsedMap map[string]any
 		require.NoError(t, json.Unmarshal(jsonLdBytes, &parsedMap))
-		require.EqualValues(t, "did:123", parsedMap["issuer"].(map[string]interface{})["id"])
+		require.EqualValues(t, "did:123", parsedMap["issuer"].(map[string]any)["id"])
 
 		payloads := []struct {
 			Type string
@@ -1451,11 +1451,11 @@ func TestWithStrictValidation(t *testing.T) {
 
 func TestCustomCredentialJsonSchemaValidator2018(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		rawMap := make(map[string]interface{})
+		rawMap := make(map[string]any)
 		require.NoError(t, json.Unmarshal([]byte(JSONSchemaLoaderV1()), &rawMap))
 
 		// extend default schema to require new referenceNumber field to be mandatory
-		required, success := rawMap["required"].([]interface{})
+		required, success := rawMap["required"].([]any)
 		require.True(t, success)
 		required = append(required, "referenceNumber")
 		rawMap["required"] = required
@@ -1475,7 +1475,7 @@ func TestCustomCredentialJsonSchemaValidator2018(t *testing.T) {
 	require.NoError(t, err)
 
 	// define credential schema
-	raw[jsonFldSchema] = map[string]interface{}{"id": testServer.URL, "type": "JsonSchemaValidator2018"}
+	raw[jsonFldSchema] = map[string]any{"id": testServer.URL, "type": "JsonSchemaValidator2018"}
 	// but new required field referenceNumber is not defined...
 
 	missingReqFieldSchema, mErr := json.Marshal(raw)
@@ -1489,7 +1489,7 @@ func TestCustomCredentialJsonSchemaValidator2018(t *testing.T) {
 	})
 
 	t.Run("Applies custom credentialSchema and passes new data inconsistency check", func(t *testing.T) {
-		raw := make(map[string]interface{})
+		raw := make(map[string]any)
 		require.NoError(t, json.Unmarshal(missingReqFieldSchema, &raw))
 
 		// define required field "referenceNumber"
@@ -1528,7 +1528,7 @@ func TestCustomCredentialJsonSchemaValidator2018(t *testing.T) {
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
 
 		// define credential schema with invalid port
-		raw[jsonFldSchema] = map[string]interface{}{"id": "http://localhost:0001", "type": "JsonSchemaValidator2018"}
+		raw[jsonFldSchema] = map[string]any{"id": "http://localhost:0001", "type": "JsonSchemaValidator2018"}
 		// but new required field referenceNumber is not defined...
 
 		schemaWithInvalidURLToCredentialSchema, err := json.Marshal(raw)
@@ -1546,7 +1546,7 @@ func TestCustomCredentialJsonSchemaValidator2018(t *testing.T) {
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &raw))
 
 		// define credential schema with not supported type
-		raw[jsonFldSchema] = map[string]interface{}{"id": testServer.URL, "type": "ZkpExampleSchema2018"}
+		raw[jsonFldSchema] = map[string]any{"id": testServer.URL, "type": "ZkpExampleSchema2018"}
 
 		unsupportedCredentialTypeOfSchema, err := json.Marshal(raw)
 		require.NoError(t, err)
@@ -1667,8 +1667,8 @@ func Test_SubjectID(t *testing.T) {
 	t.Run("With single Subject", func(t *testing.T) {
 		vcWithSingleSubject := &CredentialContents{Subject: []Subject{{
 			ID: "did:example:ebfeb1f712ebc6f1c276e12ecaa",
-			CustomFields: map[string]interface{}{
-				"degree": map[string]interface{}{
+			CustomFields: map[string]any{
+				"degree": map[string]any{
 					"type": "BachelorDegree",
 					"name": "Bachelor of Science and Arts",
 				}},
@@ -1683,14 +1683,14 @@ func Test_SubjectID(t *testing.T) {
 			Subject: []Subject{
 				{
 					ID: "did:example:ebfeb1f712ebc6f1c276e12ec21",
-					CustomFields: map[string]interface{}{
+					CustomFields: map[string]any{
 						"name":   "Jayden Doe",
 						"spouse": "did:example:c276e12ec21ebfeb1f712ebc6f1",
 					},
 				},
 				{
 					ID: "did:example:c276e12ec21ebfeb1f712ebc6f1",
-					CustomFields: map[string]interface{}{"name": "Morgan Doe",
+					CustomFields: map[string]any{"name": "Morgan Doe",
 						"spouse": "did:example:ebfeb1f712ebc6f1c276e12ec21",
 					},
 				},
@@ -1728,7 +1728,7 @@ func Test_SubjectID(t *testing.T) {
 				CustomFields: CustomFields{
 					"givenName":  "Jane",
 					"familyName": "Doe",
-					"degree": map[string]interface{}{
+					"degree": map[string]any{
 						"type":    "BachelorDegree",
 						"name":    "Bachelor of Science in Mechanical Engineering",
 						"college": "College of Engineering",
@@ -1751,11 +1751,11 @@ func TestRawCredentialSerialization(t *testing.T) {
 	rcBytes, err := json.Marshal(rc)
 	require.NoError(t, err)
 
-	var cMap map[string]interface{}
+	var cMap map[string]any
 	err = json.Unmarshal(cBytes, &cMap)
 	require.NoError(t, err)
 
-	var rcMap map[string]interface{}
+	var rcMap map[string]any
 	err = json.Unmarshal(rcBytes, &rcMap)
 	require.NoError(t, err)
 
@@ -1771,7 +1771,7 @@ func TestParseIssuer(t *testing.T) {
 	})
 
 	t.Run("Parse Issuer identified by ID and name", func(t *testing.T) {
-		issueRaw := map[string]interface{}{
+		issueRaw := map[string]any{
 			"id":   "did:example:76e12ec712ebc6f1c221ebfeb1f",
 			"name": "Example University",
 		}
@@ -1783,7 +1783,7 @@ func TestParseIssuer(t *testing.T) {
 	})
 
 	t.Run("Parse Issuer identified by ID and name and image", func(t *testing.T) {
-		issueRaw := map[string]interface{}{
+		issueRaw := map[string]any{
 			"id":    "did:example:76e12ec712ebc6f1c221ebfeb1f",
 			"name":  "Example University",
 			"image": "data:image/png;base64,iVBOR",
@@ -1797,7 +1797,7 @@ func TestParseIssuer(t *testing.T) {
 	})
 
 	t.Run("Parse Issuer identified by ID and empty name", func(t *testing.T) {
-		issueRaw := map[string]interface{}{
+		issueRaw := map[string]any{
 			"id": "did:example:76e12ec712ebc6f1c221ebfeb1f",
 		}
 
@@ -1808,7 +1808,7 @@ func TestParseIssuer(t *testing.T) {
 	})
 
 	t.Run("Parse Issuer identified by empty ID and name", func(t *testing.T) {
-		issueRaw := map[string]interface{}{
+		issueRaw := map[string]any{
 			"name": "Example University",
 		}
 
@@ -1819,7 +1819,7 @@ func TestParseIssuer(t *testing.T) {
 	})
 
 	t.Run("Parse Issuer with invalid type of ID", func(t *testing.T) {
-		issueRaw := map[string]interface{}{
+		issueRaw := map[string]any{
 			"id": 55,
 		}
 
@@ -1862,7 +1862,7 @@ func TestParseSubject(t *testing.T) {
 	})
 
 	t.Run("Parse single Subject object", func(t *testing.T) {
-		subjectRaw := map[string]interface{}{
+		subjectRaw := map[string]any{
 			"id":     "did:example:ebfeb1f712ebc6f1c276e12ec21",
 			"name":   "Jayden Doe",
 			"spouse": "did:example:c276e12ec21ebfeb1f712ebc6f1",
@@ -1878,13 +1878,13 @@ func TestParseSubject(t *testing.T) {
 	})
 
 	t.Run("Parse several Subject objects", func(t *testing.T) {
-		subjectRaw := []interface{}{
-			map[string]interface{}{
+		subjectRaw := []any{
+			map[string]any{
 				"id":     "did:example:ebfeb1f712ebc6f1c276e12ec21",
 				"name":   "Jayden Doe",
 				"spouse": "did:example:c276e12ec21ebfeb1f712ebc6f1",
 			},
-			map[string]interface{}{
+			map[string]any{
 				"id":     "did:example:c276e12ec21ebfeb1f712ebc6f1",
 				"name":   "Morgan Doe",
 				"spouse": "did:example:ebfeb1f712ebc6f1c276e12ec21",
@@ -1926,7 +1926,7 @@ func TestSerializeIssuer(t *testing.T) {
 			},
 		}
 
-		expectedIssuerBytes, err := json.Marshal(map[string]interface{}{
+		expectedIssuerBytes, err := json.Marshal(map[string]any{
 			"id":    "did:example:76e12ec712ebc6f1c221ebfeb1f",
 			"name":  "Example University",
 			"image": "data:image/png;base64,iVBOR",
@@ -1941,7 +1941,7 @@ func TestSerializeIssuer(t *testing.T) {
 	t.Run("corner case: marshal issuer with invalid custom fields", func(t *testing.T) {
 		issuer := Issuer{
 			ID:           "did:example:76e12ec712ebc6f1c221ebfeb1f",
-			CustomFields: map[string]interface{}{"image": map[chan int]interface{}{make(chan int): 777}},
+			CustomFields: map[string]any{"image": map[chan int]any{make(chan int): 777}},
 		}
 
 		issuerBytes, err := json.Marshal(serializeIssuer(issuer))
@@ -1955,7 +1955,7 @@ func TestMarshalSubject(t *testing.T) {
 		subjectRaw := []Subject{{ID: "did:example:76e12ec712ebc6f1c221ebfeb1f"}}
 
 		subject := SerializeSubject(subjectRaw)
-		require.Equal(t, map[string]interface{}{"id": "did:example:76e12ec712ebc6f1c221ebfeb1f"}, subject)
+		require.Equal(t, map[string]any{"id": "did:example:76e12ec712ebc6f1c221ebfeb1f"}, subject)
 	})
 
 	t.Run("Marshal Subject with ID, name, spouse defined", func(t *testing.T) {
@@ -1967,7 +1967,7 @@ func TestMarshalSubject(t *testing.T) {
 			},
 		}}
 
-		expectedSubject := map[string]interface{}{
+		expectedSubject := map[string]any{
 			"id":     "did:example:76e12ec712ebc6f1c221ebfeb1f",
 			"name":   "Morgan Doe",
 			"spouse": "did:example:ebfeb1f712ebc6f1c276e12ec21",
@@ -1984,18 +1984,18 @@ func TestTypesToSerialize(t *testing.T) {
 
 	// several types
 	require.Equal(t,
-		[]interface{}{"VerifiableCredential", "UniversityDegreeCredential"},
+		[]any{"VerifiableCredential", "UniversityDegreeCredential"},
 		serializeTypes([]string{"VerifiableCredential", "UniversityDegreeCredential"}))
 }
 
 func TestContextToSerialize(t *testing.T) {
 	// single context without custom objects
 	require.Equal(t,
-		[]interface{}{"https://www.w3.org/2018/credentials/v1"},
-		contextToRaw([]string{"https://www.w3.org/2018/credentials/v1"}, []interface{}{}))
+		[]any{"https://www.w3.org/2018/credentials/v1"},
+		contextToRaw([]string{"https://www.w3.org/2018/credentials/v1"}, []any{}))
 
 	// several contexts without custom objects
-	require.Equal(t, []interface{}{
+	require.Equal(t, []any{
 		"https://www.w3.org/2018/credentials/v1",
 		"https://www.w3.org/2018/credentials/examples/v1",
 	},
@@ -2003,16 +2003,16 @@ func TestContextToSerialize(t *testing.T) {
 			"https://www.w3.org/2018/credentials/v1",
 			"https://www.w3.org/2018/credentials/examples/v1",
 		},
-			[]interface{}{}))
+			[]any{}))
 
 	// context with custom objects
-	customContext := map[string]interface{}{
-		"image": map[string]interface{}{"@id": "schema:image", "@type": "@id"},
+	customContext := map[string]any{
+		"image": map[string]any{"@id": "schema:image", "@type": "@id"},
 	}
 	require.Equal(t,
-		[]interface{}{"https://www.w3.org/2018/credentials/v1", customContext},
+		[]any{"https://www.w3.org/2018/credentials/v1", customContext},
 		contextToRaw([]string{"https://www.w3.org/2018/credentials/v1"},
-			[]interface{}{
+			[]any{
 				customContext,
 			}))
 }
@@ -2382,7 +2382,7 @@ func TestParseCredentialWithDisabledProofCheck(t *testing.T) {
 	})
 
 	t.Run("ParseUnverifiedCredential() error cases", func(t *testing.T) {
-		invalidClaims := map[string]interface{}{
+		invalidClaims := map[string]any{
 			"iss": 33, // JWT issuer must be a string
 		}
 
@@ -2399,7 +2399,7 @@ func TestParseCredentialWithDisabledProofCheck(t *testing.T) {
 		require.ErrorContains(t, err, "unsupported credential format")
 		require.Nil(t, vc)
 
-		var rawVCMap map[string]interface{}
+		var rawVCMap map[string]any
 
 		require.NoError(t, json.Unmarshal([]byte(v1ValidCredential), &rawVCMap))
 		rawVCMap["@context"] = 55 // should be string or slice of strings

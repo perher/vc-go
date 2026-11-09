@@ -31,11 +31,11 @@ func TestJwtAlgorithm_Name(t *testing.T) {
 }
 
 func TestStringSlice(t *testing.T) {
-	strings, err := stringSlice([]interface{}{"str1", "str2"})
+	strings, err := stringSlice([]any{"str1", "str2"})
 	require.NoError(t, err)
 	require.Equal(t, []string{"str1", "str2"}, strings)
 
-	strings, err = stringSlice([]interface{}{"str1", 15})
+	strings, err = stringSlice([]any{"str1", 15})
 	require.Error(t, err)
 	require.Nil(t, strings)
 }
@@ -45,7 +45,7 @@ func TestTypedID_MarshalJSON(t *testing.T) {
 		tid := TypedID{
 			ID:   "http://example.com/policies/credential/4",
 			Type: "IssuerPolicy",
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"profile": "http://example.com/profiles/credential",
 			},
 		}
@@ -85,8 +85,8 @@ func TestTypedID_UnmarshalJSON(t *testing.T) {
 		require.Equal(t, "IssuerPolicy", tid.Type)
 		require.Equal(t, CustomFields{
 			"profile": "http://example.com/profiles/credential",
-			"prohibition": []interface{}{
-				map[string]interface{}{
+			"prohibition": []any{
+				map[string]any{
 					"assigner": "https://example.edu/issuers/14",
 					"assignee": "AllVerifiers",
 					"target":   "http://example.edu/credentials/3732",
@@ -118,7 +118,7 @@ func TestDecodeType(t *testing.T) {
 	})
 
 	t.Run("Decode several types", func(t *testing.T) {
-		types, err := decodeType([]interface{}{"VerifiableCredential", "UniversityDegreeCredential"})
+		types, err := decodeType([]any{"VerifiableCredential", "UniversityDegreeCredential"})
 		require.NoError(t, err)
 		require.Equal(t, []string{"VerifiableCredential", "UniversityDegreeCredential"}, types)
 	})
@@ -131,7 +131,7 @@ func TestDecodeType(t *testing.T) {
 	})
 
 	t.Run("Error on decoding of invalid Verifiable Credential types", func(t *testing.T) {
-		types, err := decodeType([]interface{}{"VerifiableCredential", 777})
+		types, err := decodeType([]any{"VerifiableCredential", 777})
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "vc types: array element is not a string")
 		require.Nil(t, types)
@@ -147,7 +147,7 @@ func TestDecodeContext(t *testing.T) {
 	})
 
 	t.Run("Decode several contexts", func(t *testing.T) {
-		contexts, extraContexts, err := decodeContext([]interface{}{
+		contexts, extraContexts, err := decodeContext([]any{
 			"https://www.w3.org/2018/credentials/v1",
 			"https://www.w3.org/2018/credentials/examples/v1",
 		})
@@ -159,10 +159,10 @@ func TestDecodeContext(t *testing.T) {
 	})
 
 	t.Run("Decode several contexts with custom objects", func(t *testing.T) {
-		customContext := map[string]interface{}{
-			"image": map[string]interface{}{"@id": "schema:image", "@type": "@id"},
+		customContext := map[string]any{
+			"image": map[string]any{"@id": "schema:image", "@type": "@id"},
 		}
-		contexts, extraContexts, err := decodeContext([]interface{}{
+		contexts, extraContexts, err := decodeContext([]any{
 			"https://www.w3.org/2018/credentials/v1",
 			"https://www.w3.org/2018/credentials/examples/v1",
 			customContext,
@@ -171,7 +171,7 @@ func TestDecodeContext(t *testing.T) {
 		require.Equal(t,
 			[]string{"https://www.w3.org/2018/credentials/v1", "https://www.w3.org/2018/credentials/examples/v1"},
 			contexts)
-		require.Equal(t, []interface{}{customContext}, extraContexts)
+		require.Equal(t, []any{customContext}, extraContexts)
 	})
 
 	t.Run("Decode context of invalid type", func(t *testing.T) {
@@ -183,7 +183,7 @@ func TestDecodeContext(t *testing.T) {
 }
 
 func Test_safeStringValue(t *testing.T) {
-	var i interface{} = "str"
+	var i any = "str"
 
 	require.Equal(t, "str", safeStringValue(i))
 
@@ -217,7 +217,7 @@ func Test_proofsToRaw(t *testing.T) {
 
 func Test_parseLDProof(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		singleProof := []interface{}{map[string]interface{}{
+		singleProof := []any{map[string]any{
 			"proofValue": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19..67TTULBvibJaJ2oZf3tGYhxZqxYS89qGQykL5hfCoh-MF0vrwQqzciZhjNrAGTAgHtDZsnSQVwJ8bO_7Sc0ECw", //nolint:lll
 		}}
 
@@ -227,7 +227,7 @@ func Test_parseLDProof(t *testing.T) {
 	})
 
 	t.Run("unsupported proof value", func(t *testing.T) {
-		singleProof := []interface{}{
+		singleProof := []any{
 			"eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il19", //nolint:lll
 		}
 
@@ -278,8 +278,8 @@ func TestParseDataURL(t *testing.T) {
 }
 
 // toArray convert array to array of json objects.
-func toArray[T any](v []T) ([]interface{}, error) {
-	maps := make([]interface{}, len(v))
+func toArray[T any](v []T) ([]any, error) {
+	maps := make([]any, len(v))
 
 	for i := range v {
 		m, err := jsonutil.ToMap(v[i])

@@ -180,7 +180,7 @@ func (c *ProofChecker) CheckLDProof(proof *proof.Proof, expectedProofIssuer stri
 
 // GetLDPCanonicalDocument will return normalized/canonical version of the document.
 func (c *ProofCheckerBase) GetLDPCanonicalDocument(proof *proof.Proof,
-	doc map[string]interface{}, opts ...processor.Opts) ([]byte, error) {
+	doc map[string]any, opts ...processor.Opts) ([]byte, error) {
 	supportedProof, err := c.getSupportedProof(proof.Type)
 	if err != nil {
 		return nil, err

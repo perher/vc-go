@@ -26,7 +26,7 @@ func ExampleParse() {
 		fmt.Println("failed to set-up test: %w", err.Error())
 	}
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"given_name": "Albert",
 		"last_name":  "Smith",
 	}
@@ -85,7 +85,7 @@ func setUp() (*testutil.Ed25519Signer, *checker.EmbeddedVMProofChecker, error) {
 	return signer, signatureVerifier, nil
 }
 
-func marshalObj(obj interface{}) (string, error) {
+func marshalObj(obj any) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
 		fmt.Println("failed to marshal object: %w", err.Error())

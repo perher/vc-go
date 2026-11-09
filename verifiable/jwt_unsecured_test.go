@@ -15,13 +15,13 @@ import (
 
 func TestUnsecuredJWT(t *testing.T) {
 	headers := jose.Headers{"alg": "none"}
-	claims := map[string]interface{}{"sub": "user123", "productIds": []interface{}{1., 2.}}
+	claims := map[string]any{"sub": "user123", "productIds": []any{1., 2.}}
 
 	serializedJWT, err := marshalUnsecuredJWT(claims)
 	require.NoError(t, err)
 	require.NotEmpty(t, serializedJWT)
 
-	var claimsParsed map[string]interface{}
+	var claimsParsed map[string]any
 	joseHeaders, err := unmarshalUnsecuredJWT(serializedJWT, &claimsParsed)
 	require.NoError(t, err)
 
@@ -29,7 +29,7 @@ func TestUnsecuredJWT(t *testing.T) {
 	require.Equal(t, joseHeaders, headers)
 
 	// marshal with invalid claims
-	invalidClaims := map[string]interface{}{"error": map[chan int]interface{}{make(chan int): 6}}
+	invalidClaims := map[string]any{"error": map[chan int]any{make(chan int): 6}}
 	serializedJWT, err = marshalUnsecuredJWT(invalidClaims)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "marshal unsecured JWT")
