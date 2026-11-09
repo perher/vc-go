@@ -97,6 +97,12 @@ linters:
       # Default: false
       check-type-assertions: true
 
+    exhaustive:
+      # Presence of "default" case in switch statements satisfies exhaustiveness,
+      # even if all enum members are not listed.
+      # Default: false
+      default-signifies-exhaustive: true
+
     funlen:
       # Checks the number of lines in a function.
       # If lower than 0, disable the check.
@@ -222,7 +228,7 @@ linters:
       - linters: [ errorlint ]
         source: '^\s+if _, ok := err\.\([^.]+\.InternalError\); ok {'
       - linters: [ gochecknoglobals ]
-        text: 'logger is a global variable'
+        text: '(?i)logger is a global variable'
       - path: '_test\.go'
         linters:
           - bodyclose
