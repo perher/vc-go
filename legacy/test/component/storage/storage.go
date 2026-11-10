@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 // These tests are intended to demonstrate the expected behaviour as defined in the documentation above the
 // spi.Provider, spi.Store and spi.Iterator interface declarations.
 //
-//nolint:mnd,dupl // shared storage test suite: literal fixture values and repeated test steps are intentional.
+//nolint:mnd,dupl,goconst // shared storage test suite: literal fixture values and repeated test steps are intentional.
 package storage
 
 import (

@@ -1484,7 +1484,7 @@ func convertToRFC9535Format(path string) string {
 
 	for i, segment := range segments {
 		if strings.Contains(segment, "-") && !strings.Contains(segment, "['") {
-			builder.WriteString(fmt.Sprintf("['%s']", segment))
+			fmt.Fprintf(&builder, "['%s']", segment)
 			continue
 		}
 

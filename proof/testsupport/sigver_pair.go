@@ -53,6 +53,10 @@ const (
 	AnyPubKeyID = "anyID"
 
 	rsaKeyBits = 2048
+
+	ed25519VMType = "Ed25519VerificationKey2018"
+	rsaVMType     = "RsaVerificationKey2018"
+	jwk2020VMType = "JsonWebKey2020"
 )
 
 // VMResolver mock verification method resolver.
@@ -137,7 +141,7 @@ func NewEd25519Pair(pubKey ed25519.PublicKey, privKey ed25519.PrivateKey,
 		mockedVerificationMethods: []mockedVerificationMethod{{
 			lookupID: publicKeyID,
 			verificationMethodValue: &vermethod.VerificationMethod{
-				Type:  "Ed25519VerificationKey2018",
+				Type:  ed25519VMType,
 				Value: pubKey,
 			}}, {
 			lookupID: publicKeyID,
@@ -179,7 +183,7 @@ func NewEd25519Pairs(sigKeys []Ed25519SignKey) (
 			{
 				lookupID: sigKey.PublicKeyID,
 				verificationMethodValue: &vermethod.VerificationMethod{
-					Type:  "Ed25519VerificationKey2018",
+					Type:  ed25519VMType,
 					Value: sigKey.PubKey,
 				},
 			},
@@ -202,7 +206,7 @@ func NewEd25519Pairs(sigKeys []Ed25519SignKey) (
 // NewEd25519Verifier returns ed25519 verifier.
 func NewEd25519Verifier(pubKey ed25519.PublicKey) *checker.EmbeddedVMProofChecker {
 	return checker.NewEmbeddedVMProofChecker(
-		&vermethod.VerificationMethod{Type: "Ed25519VerificationKey2018", Value: pubKey},
+		&vermethod.VerificationMethod{Type: ed25519VMType, Value: pubKey},
 		checker.WithSignatureVerifiers(vered25519.New()),
 		checker.WithLDProofTypes(
 			ed25519signature2018.New(),
@@ -225,7 +229,7 @@ func NewRSA256Pair(privKey *rsa.PrivateKey, publicKeyID string) (*creator.ProofC
 		mockedVerificationMethods: []mockedVerificationMethod{{
 			lookupID: publicKeyID,
 			verificationMethodValue: &vermethod.VerificationMethod{
-				Type:  "RsaVerificationKey2018",
+				Type:  rsaVMType,
 				Value: x509.MarshalPKCS1PublicKey(pubKey),
 			}},
 		},
@@ -237,7 +241,7 @@ func NewRSA256Pair(privKey *rsa.PrivateKey, publicKeyID string) (*creator.ProofC
 // NewRS256Verifier returns rsa rs verifier.
 func NewRS256Verifier(pubKey *rsa.PublicKey) *checker.EmbeddedVMProofChecker {
 	return checker.NewEmbeddedVMProofChecker(
-		&vermethod.VerificationMethod{Type: "RsaVerificationKey2018", Value: x509.MarshalPKCS1PublicKey(pubKey)},
+		&vermethod.VerificationMethod{Type: rsaVMType, Value: x509.MarshalPKCS1PublicKey(pubKey)},
 		checker.WithSignatureVerifiers(rsaver.NewRS256()),
 		checker.WithLDProofTypes(
 			jsonwebsignature2020.New(),
@@ -308,7 +312,7 @@ func NewKMSSignersAndVerifierErr(signingKeys []*SigningKey) (
 
 		case kmsapi.ECDSASecp256k1TypeIEEEP1363:
 			proofCreator, mocked, err = ecdsaSecp256k1PairDesc(sigKey,
-				sigKey.VMType == "" || sigKey.VMType == "JsonWebKey2020")
+				sigKey.VMType == "" || sigKey.VMType == jwk2020VMType)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -351,7 +355,7 @@ func rsa256PairDesc(publicKeyID *SigningKey) (*creator.ProofCreator, mockedVerif
 	vm := mockedVerificationMethod{
 		lookupID: publicKeyID.PublicKeyID,
 		verificationMethodValue: &vermethod.VerificationMethod{
-			Type:  "RsaVerificationKey2018",
+			Type:  rsaVMType,
 			Value: x509.MarshalPKCS1PublicKey(pubKey),
 		},
 	}
@@ -424,7 +428,7 @@ func ecdsaSecp256k1PairDesc(publicKeyID *SigningKey, jwkVM bool,
 		}
 
 		vm.verificationMethodValue = &vermethod.VerificationMethod{
-			Type: "JsonWebKey2020",
+			Type: jwk2020VMType,
 			JWK:  pubJWK,
 		}
 	}
@@ -462,13 +466,13 @@ func kmsPairDesc(
 			creator.WithJWTAlg(ps256.New(), signer))
 
 	vm := &vermethod.VerificationMethod{
-		Type: "JsonWebKey2020",
+		Type: jwk2020VMType,
 		JWK:  pubJWK,
 	}
 
 	sigKey.PublicKey = pubJWK
 
-	if sigKey.VMType != "" && sigKey.VMType != "JsonWebKey2020" {
+	if sigKey.VMType != "" && sigKey.VMType != jwk2020VMType {
 		pubKeyBytes, err := pubJWK.PublicKeyBytes()
 		vm = &vermethod.VerificationMethod{
 			Type:  sigKey.VMType,

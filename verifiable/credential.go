@@ -2278,7 +2278,7 @@ func jsonSchemaLoader(schemaTemplate string, defaultRequired []string, opts ...S
 		filterOut := slices.Contains(dsOpts.disabledChecks, prop)
 
 		if !filterOut {
-			required.WriteString(fmt.Sprintf(",%q", prop))
+			fmt.Fprintf(&required, ",%q", prop)
 		}
 	}
 

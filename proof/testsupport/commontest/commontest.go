@@ -32,6 +32,11 @@ import (
 	cwt2 "github.com/trustbloc/vc-go/verifiable/cwt"
 )
 
+const (
+	ed25519KeyID   = "did:example:12345#key-1"
+	secp256k1KeyID = "did:example:12345#key-3"
+)
+
 //nolint:gosec // G101 false positive: a test credential document, not a secret
 const testCredential = `
 {
@@ -89,8 +94,8 @@ func TestAllLDSignersVerifiers(t *testing.T) {
 	require.NoError(t, dlErr)
 
 	allKeyTypes := []*testsupport.SigningKey{
-		{Type: kms.ED25519Type, PublicKeyID: "did:example:12345#key-1"},
-		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: "did:example:12345#key-3"},
+		{Type: kms.ED25519Type, PublicKeyID: ed25519KeyID},
+		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: secp256k1KeyID},
 		{Type: kms.BLS12381G2Type, PublicKeyID: "did:example:12345#key-8"},
 	}
 
@@ -160,9 +165,9 @@ func TestAllJWTSignersVerifiers(t *testing.T) {
 	require.NoError(t, ldErr)
 
 	allKeyTypes := []*testsupport.SigningKey{
-		{Type: kms.ED25519Type, PublicKeyID: "did:example:12345#key-1"},
+		{Type: kms.ED25519Type, PublicKeyID: ed25519KeyID},
 		{Type: kms.ECDSAP256TypeIEEEP1363, PublicKeyID: "did:example:12345#key-2"},
-		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: "did:example:12345#key-3"},
+		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: secp256k1KeyID},
 		{Type: kms.ECDSAP384TypeIEEEP1363, PublicKeyID: "did:example:12345#key-4"},
 		{Type: kms.ECDSAP521TypeIEEEP1363, PublicKeyID: "did:example:12345#key-5"},
 		{Type: kms.RSARS256Type, PublicKeyID: "did:example:12345#key-6"},
@@ -212,9 +217,9 @@ func TestAllCWTSignersVerifiers(t *testing.T) {
 	require.NoError(t, ldErr)
 
 	allKeyTypes := []*testsupport.SigningKey{
-		{Type: kms.ED25519Type, PublicKeyID: "did:example:12345#key-1"},
+		{Type: kms.ED25519Type, PublicKeyID: ed25519KeyID},
 		{Type: kms.ECDSAP256TypeIEEEP1363, PublicKeyID: "did:example:12345#key-2"},
-		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: "did:example:12345#key-3"},
+		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: secp256k1KeyID},
 		{Type: kms.ECDSAP384TypeIEEEP1363, PublicKeyID: "did:example:12345#key-4"},
 		{Type: kms.ECDSAP521TypeIEEEP1363, PublicKeyID: "did:example:12345#key-5"},
 		{Type: kms.RSARS256Type, PublicKeyID: "did:example:12345#key-6"},
