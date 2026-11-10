@@ -10,11 +10,11 @@ import (
 	"crypto"
 	"encoding/json"
 	"errors"
+	"slices"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/slices"
 )
 
 const (

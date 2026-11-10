@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -27,7 +28,6 @@ import (
 	afgjwt "github.com/trustbloc/vc-go/jwt"
 	"github.com/veraison/go-cose"
 	"github.com/xeipuuv/gojsonschema"
-	"golang.org/x/exp/slices"
 
 	"github.com/trustbloc/vc-go/proof/testsupport"
 	jsonutil "github.com/trustbloc/vc-go/util/json"

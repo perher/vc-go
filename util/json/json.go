@@ -8,8 +8,7 @@ package json
 import (
 	"encoding/json"
 	"maps"
-
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // MarshalWithCustomFields marshals value merged with custom fields defined in the map into JSON bytes.
