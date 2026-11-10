@@ -21,7 +21,7 @@ endif
 all: clean checks unit-test
 
 .PHONY: checks
-checks: generate license #lint
+checks: generate license lint
 
 .PHONY: lint
 lint: generate

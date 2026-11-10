@@ -54,7 +54,7 @@ linters:
     - godot # Check if comments end in a period
     #    - goimports # In addition to fixing imports, goimports also formats your code in the same style as gofmt.
     - mnd # An analyzer to detect magic numbers.
-    - gomodguard # Allow and block list linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations.
+    - gomodguard_v2 # Allow and block list linter for direct Go module dependencies. This is different from depguard where there are different block types for example version constraints and module recommendations.
     - goprintffuncname # Checks that printf-like functions are named with f at the end
     - gosec # Inspects source code for security problems
     #    - lll # Reports long lines
@@ -152,23 +152,22 @@ linters:
         - strconv.ParseInt
         - strconv.ParseUint
 
-    gomodguard:
+    gomodguard_v2:
+      # List of blocked modules.
+      # Default: []
       blocked:
-        # List of blocked modules.
-        # Default: []
-        modules:
-          - github.com/golang/protobuf:
-              recommendations:
-                - google.golang.org/protobuf
-              reason: "see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules"
-          - github.com/satori/go.uuid:
-              recommendations:
-                - github.com/google/uuid
-              reason: "satori's package is not maintained"
-          - github.com/gofrs/uuid:
-              recommendations:
-                - github.com/google/uuid
-              reason: "see recommendation from dev-infra team: https://confluence.gtforge.com/x/gQI6Aw"
+        - module: github.com/golang/protobuf
+          recommendations:
+            - google.golang.org/protobuf
+          reason: "see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules"
+        - module: github.com/satori/go.uuid
+          recommendations:
+            - github.com/google/uuid
+          reason: "satori's package is not maintained"
+        - module: github.com/gofrs/uuid
+          recommendations:
+            - github.com/google/uuid
+          reason: "see recommendation from dev-infra team: https://confluence.gtforge.com/x/gQI6Aw"
 
     govet:
       # Enable all analyzers.
@@ -229,6 +228,11 @@ linters:
         source: '^\s+if _, ok := err\.\([^.]+\.InternalError\); ok {'
       - linters: [ gochecknoglobals ]
         text: '(?i)logger is a global variable'
+      # Go 1.26 deprecated the raw ecdsa key fields. Their replacements
+      # (PublicKey.Bytes, ParseUncompressedPublicKey, ParseRawPrivateKey) only
+      # support NIST curves, not secp256k1. Remove once the code is migrated.
+      - linters: [ staticcheck ]
+        text: 'SA1019: \(crypto/ecdsa\.(PublicKey\)\.[XY]|PrivateKey\)\.D) has been deprecated'
       - path: '_test\.go'
         linters:
           - bodyclose
