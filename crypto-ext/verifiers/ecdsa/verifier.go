@@ -128,7 +128,7 @@ func (sv *Verifier) Verify(signature, msg []byte, pubKey *pubkey.PublicKey) erro
 func (sv *Verifier) createECDSAPublicKey(pubKeyBytes []byte) (*ecdsa.PublicKey, error) {
 	curve := sv.ec.curve
 
-	x, y := elliptic.Unmarshal(curve, pubKeyBytes)
+	x, y := elliptic.Unmarshal(curve, pubKeyBytes) //nolint:staticcheck // no drop-in replacement: crypto/ecdh lacks secp256k1 and errors where this panics
 	if x == nil {
 		return nil, errors.New("invalid public key bytes")
 	}

@@ -72,7 +72,7 @@ func CreateEDSASecp256k1(jwkVM bool) (*ECDSASigner, *pubkey.PublicKey, error) {
 
 	pub := &pubkey.PublicKey{
 		Type:     kms.ECDSASecp256k1TypeIEEEP1363,
-		BytesKey: &pubkey.BytesKey{Bytes: elliptic.Marshal(pubKey.Curve, pubKey.X, pubKey.Y)},
+		BytesKey: &pubkey.BytesKey{Bytes: elliptic.Marshal(pubKey.Curve, pubKey.X, pubKey.Y)}, //nolint:staticcheck // no drop-in replacement: crypto/ecdh lacks secp256k1 and errors where this panics
 	}
 
 	if jwkVM {

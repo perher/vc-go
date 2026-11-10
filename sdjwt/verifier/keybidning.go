@@ -8,6 +8,7 @@ Package verifier enables the Verifier: An entity that requests, checks and
 extracts the claims from an SD-JWT and respective Disclosures.
 */
 
+//nolint:dupl // SD-JWT draft-02 key binding and draft-05 holder binding are kept separate
 package verifier
 
 import (

@@ -151,7 +151,9 @@ func setDisclosureClaimValue(recData *recursiveData, disclosureClaim *Disclosure
 }
 
 // discloseClaimValue returns new value of claim, resolving dependencies on other disclosures.
-func discloseClaimValue(claim any, recData *recursiveData) (any, error) { // nolint:funlen,gocyclo
+//
+//nolint:funlen,gocyclo,gocognit,cyclop // refactor is risky; split when next changing this code
+func discloseClaimValue(claim any, recData *recursiveData) (any, error) {
 	switch disclosureValue := claim.(type) {
 	case []any:
 		var newValues []any
@@ -211,7 +213,7 @@ func discloseClaimValue(claim any, recData *recursiveData) (any, error) { // nol
 		}
 
 		if len(newValues) == 0 {
-			return nil, nil
+			return nil, nil //nolint:nilnil // nil result means the optional value is absent
 		}
 
 		return newValues, nil

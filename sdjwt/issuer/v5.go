@@ -88,7 +88,7 @@ func (s *SDJWTBuilderV5) CreateDisclosuresAndDigests( // nolint:funlen,gocyclo
 	return s.createDisclosuresAndDigestsInternal(path, claims, opts, false)
 }
 
-//nolint:funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit,cyclop // refactor is risky; split when next changing this code
 func (s *SDJWTBuilderV5) createDisclosuresAndDigestsInternal(
 	path string,
 	claims map[string]any,

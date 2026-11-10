@@ -362,7 +362,7 @@ func makeMockDIDResolution(id string, vm *did.VerificationMethod, vr did.Verific
 		ID: id,
 	}
 
-	switch vr {
+	switch vr { //nolint:exhaustive // test only uses these relationships
 	case did.VerificationRelationshipGeneral:
 		doc.VerificationMethod = []did.VerificationMethod{*vm}
 	case did.Authentication:

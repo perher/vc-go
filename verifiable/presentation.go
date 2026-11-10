@@ -735,7 +735,7 @@ func decodeHolder(holder any) (string, error) {
 	}
 }
 
-// nolint:funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func validateHolder(
 	proofs []Proof,
 	creds []*Credential,

@@ -1328,7 +1328,7 @@ func WithJSONLDIncludeDetailedStructureDiffOnError() CredentialOpt {
 // - object with mandatory "id" field and optional "name" field.
 func parseIssuer(issuerRaw any) (*Issuer, error) {
 	if issuerRaw == nil {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	switch issuer := issuerRaw.(type) {
@@ -1708,7 +1708,7 @@ func validateJSONLD(vcJSON JSONObject, vcc *CredentialContents, vcOpts *credenti
 	return nil
 }
 
-// nolint: funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func parseCredentialContents(raw JSONObject, isSDJWT bool) (*CredentialContents, error) {
 	var schemas []TypedID
 
@@ -1824,7 +1824,7 @@ func parseRefreshService(typeIDRaw any) (*TypedID, error) {
 	}
 
 	if len(typed) == 0 {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	return &typed[0], nil
@@ -1905,7 +1905,7 @@ func parseTypedID(typeIDRaw any) ([]TypedID, error) {
 
 func parseSDAlg(rawCred JSONObject, subjects []Subject, isSDJWT bool) (*crypto.Hash, error) {
 	if !isSDJWT {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	sdJWTHashAlgStr, err := parseStringFld(rawCred, jsonFldSDJWTHashAlg)
@@ -2318,7 +2318,7 @@ func getJSONSchema(url string, opts *credentialOpts) ([]byte, error) {
 }
 
 func loadJSONSchema(url string, client *http.Client) ([]byte, error) {
-	resp, err := client.Get(url)
+	resp, err := client.Get(url) //nolint:noctx // the public API takes no context.Context yet
 	if err != nil {
 		return nil, fmt.Errorf("load credential schema: %w", err)
 	}
@@ -2447,7 +2447,7 @@ func SubjectID(subject []Subject) (string, error) { //nolint:funlen
 	return subject[0].ID, nil
 }
 
-func serializeCredentialContents(vcc *CredentialContents, proofs []Proof) (JSONObject, error) { //nolint:funlen,gocyclo
+func serializeCredentialContents(vcc *CredentialContents, proofs []Proof) (JSONObject, error) { //nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 	contexts := contextToRaw(vcc.Context, vcc.CustomContext)
 
 	vcJSON := map[string]any{}

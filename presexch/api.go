@@ -138,7 +138,7 @@ func (pd *PresentationDefinition) Match(
 	return result, nil
 }
 
-func getMatchedCreds( //nolint:gocyclo,funlen
+func getMatchedCreds( //nolint:gocyclo,funlen,gocognit // refactor is risky; split when next changing this code
 	pd *PresentationDefinition,
 	vpList []*verifiable.Presentation,
 	contextLoader ld.DocumentLoader,

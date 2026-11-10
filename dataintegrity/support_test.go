@@ -55,7 +55,7 @@ func deepEqual(doc1, doc2 gjson.Result) bool {
 		return false
 	}
 
-	switch doc1.Type {
+	switch doc1.Type { //nolint:exhaustive // other values are handled after the switch
 	case gjson.Null, gjson.False, gjson.True:
 		return true
 	case gjson.String:
@@ -170,7 +170,7 @@ func makeMockDIDResolution(id string, vm *did.VerificationMethod, vr did.Verific
 		ID: id,
 	}
 
-	switch vr {
+	switch vr { //nolint:exhaustive // test only uses these relationships
 	case did.VerificationRelationshipGeneral:
 		doc.VerificationMethod = []did.VerificationMethod{*vm}
 	case did.Authentication:

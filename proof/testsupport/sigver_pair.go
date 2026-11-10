@@ -413,7 +413,7 @@ func ecdsaSecp256k1PairDesc(publicKeyID *SigningKey, jwkVM bool,
 		lookupID: publicKeyID.PublicKeyID,
 		verificationMethodValue: &vermethod.VerificationMethod{
 			Type:  "EcdsaSecp256k1VerificationKey2019",
-			Value: elliptic.Marshal(pubKey.Curve, pubKey.X, pubKey.Y),
+			Value: elliptic.Marshal(pubKey.Curve, pubKey.X, pubKey.Y), //nolint:staticcheck // no drop-in replacement: crypto/ecdh lacks secp256k1 and errors where this panics
 		},
 	}
 

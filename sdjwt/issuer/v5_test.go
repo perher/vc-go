@@ -188,6 +188,7 @@ func TestDisclosureV5Map(
 	})
 }
 
+//nolint:gocognit // test with many sub-cases
 func TestDisclosureV5Array(
 	t *testing.T,
 ) {

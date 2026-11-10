@@ -655,7 +655,7 @@ func (pd *PresentationDefinition) MatchSubmissionRequirement(credentials []*veri
 // ErrNoCredentials when any credentials do not satisfy requirements.
 var ErrNoCredentials = errors.New("credentials do not satisfy requirements")
 
-// nolint: funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func (pd *PresentationDefinition) matchRequirement(req *requirement, creds []*verifiable.Credential,
 	documentLoader ld.DocumentLoader, opts *matchRequirementsOpts) (*MatchedSubmissionRequirement, error) {
 	matchedReq := &MatchedSubmissionRequirement{
@@ -731,6 +731,7 @@ type credWrapper struct {
 	vc       *verifiable.Credential
 }
 
+//nolint:gocognit // refactor is risky; split when next changing this code
 func (pd *PresentationDefinition) applyRequirement( // nolint:funlen,gocyclo
 	req *requirement,
 	creds []*verifiable.Credential,
@@ -1015,7 +1016,7 @@ func filterConstraints(constraints *Constraints, creds []*verifiable.Credential)
 	return result, debugCred, nil
 }
 
-// nolint: gocyclo, funlen
+//nolint:gocyclo,funlen,gocognit // refactor is risky; split when next changing this code
 func limitDisclosure(filterResults []constraintsFilterResult,
 	sdBBSProofCreator *verifiable.BBSProofCreator, opts ...verifiable.CredentialOpt) ([]*credWrapper, error) {
 	var result []*credWrapper
@@ -1497,7 +1498,7 @@ func convertToRFC9535Format(path string) string {
 	return builder.String()
 }
 
-//nolint:gocyclo,funlen
+//nolint:gocyclo,funlen,gocognit // refactor is risky; split when next changing this code
 func checkPathValue(
 	isJWTCredential bool,
 	path string,
@@ -1739,7 +1740,7 @@ func (a byID) Len() int           { return len(a) }
 func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 func (a byID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
-//nolint:funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func filterFormat(format *Format, credentials []*verifiable.Credential) (string, []*verifiable.Credential) {
 	var ldpCreds, ldpvcCreds, ldpvpCreds, jwtCreds, jwtvcCreds, jwtvpCreds []*verifiable.Credential
 
@@ -1833,7 +1834,7 @@ func credByProof(c *verifiable.Credential, ldp *LdpType) bool {
 	return false
 }
 
-// nolint: gocyclo
+//nolint:gocyclo,gocognit // refactor is risky; split when next changing this code
 func filterSchema(schemas []*Schema, credentials []*verifiable.Credential,
 	documentLoader ld.DocumentLoader) ([]*verifiable.Credential, error) {
 	var result []*verifiable.Credential

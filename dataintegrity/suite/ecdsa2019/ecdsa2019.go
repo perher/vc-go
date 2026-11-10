@@ -230,7 +230,7 @@ func (s *Suite) unmarshalECKey(ecCRV elliptic.Curve, pubKey []byte) ([]byte, err
 	xBig, yBig := elliptic.UnmarshalCompressed(ecCRV, pubKey)
 
 	if xBig != nil && yBig != nil {
-		pubKey = elliptic.Marshal(ecCRV, xBig, yBig)
+		pubKey = elliptic.Marshal(ecCRV, xBig, yBig) //nolint:staticcheck // no drop-in replacement: crypto/ecdh lacks secp256k1 and errors where this panics
 	} else {
 		pubKey = append([]byte{4}, pubKey...)
 	}
@@ -242,7 +242,7 @@ func (s *Suite) unmarshalECKey(ecCRV elliptic.Curve, pubKey []byte) ([]byte, err
 	return pubKey, nil
 }
 
-//nolint:funlen,gocyclo // Old function
+//nolint:funlen,gocyclo,gocognit // Old function
 func (s *Suite) transformAndHash(doc []byte, opts *models.ProofOptions) ([]byte, *pubkey.PublicKey, Verifier, error) {
 	if opts.SuiteType == "" {
 		opts.SuiteType = SuiteType

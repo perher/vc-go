@@ -241,7 +241,7 @@ func ParseCryptoHashAlg(sdAlg string) (crypto.Hash, error) {
 
 // FormatCryptoHashAlg returns algorithm name.
 func FormatCryptoHashAlg(sdAlg crypto.Hash) (string, error) {
-	switch sdAlg {
+	switch sdAlg { //nolint:exhaustive // unsupported hashes fall through to the error
 	case crypto.SHA256:
 		fallthrough
 	case crypto.SHA384:
@@ -318,6 +318,8 @@ func GetCNF(claims map[string]any) (map[string]any, error) {
 
 // GetDisclosureDigests returns digests from claims map considering
 // either SDKey and array elements that are objects with one key, that key being ... and referring to a string.
+//
+//nolint:gocognit // refactor is risky; split when next changing this code
 func GetDisclosureDigests(claims map[string]any) (map[string]bool, error) {
 	var (
 		digests []string

@@ -5,6 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 // Package status implements a Verifiable Credential Status API Client.
+//
+//nolint:cyclop // package average 10.5 is just over the max of 10
 package status
 
 import (

@@ -370,7 +370,7 @@ func parseTimeFld(obj JSONObject, fldName string) (*util.TimeWrapper, error) {
 	jsonTime := obj[fldName]
 
 	if jsonTime == nil {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	switch timeStr := jsonTime.(type) {

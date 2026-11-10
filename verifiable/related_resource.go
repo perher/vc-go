@@ -83,7 +83,7 @@ func (r *RelatedResourceValidator) Fetch(targetURL string) (*CachedResource, err
 		return v, nil
 	}
 
-	req, err := http.NewRequest(http.MethodGet, targetURL, nil)
+	req, err := http.NewRequest(http.MethodGet, targetURL, nil) //nolint:noctx // the public API takes no context.Context yet
 	if err != nil {
 		return nil, errors.Join(err, fmt.Errorf("create related resource request: %s", targetURL))
 	}
