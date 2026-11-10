@@ -1,3 +1,9 @@
+/*
+Copyright Gen Digital Inc. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
 package vermethod
 
 import "github.com/trustbloc/kms-go/doc/jose/jwk"
