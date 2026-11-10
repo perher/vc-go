@@ -1,0 +1,20 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+coverage:
+  status:
+    project:
+      default:
+        # Fail if total coverage drops by more than 1% against the base commit.
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        # New and changed lines should be tested.
+        target: 80%
+        threshold: 5%
+
+ignore:
+  - "**/mocks/**"
+  - "**/*_mocks_test.go"

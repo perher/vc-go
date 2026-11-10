@@ -15,24 +15,31 @@ function filterExcludedFiles {
   | grep -v go.sum$ | grep -v gomocks | grep -v \\.jsonld$ | grep -v testdata/ | grep -v third_party/ | sort -u`
 }
 
-CHECK=$(git diff --name-only --diff-filter=ACMRTUXB HEAD)
-REMOTE_REF=$(git log -1 --pretty=format:"%d" | grep '[(].*\/' | wc -l)
-
-# If CHECK is empty then there is no working directory changes: fallback to last two commits.
-# Else if REMOTE_REF=0 then working copy commits are even with remote: only use the working copy changes.
-# Otherwise assume that the change is amending the previous commit: use both last two commit and working copy changes.
-if [[ -z "${CHECK}" ]] || [[ "${REMOTE_REF}" -eq 0 ]]; then
-    if [[ ! -z "${CHECK}" ]]; then
-        echo "Examining last commit and working directory changes"
-        CHECK+=$'\n'
-    else
-        echo "Examining last commit changes"
-    fi
-
-  LAST_COMMITS=($(git log -2 --pretty=format:"%h"))
-  CHECK+=$(git diff-tree --no-commit-id --name-only --diff-filter=ACMRTUXB -r ${LAST_COMMITS[1]} ${LAST_COMMITS[0]})
+# CHECK_ALL_FILES=true checks every tracked file (used by CI). Otherwise only
+# recently changed files are checked, which is faster for local use.
+if [[ "${CHECK_ALL_FILES}" == "true" ]]; then
+    echo "Examining all tracked files"
+    CHECK=$(git ls-files)
 else
-    echo "Examining working directory changes"
+    CHECK=$(git diff --name-only --diff-filter=ACMRTUXB HEAD)
+    REMOTE_REF=$(git log -1 --pretty=format:"%d" | grep '[(].*\/' | wc -l)
+
+    # If CHECK is empty then there is no working directory changes: fallback to last two commits.
+    # Else if REMOTE_REF=0 then working copy commits are even with remote: only use the working copy changes.
+    # Otherwise assume that the change is amending the previous commit: use both last two commit and working copy changes.
+    if [[ -z "${CHECK}" ]] || [[ "${REMOTE_REF}" -eq 0 ]]; then
+        if [[ ! -z "${CHECK}" ]]; then
+            echo "Examining last commit and working directory changes"
+            CHECK+=$'\n'
+        else
+            echo "Examining last commit changes"
+        fi
+
+      LAST_COMMITS=($(git log -2 --pretty=format:"%h"))
+      CHECK+=$(git diff-tree --no-commit-id --name-only --diff-filter=ACMRTUXB -r ${LAST_COMMITS[1]} ${LAST_COMMITS[0]})
+    else
+        echo "Examining working directory changes"
+    fi
 fi
 
 filterExcludedFiles

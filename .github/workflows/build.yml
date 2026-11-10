@@ -8,57 +8,132 @@ name: "vc-go ci"
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, next]
   pull_request:
-    branches: [ main ]
+    branches: [main, next]
+  merge_group:
+  workflow_dispatch:
+
+# Least privilege: no permissions by default; each job requests what it needs.
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GOTOOLCHAIN: local
+  GOLANGCI_LINT_VERSION: v2.9.0 # keep in sync with scripts/check_lint.sh
 
 jobs:
-  SemanticPullRequest:
+  semantic-pr:
     name: Semantic Pull Request Check
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read # read the PR title
     steps:
-      - uses: amannn/action-semantic-pull-request@v4
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  Checks:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
+  license:
+    name: License headers
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Go 1.26
-        uses: actions/setup-go@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          go-version: '1.26'
-      - name: Run checks
+          persist-credentials: false
+
+      - name: Check license headers in all tracked files
+        run: scripts/check_license.sh
+        env:
+          CHECK_ALL_FILES: "true"
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read # only-new-issues reads the PR diff
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          check-latest: true
+          cache-dependency-path: go.sum
+
+      # Generates the gitignored *_mocks_test.go files (mockgen).
+      - name: Generate mocks
+        run: make generate
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=10m
+          only-new-issues: true
+
+  test:
+    name: Test (Go ${{ matrix.go }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.26", "stable"] # minimum from go.mod, and latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+          cache-dependency-path: go.sum
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Check go.mod and go.sum are tidy
         run: |
-          echo $PATH
-          go env
-          echo ${{ github.workspace }}
-          make checks
+          go mod tidy
+          git diff --exit-code -- go.mod go.sum
+
+      - name: Build
+        run: go build ./...
+
+      # Generates the gitignored *_mocks_test.go files (mockgen).
+      - name: Generate mocks
+        run: make generate
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Unit tests
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CGO_ENABLED: "1" # required by -race
+        run: |
+          go test $(go list ./... | grep -v /mocks) \
+            -race -shuffle=on -count=1 -timeout=20m \
+            -covermode=atomic -coverprofile=coverage.out
 
-  UnitTest:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    steps:
-
-      - name: Setup Go 1.26
-        uses: actions/setup-go@v4
+      - name: Save coverage report
+        if: matrix.go == '1.26'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          go-version: '1.26'
-        id: go
-
-      - uses: actions/checkout@v3
-
-      - name: Run unit test
-        timeout-minutes: 15
-        run: make unit-test
-
-      - name: Upload coverage to Codecov
-        timeout-minutes: 10
-        uses: codecov/codecov-action@v3.1.6
-        with:
-          file: ./coverage.out
+          name: coverage
+          path: coverage.out
+          retention-days: 7
