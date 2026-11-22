@@ -10,11 +10,11 @@ import (
 	"crypto"
 	"encoding/json"
 	"errors"
+	"slices"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/slices"
 )
 
 const (
@@ -188,6 +188,7 @@ func TestDisclosureV5Map(
 	})
 }
 
+//nolint:gocognit // test with many sub-cases
 func TestDisclosureV5Array(
 	t *testing.T,
 ) {

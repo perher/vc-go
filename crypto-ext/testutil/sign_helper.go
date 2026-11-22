@@ -22,9 +22,11 @@ import (
 	"github.com/trustbloc/vc-go/internal/testutil/kmscryptoutil"
 )
 
+const rsaKeyBits = 2048
+
 // CreateRSARS256 created signer and corresponding public key.
 func CreateRSARS256() (*RS256Signer, *pubkey.PublicKey, error) {
-	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privKey, err := rsa.GenerateKey(rand.Reader, rsaKeyBits)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -42,7 +44,7 @@ func CreateRSARS256() (*RS256Signer, *pubkey.PublicKey, error) {
 
 // CreateRSAPS256 created signer and corresponding public key.
 func CreateRSAPS256() (*PS256Signer, *pubkey.PublicKey, error) {
-	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privKey, err := rsa.GenerateKey(rand.Reader, rsaKeyBits)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -70,7 +72,7 @@ func CreateEDSASecp256k1(jwkVM bool) (*ECDSASigner, *pubkey.PublicKey, error) {
 
 	pub := &pubkey.PublicKey{
 		Type:     kms.ECDSASecp256k1TypeIEEEP1363,
-		BytesKey: &pubkey.BytesKey{Bytes: elliptic.Marshal(pubKey.Curve, pubKey.X, pubKey.Y)},
+		BytesKey: &pubkey.BytesKey{Bytes: elliptic.Marshal(pubKey.Curve, pubKey.X, pubKey.Y)}, //nolint:staticcheck // no drop-in replacement: crypto/ecdh lacks secp256k1 and errors where this panics
 	}
 
 	if jwkVM {

@@ -12,7 +12,6 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
-	"fmt"
 	"slices"
 	"testing"
 	"time"
@@ -73,7 +72,7 @@ func TestSDJWTFlow(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", combinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", combinedFormatForIssuance)
 
 		// Holder will parse combined format for issuance and hold on to that
 		// combined format for issuance and the claims that can be selected.
@@ -89,7 +88,7 @@ func TestSDJWTFlow(t *testing.T) {
 		combinedFormatForPresentation, err := holder.CreatePresentation(combinedFormatForIssuance, selectedDisclosures)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("holder SD-JWT: %s", combinedFormatForPresentation))
+		t.Logf("holder SD-JWT: %s", combinedFormatForPresentation)
 
 		// Verifier will validate combined format for presentation and create verified claims.
 		verifiedClaims, err := verifier.Parse(combinedFormatForPresentation,
@@ -122,7 +121,7 @@ func TestSDJWTFlow(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", combinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", combinedFormatForIssuance)
 
 		// Holder will parse combined format for issuance and hold on to that
 		// combined format for issuance and the claims that can be selected.
@@ -151,7 +150,7 @@ func TestSDJWTFlow(t *testing.T) {
 			}))
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("holder SD-JWT: %s", combinedFormatForPresentation))
+		t.Logf("holder SD-JWT: %s", combinedFormatForPresentation)
 
 		// Verifier will validate combined format for presentation and create verified claims.
 		verifiedClaims, err := verifier.Parse(combinedFormatForPresentation,
@@ -184,7 +183,7 @@ func TestSDJWTFlow(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", combinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", combinedFormatForIssuance)
 
 		// Holder will parse combined format for issuance and hold on to that
 		// combined format for issuance and the claims that can be selected.
@@ -201,7 +200,7 @@ func TestSDJWTFlow(t *testing.T) {
 		combinedFormatForPresentation, err := holder.CreatePresentation(combinedFormatForIssuance, selectedDisclosures)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("holder SD-JWT: %s", combinedFormatForPresentation))
+		t.Logf("holder SD-JWT: %s", combinedFormatForPresentation)
 
 		// Verifier will validate combined format for presentation and create verified claims.
 		verifiedClaims, err := verifier.Parse(combinedFormatForPresentation,
@@ -231,7 +230,7 @@ func TestSDJWTFlow(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", combinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", combinedFormatForIssuance)
 
 		// Holder will parse combined format for issuance and hold on to that
 		// combined format for issuance and the claims that can be selected.
@@ -248,7 +247,7 @@ func TestSDJWTFlow(t *testing.T) {
 		combinedFormatForPresentation, err := holder.CreatePresentation(combinedFormatForIssuance, selectedDisclosures)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("holder SD-JWT: %s", combinedFormatForPresentation))
+		t.Logf("holder SD-JWT: %s", combinedFormatForPresentation)
 
 		// Verifier will validate combined format for presentation and create verified claims.
 		verifiedClaims, err := verifier.Parse(combinedFormatForPresentation,
@@ -290,7 +289,7 @@ func TestSDJWTFlow(t *testing.T) {
 		vcCombinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", vcCombinedFormatForIssuance)
 
 		claims, err := holder.Parse(vcCombinedFormatForIssuance, holder.WithSignatureVerifier(signatureVerifier))
 		r.NoError(err)
@@ -318,7 +317,7 @@ func TestSDJWTFlow(t *testing.T) {
 			}))
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("holder SD-JWT: %s", combinedFormatForPresentation))
+		t.Logf("holder SD-JWT: %s", combinedFormatForPresentation)
 
 		// Verifier will validate combined format for presentation and create verified claims.
 		// In this case it will be VC since VC was passed in.
@@ -392,7 +391,7 @@ func TestSDJWTFlow(t *testing.T) {
 		vcCombinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", vcCombinedFormatForIssuance)
 
 		claims, err := holder.Parse(vcCombinedFormatForIssuance,
 			holder.WithSignatureVerifier(signatureVerifier),
@@ -422,7 +421,7 @@ func TestSDJWTFlow(t *testing.T) {
 			}))
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("holder SD-JWT: %s", combinedFormatForPresentation))
+		t.Logf("holder SD-JWT: %s", combinedFormatForPresentation)
 
 		// Verifier will validate combined format for presentation and create verified claims.
 		// In this case it will be VC since VC was passed in.
@@ -480,8 +479,7 @@ func printObject(t *testing.T, name string, obj any) {
 	prettyJSON, err := prettyPrint(objBytes)
 	require.NoError(t, err)
 
-	fmt.Println(name + ":")
-	fmt.Println(prettyJSON)
+	t.Logf("%s:\n%s", name, prettyJSON)
 }
 
 func prettyPrint(msg []byte) (string, error) {

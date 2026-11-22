@@ -63,5 +63,5 @@ func (s *Proof) JWTAlgorithm() string {
 
 // CWTAlgorithm return cwt algorithm that corresponds to VerificationMethod.
 func (s *Proof) CWTAlgorithm() cose.Algorithm {
-	return cose.AlgorithmEd25519
+	return cose.AlgorithmEdDSA
 }

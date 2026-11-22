@@ -655,7 +655,7 @@ func (pd *PresentationDefinition) MatchSubmissionRequirement(credentials []*veri
 // ErrNoCredentials when any credentials do not satisfy requirements.
 var ErrNoCredentials = errors.New("credentials do not satisfy requirements")
 
-// nolint: funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func (pd *PresentationDefinition) matchRequirement(req *requirement, creds []*verifiable.Credential,
 	documentLoader ld.DocumentLoader, opts *matchRequirementsOpts) (*MatchedSubmissionRequirement, error) {
 	matchedReq := &MatchedSubmissionRequirement{
@@ -731,6 +731,7 @@ type credWrapper struct {
 	vc       *verifiable.Credential
 }
 
+//nolint:gocognit // refactor is risky; split when next changing this code
 func (pd *PresentationDefinition) applyRequirement( // nolint:funlen,gocyclo
 	req *requirement,
 	creds []*verifiable.Credential,
@@ -1015,7 +1016,7 @@ func filterConstraints(constraints *Constraints, creds []*verifiable.Credential)
 	return result, debugCred, nil
 }
 
-// nolint: gocyclo, funlen
+//nolint:gocyclo,funlen,gocognit // refactor is risky; split when next changing this code
 func limitDisclosure(filterResults []constraintsFilterResult,
 	sdBBSProofCreator *verifiable.BBSProofCreator, opts ...verifiable.CredentialOpt) ([]*credWrapper, error) {
 	var result []*credWrapper
@@ -1041,7 +1042,7 @@ func limitDisclosure(filterResults []constraintsFilterResult,
 		}
 
 		if constraints.LimitDisclosure.isRequired() &&
-			!(predicate || supportsSelectiveDisclosure(credential) || subjectIsIssuer(&credentialContents)) {
+			(!predicate && !supportsSelectiveDisclosure(credential) && !subjectIsIssuer(&credentialContents)) {
 			continue
 		}
 
@@ -1054,16 +1055,7 @@ func limitDisclosure(filterResults []constraintsFilterResult,
 			template := credentialSrc
 
 			if constraints.LimitDisclosure.isRequired() {
-				var (
-					contexts []any
-					err      error
-				)
-
-				for _, ctx := range credentialContents.Context {
-					contexts = append(contexts, ctx)
-				}
-
-				contexts = append(contexts, credentialContents.CustomContext...)
+				var err error
 
 				templateObj := jsonutil.Select(credential.ToRawJSON(),
 					"id",
@@ -1482,7 +1474,9 @@ func filterField(f *Field, credential map[string]any, isJWTCredential bool) erro
 	return lastErr
 }
 
-// deprecated: convertToRFC9535Format converts path to RFC 9535 format.
+// convertToRFC9535Format converts path to RFC 9535 format.
+//
+// Deprecated: kept for pre-RFC 9535 paths; remove once profile presentations use RFC 9535 format.
 func convertToRFC9535Format(path string) string {
 	var builder strings.Builder
 
@@ -1490,7 +1484,7 @@ func convertToRFC9535Format(path string) string {
 
 	for i, segment := range segments {
 		if strings.Contains(segment, "-") && !strings.Contains(segment, "['") {
-			builder.WriteString(fmt.Sprintf("['%s']", segment))
+			fmt.Fprintf(&builder, "['%s']", segment)
 			continue
 		}
 
@@ -1504,7 +1498,7 @@ func convertToRFC9535Format(path string) string {
 	return builder.String()
 }
 
-//nolint:gocyclo,funlen
+//nolint:gocyclo,funlen,gocognit // refactor is risky; split when next changing this code
 func checkPathValue(
 	isJWTCredential bool,
 	path string,
@@ -1523,17 +1517,14 @@ func checkPathValue(
 			path = strings.Replace(path, old, newVal, 1)
 		}
 
-		if strings.EqualFold(path, "$.issuer") {
-			switch issuerFld := credential["issuer"].(type) {
-			case map[string]any:
-				if _, ok := issuerFld["id"]; ok {
-					path = "$.issuer.id"
-				}
+		if issuerFld, isMap := credential["issuer"].(map[string]any); isMap && strings.EqualFold(path, "$.issuer") {
+			if _, ok := issuerFld["id"]; ok {
+				path = "$.issuer.id"
 			}
 		}
 	}
 
-	if !strings.HasPrefix(path, "$") && !strings.HasPrefix("@", path) {
+	if !strings.HasPrefix(path, "$") && !strings.HasPrefix(path, "@") {
 		return errors.New("expected $ or @ at start of path")
 	}
 
@@ -1749,7 +1740,7 @@ func (a byID) Len() int           { return len(a) }
 func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 func (a byID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
-//nolint:funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func filterFormat(format *Format, credentials []*verifiable.Credential) (string, []*verifiable.Credential) {
 	var ldpCreds, ldpvcCreds, ldpvpCreds, jwtCreds, jwtvcCreds, jwtvpCreds []*verifiable.Credential
 
@@ -1843,7 +1834,7 @@ func credByProof(c *verifiable.Credential, ldp *LdpType) bool {
 	return false
 }
 
-// nolint: gocyclo
+//nolint:gocyclo,gocognit // refactor is risky; split when next changing this code
 func filterSchema(schemas []*Schema, credentials []*verifiable.Credential,
 	documentLoader ld.DocumentLoader) ([]*verifiable.Credential, error) {
 	var result []*verifiable.Credential
@@ -1932,7 +1923,7 @@ func typeFoundInContext(typ string, ctxObj *ld.Context) ([]string, error) {
 }
 
 func getContext(contextURI string, documentLoader ld.DocumentLoader) (*ld.Context, error) {
-	contextURI = strings.SplitN(contextURI, "#", 2)[0]
+	contextURI, _, _ = strings.Cut(contextURI, "#")
 
 	remoteDoc, err := documentLoader.LoadDocument(contextURI)
 	if err != nil {

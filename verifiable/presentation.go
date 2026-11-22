@@ -371,9 +371,7 @@ func NewPresentation(opts ...CreatePresentationOpt) (*Presentation, error) {
 // WithCredentials sets the provided credentials into the presentation.
 func WithCredentials(cs ...*Credential) CreatePresentationOpt {
 	return func(p *Presentation) error {
-		for _, c := range cs {
-			p.credentials = append(p.credentials, c)
-		}
+		p.credentials = append(p.credentials, cs...)
 
 		return nil
 	}
@@ -467,9 +465,7 @@ func (vp *Presentation) Credentials() []*Credential {
 
 // AddCredentials adds credentials to presentation.
 func (vp *Presentation) AddCredentials(credentials ...*Credential) {
-	for _, credential := range credentials {
-		vp.credentials = append(vp.credentials, credential)
-	}
+	vp.credentials = append(vp.credentials, credentials...)
 }
 
 // MarshalledCredentials provides marshalled credentials enclosed into Presentation in raw byte array format.
@@ -559,7 +555,7 @@ const (
 	vpFldContext    = "@context"
 	vpFldID         = "id"
 	vpFldType       = "type"
-	vpFldCredential = "verifiableCredential"
+	vpFldCredential = "verifiableCredential" //nolint:gosec // G101 false positive: a JSON field name
 	vpFldHolder     = "holder"
 	vpFldProof      = "proof"
 )
@@ -739,7 +735,7 @@ func decodeHolder(holder any) (string, error) {
 	}
 }
 
-// nolint:funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func validateHolder(
 	proofs []Proof,
 	creds []*Credential,
@@ -895,7 +891,7 @@ func decodeCredentials(rawCred any, opts *presentationOpts) ([]*Credential, erro
 	unmarshalSingleCredFn := func(cred any) (*Credential, error) {
 		credOpts := []CredentialOpt{
 			WithProofChecker(opts.proofChecker),
-			WithJSONLDDocumentLoader(opts.jsonldCredentialOpts.jsonldDocumentLoader),
+			WithJSONLDDocumentLoader(opts.jsonldDocumentLoader),
 		}
 
 		if opts.disabledProofCheck {
@@ -963,8 +959,8 @@ func validateVP(data rawPresentation, opts *presentationOpts) error {
 
 func validateVPJSONLD(vpBytes rawPresentation, opts *presentationOpts) error {
 	return docjsonld.ValidateJSONLDMap(vpBytes,
-		docjsonld.WithDocumentLoader(opts.jsonldCredentialOpts.jsonldDocumentLoader),
-		docjsonld.WithExternalContext(opts.jsonldCredentialOpts.externalContext),
+		docjsonld.WithDocumentLoader(opts.jsonldDocumentLoader),
+		docjsonld.WithExternalContext(opts.externalContext),
 		docjsonld.WithStrictValidation(opts.strictValidation),
 	)
 }

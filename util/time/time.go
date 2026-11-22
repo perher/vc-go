@@ -15,7 +15,7 @@ import (
 // unmarshalled from JSON, it saves the string literal, which it uses when marshalling.
 // If a TimeWrapper is created using NewTime or a struct literal, it marshals with the default
 // time.RFC3339 format.
-type TimeWrapper struct { // nolint:golint
+type TimeWrapper struct {
 	time.Time
 	timeStr string
 }
@@ -26,7 +26,7 @@ type TimeWrapper struct { // nolint:golint
 // while TimeWithTrailingZeroMsec marshals to the initial 2018-03-15T00:00:00.000Z value.
 //
 // Deprecated: use TimeWrapper instead.
-type TimeWithTrailingZeroMsec = TimeWrapper // nolint:golint
+type TimeWithTrailingZeroMsec = TimeWrapper
 
 // NewTime creates a TimeWrapper wrapped around the given time.Time.
 // It functions as a normal time.Time object.
@@ -107,7 +107,7 @@ func (tm *TimeWrapper) FormatToString() string {
 		return tm.timeStr
 	}
 
-	return tm.Time.Format(time.RFC3339Nano)
+	return tm.Format(time.RFC3339Nano)
 }
 
 // ParseTimeWithTrailingZeroMsec parses a formatted string and returns the time value it represents.

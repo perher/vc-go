@@ -228,7 +228,8 @@ type options struct {
 type Option func(opts *options)
 
 // WithHolderBinding option to set optional holder binding.
-// Deprecated. Use WithHolderVerification instead.
+//
+// Deprecated: use WithHolderVerification instead.
 func WithHolderBinding(info *BindingInfo) Option {
 	return func(opts *options) {
 		opts.holderVerificationInfo = info

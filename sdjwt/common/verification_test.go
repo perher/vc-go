@@ -11,6 +11,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rand"
 	"fmt"
+	"slices"
 	"testing"
 	"time"
 
@@ -317,8 +318,7 @@ func findAndAppendSDElementDigest(claimsMap map[string]any, additionalDigest ...
 	}
 
 	for _, v := range claimsMap {
-		switch t := v.(type) {
-		case map[string]any:
+		if t, isMap := v.(map[string]any); isMap {
 			if ok := findAndAppendSDElementDigest(t, additionalDigest...); ok {
 				return ok
 			}
@@ -366,7 +366,7 @@ func findAndAppendArrayElementDigest(claimsMap map[string]any, additionalDigest 
 			for _, nv := range t {
 				if mapped, ok := nv.(map[string]any); ok {
 					if _, ok := mapped[ArrayElementDigestKey]; ok {
-						updatedList := append(t, map[string]any{
+						updatedList := append(slices.Clone(t), map[string]any{
 							ArrayElementDigestKey: additionalDigest,
 						}, map[string]any{
 							ArrayElementDigestKey: additionalDigest,

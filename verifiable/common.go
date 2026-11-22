@@ -229,7 +229,7 @@ func describeSchemaValidationError(result *gojsonschema.Result, what string) str
 	var errMsg strings.Builder
 	errMsg.WriteString(what + " is not valid:\n")
 	for _, desc := range result.Errors() {
-		errMsg.WriteString(fmt.Sprintf("- %s\n", desc))
+		fmt.Fprintf(&errMsg, "- %s\n", desc)
 	}
 
 	return errMsg.String()
@@ -370,7 +370,7 @@ func parseTimeFld(obj JSONObject, fldName string) (*util.TimeWrapper, error) {
 	jsonTime := obj[fldName]
 
 	if jsonTime == nil {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	switch timeStr := jsonTime.(type) {

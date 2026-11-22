@@ -32,8 +32,8 @@ var examplePresentation4 []byte
 var examplePresentation5 []byte
 
 func TestMustIncludeHolderProperty(t *testing.T) {
-	//A verifiable presentation that includes a self-asserted verifiable credential, which is secured only
-	//using the same mechanism as the verifiable presentation, MUST include a holder property.
+	// A verifiable presentation that includes a self-asserted verifiable credential, which is secured only
+	// using the same mechanism as the verifiable presentation, MUST include a holder property.
 	vdr := vdrpkg.New(vdrpkg.WithVDR(jwk.New()), vdrpkg.WithVDR(key.New()))
 
 	loader := ld.NewDefaultDocumentLoader(http.DefaultClient)
@@ -63,8 +63,8 @@ func TestMustIncludeHolderProperty(t *testing.T) {
 }
 
 func TestHolderMustBeEqualToIssuer(t *testing.T) {
-	//A verifiable presentation that includes a self-asserted verifiable credential, which is secured only
-	//using the same mechanism as the verifiable presentation, MUST include a holder property.
+	// A verifiable presentation that includes a self-asserted verifiable credential, which is secured only
+	// using the same mechanism as the verifiable presentation, MUST include a holder property.
 	vdr := vdrpkg.New(vdrpkg.WithVDR(jwk.New()), vdrpkg.WithVDR(key.New()))
 
 	loader := ld.NewDefaultDocumentLoader(http.DefaultClient)

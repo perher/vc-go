@@ -28,11 +28,11 @@ const (
 	PresentationSubmissionJSONLDContextIRI = "https://identity.foundation/presentation-exchange/submission/v1"
 	// CredentialApplicationJSONLDContextIRI is the JSONLD context of credential application
 	// which also contains presentation submission details.
-	CredentialApplicationJSONLDContextIRI = "https://identity.foundation/credential-manifest/application/v1"
+	CredentialApplicationJSONLDContextIRI = "https://identity.foundation/credential-manifest/application/v1" //nolint:gosec // G101 false positive
 	// PresentationSubmissionJSONLDType is the JSONLD type of presentation submissions.
 	PresentationSubmissionJSONLDType = "PresentationSubmission"
 	// CredentialApplicationJSONLDType is the JSONLD type of credential application.
-	CredentialApplicationJSONLDType = "CredentialApplication"
+	CredentialApplicationJSONLDType = "CredentialApplication" //nolint:gosec // G101 false positive
 
 	submissionProperty    = "presentation_submission"
 	descriptorMapProperty = "descriptor_map"
@@ -138,7 +138,7 @@ func (pd *PresentationDefinition) Match(
 	return result, nil
 }
 
-func getMatchedCreds( //nolint:gocyclo,funlen
+func getMatchedCreds( //nolint:gocyclo,funlen,gocognit // refactor is risky; split when next changing this code
 	pd *PresentationDefinition,
 	vpList []*verifiable.Presentation,
 	contextLoader ld.DocumentLoader,
@@ -205,11 +205,12 @@ func getMatchedCreds( //nolint:gocyclo,funlen
 				selectErr error
 			)
 
-			if descriptorMappingExpectsVPList(mapping) {
+			switch {
+			case descriptorMappingExpectsVPList(mapping):
 				vc, selectErr = selectVC(rawVPs, mapping, opts)
-			} else if len(vpList) == 1 || !useMergedSubmission {
+			case len(vpList) == 1 || !useMergedSubmission:
 				vc, selectErr = selectVC(typelessVP, mapping, opts)
-			} else {
+			default:
 				return nil, errors.New("presentation submission has invalid path for matching a list of presentations")
 			}
 
@@ -223,7 +224,7 @@ func getMatchedCreds( //nolint:gocyclo,funlen
 
 			passed, fltErr := filterSchema(inputDescriptor.Schema, []*verifiable.Credential{vc}, contextLoader)
 			if fltErr != nil {
-				return nil, err
+				return nil, fltErr
 			}
 
 			if len(passed) == 0 && !opts.DisableSchemaValidation {
@@ -447,13 +448,12 @@ func rootIndex(jsonPathStr string) int {
 		return -1
 	}
 
-	split := strings.SplitN(jsonPathStr[2:], "]", 2)
-
-	if len(split) == 0 || split[0] == "" {
+	index, _, _ := strings.Cut(jsonPathStr[2:], "]")
+	if index == "" {
 		return -1
 	}
 
-	result, err := strconv.Atoi(split[0])
+	result, err := strconv.Atoi(index)
 	if err != nil {
 		return -1
 	}

@@ -34,7 +34,6 @@ type Proof struct {
 	supportedVMs    []proof.SupportedVerificationMethod
 }
 
-// nolint: golint
 const (
 	ProofType              = "JsonWebSignature2020"
 	VerificationMethodType = "JsonWebKey2020"

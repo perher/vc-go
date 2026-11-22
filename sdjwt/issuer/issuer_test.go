@@ -78,7 +78,7 @@ func TestNew(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		require.NoError(t, err)
 
-		fmt.Print(combinedFormatForIssuance)
+		t.Log(combinedFormatForIssuance)
 
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 1, len(cfi.Disclosures))
@@ -93,7 +93,7 @@ func TestNew(t *testing.T) {
 		prettyJSON, err := prettyPrint(parsedClaimsBytes)
 		require.NoError(t, err)
 
-		fmt.Println(prettyJSON)
+		t.Log(prettyJSON)
 
 		require.True(t, existsInDisclosures(parsedClaims, expectedHashWithSpaces))
 
@@ -131,7 +131,7 @@ func TestNew(t *testing.T) {
 		prettyJSON, err := prettyPrint(parsedClaimsBytes)
 		require.NoError(t, err)
 
-		fmt.Println(prettyJSON)
+		t.Log(prettyJSON)
 
 		expectedHashWithSpaces := expectedHashWithSpaces
 		require.True(t, existsInDisclosures(parsedClaims, expectedHashWithSpaces))
@@ -174,7 +174,7 @@ func TestNew(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		require.NoError(t, err)
 
-		fmt.Print(combinedFormatForIssuance)
+		t.Log(combinedFormatForIssuance)
 
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 7, len(cfi.Disclosures))
@@ -224,7 +224,7 @@ func TestNew(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		require.NoError(t, err)
 
-		fmt.Print(combinedFormatForIssuance)
+		t.Log(combinedFormatForIssuance)
 
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		// expected 6 simple + 4 address object disclosures
@@ -240,7 +240,7 @@ func TestNew(t *testing.T) {
 		prettyJSON, err := prettyPrint(parsedClaimsBytes)
 		require.NoError(t, err)
 
-		fmt.Println(prettyJSON)
+		t.Log(prettyJSON)
 
 		err = verifyEd25519(cfi.SDJWT, pubKey)
 		r.NoError(err)
@@ -282,7 +282,7 @@ func TestNew(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		require.NoError(t, err)
 
-		fmt.Print(combinedFormatForIssuance)
+		t.Log(combinedFormatForIssuance)
 
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 4, len(cfi.Disclosures))
@@ -339,7 +339,7 @@ func TestNew(t *testing.T) {
 		combinedFormatForIssuance, err := token.Serialize(false)
 		require.NoError(t, err)
 
-		fmt.Print(combinedFormatForIssuance)
+		t.Log(combinedFormatForIssuance)
 
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 3, len(cfi.Disclosures))
@@ -454,7 +454,7 @@ func TestNew(t *testing.T) {
 		prettyJSON, err := prettyPrint(parsedClaimsBytes)
 		require.NoError(t, err)
 
-		fmt.Println(prettyJSON)
+		t.Log(prettyJSON)
 	})
 
 	t.Run("error - claims contain _sd key (top level object)", func(t *testing.T) {
@@ -598,7 +598,7 @@ func TestNewFromVC(t *testing.T) {
 		vcCombinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", vcCombinedFormatForIssuance)
 
 		var vcWithSelectedDisclosures map[string]any
 		err = token.DecodeClaims(&vcWithSelectedDisclosures)
@@ -642,7 +642,7 @@ func TestNewFromVC(t *testing.T) {
 		vcCombinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", vcCombinedFormatForIssuance)
 
 		var vcWithSelectedDisclosures map[string]any
 		err = token.DecodeClaims(&vcWithSelectedDisclosures)
@@ -684,7 +684,7 @@ func TestNewFromVC(t *testing.T) {
 		vcCombinedFormatForIssuance, err := token.Serialize(false)
 		r.NoError(err)
 
-		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
+		t.Logf("issuer SD-JWT: %s", vcCombinedFormatForIssuance)
 
 		var vcWithSelectedDisclosures map[string]any
 		err = token.DecodeClaims(&vcWithSelectedDisclosures)
@@ -1046,8 +1046,7 @@ func printObject(t *testing.T, name string, obj any) {
 	prettyJSON, err := prettyPrint(objBytes)
 	require.NoError(t, err)
 
-	fmt.Println(name + ":")
-	fmt.Println(prettyJSON)
+	t.Logf("%s:\n%s", name, prettyJSON)
 }
 
 // Signer defines JWS Signer interface. It makes signing of data and provides custom JWS headers relevant to the signer.

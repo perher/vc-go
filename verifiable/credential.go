@@ -582,7 +582,7 @@ const (
 	// https://www.w3.org/TR/vc-json-schema/#jsonschema
 	jsonSchemaType = "JsonSchema"
 	// https://www.w3.org/TR/vc-json-schema/#jsonschemacredential
-	jsonSchemaCredentialType = "JsonSchemaCredential"
+	jsonSchemaCredentialType = "JsonSchemaCredential" //nolint:gosec // G101 false positive: a VC type name
 )
 
 const (
@@ -731,7 +731,7 @@ func (sc *ExpirableSchemaCache) Put(k string, v []byte) {
 	const numBytesTime = 8
 
 	b := make([]byte, numBytesTime)
-	binary.LittleEndian.PutUint64(b, uint64(expires))
+	binary.LittleEndian.PutUint64(b, uint64(expires)) //nolint:gosec // G115: reversed losslessly in Get
 
 	ve := make([]byte, numBytesTime+len(v))
 	copy(ve[:numBytesTime], b)
@@ -750,7 +750,7 @@ func (sc *ExpirableSchemaCache) Get(k string) ([]byte, bool) {
 
 	const numBytesTime = 8
 
-	expires := int64(binary.LittleEndian.Uint64(b[:numBytesTime]))
+	expires := int64(binary.LittleEndian.Uint64(b[:numBytesTime])) //nolint:gosec // G115: written from an int64 in Put
 	if expires < time.Now().Unix() {
 		// cache expires
 		sc.cache.Del([]byte(k))
@@ -1328,7 +1328,7 @@ func WithJSONLDIncludeDetailedStructureDiffOnError() CredentialOpt {
 // - object with mandatory "id" field and optional "name" field.
 func parseIssuer(issuerRaw any) (*Issuer, error) {
 	if issuerRaw == nil {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	switch issuer := issuerRaw.(type) {
@@ -1678,8 +1678,8 @@ func validateJSONLD(vcJSON JSONObject, vcc *CredentialContents, vcOpts *credenti
 
 	// TODO: docjsonld.ValidateJSONLDMap has bug that it modify contexts of input vcJSON. Fix in did-go
 	validateOpts := []docjsonld.ValidateOpts{
-		docjsonld.WithDocumentLoader(vcOpts.jsonldCredentialOpts.jsonldDocumentLoader),
-		docjsonld.WithExternalContext(vcOpts.jsonldCredentialOpts.externalContext),
+		docjsonld.WithDocumentLoader(vcOpts.jsonldDocumentLoader),
+		docjsonld.WithExternalContext(vcOpts.externalContext),
 		docjsonld.WithStrictValidation(vcOpts.strictValidation),
 		docjsonld.WithStrictContextURIPosition(baseContext),
 	}
@@ -1708,7 +1708,7 @@ func validateJSONLD(vcJSON JSONObject, vcc *CredentialContents, vcOpts *credenti
 	return nil
 }
 
-// nolint: funlen,gocyclo
+//nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 func parseCredentialContents(raw JSONObject, isSDJWT bool) (*CredentialContents, error) {
 	var schemas []TypedID
 
@@ -1824,7 +1824,7 @@ func parseRefreshService(typeIDRaw any) (*TypedID, error) {
 	}
 
 	if len(typed) == 0 {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	return &typed[0], nil
@@ -1905,7 +1905,7 @@ func parseTypedID(typeIDRaw any) ([]TypedID, error) {
 
 func parseSDAlg(rawCred JSONObject, subjects []Subject, isSDJWT bool) (*crypto.Hash, error) {
 	if !isSDJWT {
-		return nil, nil
+		return nil, nil //nolint:nilnil // nil result means the optional value is absent
 	}
 
 	sdJWTHashAlgStr, err := parseStringFld(rawCred, jsonFldSDJWTHashAlg)
@@ -2278,7 +2278,7 @@ func jsonSchemaLoader(schemaTemplate string, defaultRequired []string, opts ...S
 		filterOut := slices.Contains(dsOpts.disabledChecks, prop)
 
 		if !filterOut {
-			required.WriteString(fmt.Sprintf(",%q", prop))
+			fmt.Fprintf(&required, ",%q", prop)
 		}
 	}
 
@@ -2318,7 +2318,7 @@ func getJSONSchema(url string, opts *credentialOpts) ([]byte, error) {
 }
 
 func loadJSONSchema(url string, client *http.Client) ([]byte, error) {
-	resp, err := client.Get(url)
+	resp, err := client.Get(url) //nolint:noctx // the public API takes no context.Context yet
 	if err != nil {
 		return nil, fmt.Errorf("load credential schema: %w", err)
 	}
@@ -2447,7 +2447,7 @@ func SubjectID(subject []Subject) (string, error) { //nolint:funlen
 	return subject[0].ID, nil
 }
 
-func serializeCredentialContents(vcc *CredentialContents, proofs []Proof) (JSONObject, error) { //nolint:funlen,gocyclo
+func serializeCredentialContents(vcc *CredentialContents, proofs []Proof) (JSONObject, error) { //nolint:funlen,gocyclo,gocognit // refactor is risky; split when next changing this code
 	contexts := contextToRaw(vcc.Context, vcc.CustomContext)
 
 	vcJSON := map[string]any{}
@@ -2732,9 +2732,10 @@ func (vc *Credential) WithModifiedStatus(status ...*TypedID) *Credential {
 
 	newContents.Status = statuses
 
-	if len(statuses) == 1 {
+	switch {
+	case len(statuses) == 1:
 		newCredJSON[jsonFldStatus] = serializeTypedIDObj(*statuses[0])
-	} else if len(statuses) > 1 {
+	case len(statuses) > 1:
 		statusObjects := make([]any, len(statuses))
 
 		for i, s := range statuses {
@@ -2742,7 +2743,7 @@ func (vc *Credential) WithModifiedStatus(status ...*TypedID) *Credential {
 		}
 
 		newCredJSON[jsonFldStatus] = statusObjects
-	} else {
+	default:
 		delete(newCredJSON, jsonFldStatus)
 	}
 

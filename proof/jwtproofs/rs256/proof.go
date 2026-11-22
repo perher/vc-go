@@ -19,9 +19,9 @@ type Proof struct {
 }
 
 const (
-	//JWKKeyType for rsa proof.
+	// JWKKeyType for rsa proof.
 	JWKKeyType = "RSA"
-	//JWTAlg for rsa proof.
+	// JWTAlg for rsa proof.
 	JWTAlg = "RS256"
 )
 

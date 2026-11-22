@@ -372,14 +372,12 @@ func TestSigner_AddProof(t *testing.T) {
 	})
 }
 
-func extractProof(t *testing.T, doc []byte) (proof []byte, rest []byte) {
-	var err error
-
+func extractProof(t *testing.T, doc []byte) ([]byte, []byte) {
 	proofRaw := gjson.GetBytes(doc, proofPath)
 
-	proof = []byte(proofRaw.Raw)
+	proof := []byte(proofRaw.Raw)
 
-	rest, err = sjson.DeleteBytes(doc, proofPath)
+	rest, err := sjson.DeleteBytes(doc, proofPath)
 	require.NoError(t, err)
 
 	return proof, rest

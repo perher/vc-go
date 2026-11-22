@@ -32,6 +32,12 @@ import (
 	cwt2 "github.com/trustbloc/vc-go/verifiable/cwt"
 )
 
+const (
+	ed25519KeyID   = "did:example:12345#key-1"
+	secp256k1KeyID = "did:example:12345#key-3"
+)
+
+//nolint:gosec // G101 false positive: a test credential document, not a secret
 const testCredential = `
 {
 	"@context": [
@@ -88,8 +94,8 @@ func TestAllLDSignersVerifiers(t *testing.T) {
 	require.NoError(t, dlErr)
 
 	allKeyTypes := []*testsupport.SigningKey{
-		{Type: kms.ED25519Type, PublicKeyID: "did:example:12345#key-1"},
-		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: "did:example:12345#key-3"},
+		{Type: kms.ED25519Type, PublicKeyID: ed25519KeyID},
+		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: secp256k1KeyID},
 		{Type: kms.BLS12381G2Type, PublicKeyID: "did:example:12345#key-8"},
 	}
 
@@ -159,15 +165,18 @@ func TestAllJWTSignersVerifiers(t *testing.T) {
 	require.NoError(t, ldErr)
 
 	allKeyTypes := []*testsupport.SigningKey{
-		{Type: kms.ED25519Type, PublicKeyID: "did:example:12345#key-1"},
+		{Type: kms.ED25519Type, PublicKeyID: ed25519KeyID},
 		{Type: kms.ECDSAP256TypeIEEEP1363, PublicKeyID: "did:example:12345#key-2"},
-		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: "did:example:12345#key-3"},
+		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: secp256k1KeyID},
 		{Type: kms.ECDSAP384TypeIEEEP1363, PublicKeyID: "did:example:12345#key-4"},
 		{Type: kms.ECDSAP521TypeIEEEP1363, PublicKeyID: "did:example:12345#key-5"},
 		{Type: kms.RSARS256Type, PublicKeyID: "did:example:12345#key-6"},
 	}
 
 	proofCreators, proofChecker := testsupport.NewKMSSignersAndVerifier(t, allKeyTypes)
+
+	// unsupportedJWSAlg is outside the range of defined verifiable.JWSAlgorithm values.
+	const unsupportedJWSAlg verifiable.JWSAlgorithm = 10
 
 	testCases := []jwtTestCase{
 		{Alg: verifiable.EdDSA, proofCreator: proofCreators[0], signingKey: allKeyTypes[0]},
@@ -178,7 +187,7 @@ func TestAllJWTSignersVerifiers(t *testing.T) {
 		{Alg: verifiable.RS256, proofCreator: proofCreators[5], signingKey: allKeyTypes[5]},
 
 		{Alg: verifiable.ECDSASecp256r1, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], verFail: true},
-		{Alg: verifiable.JWSAlgorithm(10), proofCreator: proofCreators[0], signingKey: allKeyTypes[0], fail: true},
+		{Alg: unsupportedJWSAlg, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], fail: true},
 	}
 
 	for _, testCase := range testCases {
@@ -208,9 +217,9 @@ func TestAllCWTSignersVerifiers(t *testing.T) {
 	require.NoError(t, ldErr)
 
 	allKeyTypes := []*testsupport.SigningKey{
-		{Type: kms.ED25519Type, PublicKeyID: "did:example:12345#key-1"},
+		{Type: kms.ED25519Type, PublicKeyID: ed25519KeyID},
 		{Type: kms.ECDSAP256TypeIEEEP1363, PublicKeyID: "did:example:12345#key-2"},
-		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: "did:example:12345#key-3"},
+		{Type: kms.ECDSASecp256k1TypeIEEEP1363, PublicKeyID: secp256k1KeyID},
 		{Type: kms.ECDSAP384TypeIEEEP1363, PublicKeyID: "did:example:12345#key-4"},
 		{Type: kms.ECDSAP521TypeIEEEP1363, PublicKeyID: "did:example:12345#key-5"},
 		{Type: kms.RSARS256Type, PublicKeyID: "did:example:12345#key-6"},
@@ -219,7 +228,7 @@ func TestAllCWTSignersVerifiers(t *testing.T) {
 	proofCreators, proofChecker := testsupport.NewKMSSignersAndVerifier(t, allKeyTypes)
 
 	testCases := []cwtTestCase{
-		{Alg: verifiable.EdDSA, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], CborAlg: cose.AlgorithmEd25519},
+		{Alg: verifiable.EdDSA, proofCreator: proofCreators[0], signingKey: allKeyTypes[0], CborAlg: cose.AlgorithmEdDSA},
 		{Alg: verifiable.ECDSASecp256r1, proofCreator: proofCreators[1], signingKey: allKeyTypes[1], CborAlg: cose.AlgorithmES256},
 		{Alg: verifiable.ECDSASecp384r1, proofCreator: proofCreators[3], signingKey: allKeyTypes[3], CborAlg: cose.AlgorithmES384},
 	}

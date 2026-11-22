@@ -20,6 +20,8 @@ import (
 )
 
 func TestNewECDSAES256SignatureVerifier(t *testing.T) {
+	t.Parallel()
+
 	msg := []byte("test message")
 
 	t.Run("happy path", func(t *testing.T) {

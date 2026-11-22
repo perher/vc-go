@@ -109,6 +109,7 @@ func (v *Verifier) VerifyProof(doc []byte, opts *models.ProofOptions) error {
 	return nil
 }
 
+//nolint:gocognit // refactor is risky; split when next changing this code
 func (v *Verifier) verifyProof( // nolint:funlen,gocyclo
 	proofRaw, unsecuredDoc []byte,
 	opts *models.ProofOptions,

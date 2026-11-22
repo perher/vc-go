@@ -31,7 +31,6 @@ require (
 	github.com/trustbloc/kms-go v1.2.3
 	github.com/veraison/go-cose v1.3.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546
 )
 
 require (

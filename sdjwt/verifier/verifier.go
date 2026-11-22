@@ -86,18 +86,21 @@ func WithHolderSigningAlgorithms(algorithms []string) ParseOpt {
 }
 
 // WithHolderBindingRequired option is for enforcing holder binding.
+//
 // Deprecated: use WithHolderVerificationRequired instead.
 func WithHolderBindingRequired(flag bool) ParseOpt {
 	return WithHolderVerificationRequired(flag)
 }
 
 // WithExpectedAudienceForHolderBinding option is to pass expected audience for holder binding.
+//
 // Deprecated: use WithExpectedAudienceForHolderVerification instead.
 func WithExpectedAudienceForHolderBinding(audience string) ParseOpt {
 	return WithExpectedAudienceForHolderVerification(audience)
 }
 
 // WithExpectedNonceForHolderBinding option is to pass nonce value for holder binding.
+//
 // Deprecated: use WithExpectedNonceForHolderVerification instead.
 func WithExpectedNonceForHolderBinding(nonce string) ParseOpt {
 	return WithExpectedNonceForHolderVerification(nonce)

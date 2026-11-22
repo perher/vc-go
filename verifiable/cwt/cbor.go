@@ -13,6 +13,21 @@ import (
 	"github.com/fxamacker/cbor/v2"
 )
 
+// CBOR initial byte layout (RFC 8949, section 3): the top 3 bits are the major type,
+// the low 5 bits are the additional information.
+const (
+	cborMajorTypeShift = 5
+	cborMajorTypeBstr  = 2
+	cborAddInfoMask    = 0x1f
+
+	// Additional information values below cborAddInfoUint8 are the argument itself; these say that
+	// the argument follows in the next 1, 2, 4 or 8 bytes.
+	cborAddInfoUint8  = 24
+	cborAddInfoUint16 = 25
+	cborAddInfoUint32 = 26
+	cborAddInfoUint64 = 27
+)
+
 // Pre-configured modes for CBOR encoding and decoding.
 var (
 	encMode                  cbor.EncMode //nolint:gochecknoglobals
@@ -55,34 +70,34 @@ func deterministicBinaryString(data cbor.RawMessage) (cbor.RawMessage, error) { 
 		return nil, io.EOF
 	}
 
-	if data[0]>>5 != 2 { // major type 2: bstr
+	if data[0]>>cborMajorTypeShift != cborMajorTypeBstr {
 		return nil, errors.New("cbor: require bstr type")
 	}
 
 	// fast path: return immediately if bstr is already deterministic
-	if err := decModeWithTagsForbidden.Valid(data); err != nil {
+	if err := decModeWithTagsForbidden.Wellformed(data); err != nil {
 		return nil, err
 	}
 
-	ai := data[0] & 0x1f
-	if ai < 24 {
+	ai := data[0] & cborAddInfoMask
+	if ai < cborAddInfoUint8 {
 		return data, nil
 	}
 
 	switch ai {
-	case 24:
-		if data[1] >= 24 {
+	case cborAddInfoUint8:
+		if data[1] >= cborAddInfoUint8 {
 			return data, nil
 		}
-	case 25:
+	case cborAddInfoUint16:
 		if data[1] != 0 {
 			return data, nil
 		}
-	case 26:
+	case cborAddInfoUint32:
 		if data[1] != 0 || data[2] != 0 {
 			return data, nil
 		}
-	case 27:
+	case cborAddInfoUint64:
 		if data[1] != 0 || data[2] != 0 || data[3] != 0 || data[4] != 0 {
 			return data, nil
 		}

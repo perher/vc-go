@@ -45,6 +45,10 @@ const (
 	arrayDigestValuePosition = 1
 	sdDigestNamePosition     = 1
 	sdDigestValuePosition    = 2
+
+	// sdJWTAndHolderBindingParts is the number of combined format for presentation parts that are not disclosures:
+	// the SD-JWT itself and the trailing holder binding.
+	sdJWTAndHolderBindingParts = 2
 )
 
 // DisclosureClaimType disclosure claim type, used for sd-jwt v5+.
@@ -129,8 +133,13 @@ func GetDisclosureClaims(
 		return nil, err
 	}
 
+	claimsByDigest := make(map[string]*DisclosureClaim, len(disclosureClaims))
+	for _, claim := range disclosureClaims {
+		claimsByDigest[claim.Digest] = claim
+	}
+
 	recData := &recursiveData{
-		disclosures:          disclosureClaims,
+		disclosures:          claimsByDigest,
 		cleanupDigestsClaims: true,
 	}
 
@@ -140,13 +149,7 @@ func GetDisclosureClaims(
 		}
 	}
 
-	final := make([]*DisclosureClaim, 0, len(disclosureClaims))
-
-	for _, disclosureClaim := range recData.disclosures {
-		final = append(final, disclosureClaim)
-	}
-
-	return final, nil
+	return disclosureClaims, nil
 }
 
 // ParseCombinedFormatForIssuance parses combined format for issuance into CombinedFormatForIssuance parts.
@@ -168,7 +171,7 @@ func ParseCombinedFormatForPresentation(combinedFormatForPresentation string) *C
 	parts := strings.Split(combinedFormatForPresentation, CombinedFormatSeparator)
 
 	var disclosures []string
-	if len(parts) > 2 {
+	if len(parts) > sdJWTAndHolderBindingParts {
 		disclosures = parts[1 : len(parts)-1]
 	}
 
@@ -238,7 +241,7 @@ func ParseCryptoHashAlg(sdAlg string) (crypto.Hash, error) {
 
 // FormatCryptoHashAlg returns algorithm name.
 func FormatCryptoHashAlg(sdAlg crypto.Hash) (string, error) {
-	switch sdAlg {
+	switch sdAlg { //nolint:exhaustive // unsupported hashes fall through to the error
 	case crypto.SHA256:
 		fallthrough
 	case crypto.SHA384:
@@ -315,6 +318,8 @@ func GetCNF(claims map[string]any) (map[string]any, error) {
 
 // GetDisclosureDigests returns digests from claims map considering
 // either SDKey and array elements that are objects with one key, that key being ... and referring to a string.
+//
+//nolint:gocognit // refactor is risky; split when next changing this code
 func GetDisclosureDigests(claims map[string]any) (map[string]bool, error) {
 	var (
 		digests []string
@@ -332,8 +337,7 @@ func GetDisclosureDigests(claims map[string]any) (map[string]bool, error) {
 
 	// Find all array elements that are objects with one key, that key being ... and referring to a string.
 	for _, v := range claims {
-		switch t := v.(type) {
-		case []any:
+		if t, isArray := v.([]any); isArray {
 			for _, vv := range t {
 				valueMapped, ok := vv.(map[string]any)
 				if !ok {

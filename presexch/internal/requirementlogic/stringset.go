@@ -57,7 +57,7 @@ func (s StringSet) Len() int {
 // ToString creates a string representation of s, guaranteed to be identical for
 // two StringSets containing the same strings.
 func (s StringSet) ToString() string {
-	escaped := make([]string, s.Len())
+	escaped := make([]string, 0, s.Len())
 
 	for d := range s {
 		escaped = append(escaped, strings.ReplaceAll(d, "\x00", "\\x00"))
