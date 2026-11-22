@@ -1,3 +1,9 @@
+/*
+Copyright Gen Digital Inc. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
 // Package kmscryptoutil contains test utilities for tests using the kmscrypto wrappers.
 package kmscryptoutil
 

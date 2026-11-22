@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-export GOTOOLCHAIN=go1.25.0+auto
 # Tool commands (overridable)
 DOCKER_CMD ?= docker
 

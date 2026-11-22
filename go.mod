@@ -4,7 +4,7 @@
 
 module github.com/trustbloc/vc-go
 
-go 1.25.3
+go 1.26
 
 require (
 	github.com/PaesslerAG/gval v1.2.4
@@ -13,7 +13,7 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.5
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/fxamacker/cbor/v2 v2.9.0
-	github.com/go-jose/go-jose/v3 v3.0.4
+	github.com/go-jose/go-jose/v3 v3.0.5
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7

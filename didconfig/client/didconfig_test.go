@@ -9,6 +9,7 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -93,13 +94,19 @@ func TestVerifyDIDAndDomain(t *testing.T) {
 	})
 
 	t.Run("error - http client error", func(t *testing.T) {
-		c := New(WithJSONLDDocumentLoader(loader))
+		httpClient := &mockHTTPClient{
+			DoFunc: func(req *http.Request) (*http.Response, error) {
+				require.Equal(t, "https://non-existent-abc.com/.well-known/did-configuration.json", req.URL.String())
+
+				return nil, errors.New("dial tcp: lookup non-existent-abc.com: no such host")
+			},
+		}
+
+		c := New(WithJSONLDDocumentLoader(loader), WithHTTPClient(httpClient))
 
 		err := c.VerifyDIDAndDomain(testDID, "https://non-existent-abc.com")
-		require.Error(t, err)
-		require.Contains(t, err.Error(),
-			"Get \"https://non-existent-abc.com/.well-known/did-configuration.json\": dial tcp: "+
-				"lookup non-existent-abc.com")
+		require.EqualError(t, err,
+			"httpClient.Do: dial tcp: lookup non-existent-abc.com: no such host")
 	})
 
 	t.Run("error - http request error", func(t *testing.T) {
