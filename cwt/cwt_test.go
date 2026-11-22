@@ -32,7 +32,7 @@ const (
 )
 
 func createTestProof() (string, error) {
-	data := map[int]interface{}{
+	data := map[int]any{
 		1:  "test-client",
 		3:  "http://127.0.0.1:60413",
 		6:  1706706927,
@@ -155,7 +155,7 @@ func TestParse(t *testing.T) {
 	})
 
 	t.Run("missing issuer", func(t *testing.T) {
-		data := map[int]interface{}{
+		data := map[int]any{
 			100500: "1234567890",
 		}
 
@@ -171,7 +171,7 @@ func TestParse(t *testing.T) {
 	})
 
 	t.Run("issuer invalid type", func(t *testing.T) {
-		data := map[int]interface{}{
+		data := map[int]any{
 			1: 100500,
 		}
 
@@ -187,7 +187,7 @@ func TestParse(t *testing.T) {
 	})
 
 	t.Run("invalid data type", func(t *testing.T) {
-		data := map[string]interface{}{
+		data := map[string]any{
 			"100500": "1234567890",
 		}
 

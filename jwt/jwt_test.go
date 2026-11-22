@@ -145,7 +145,7 @@ func TestParse(t *testing.T) {
 
 	proofCreator, proofChecker := testsupport.NewEd25519Pair(pubKey, privKey, signKeyID)
 
-	claims := map[string]interface{}{"iss": signKeyController}
+	claims := map[string]any{"iss": signKeyController}
 
 	token, err := NewSigned(claims, SignParameters{
 		KeyID:  signKeyID,
@@ -161,13 +161,13 @@ func TestParse(t *testing.T) {
 	_, _, err = ParseAndCheckProof(jws, proofChecker, true)
 	r.NoError(err)
 
-	var parsedClaims map[string]interface{}
+	var parsedClaims map[string]any
 	err = jsonWebToken.DecodeClaims(&parsedClaims)
 	r.NoError(err)
 
 	r.Equal(claims, parsedClaims)
 
-	var decodedClaims map[string]interface{}
+	var decodedClaims map[string]any
 
 	_, _, err = Parse(jws, DecodeClaimsTo(&decodedClaims))
 	r.NoError(err)
@@ -195,7 +195,7 @@ func TestParse(t *testing.T) {
 	r.NoError(err)
 
 	// claims is not JSON
-	jws, err = buildJWS(proofCreator, map[string]interface{}{"alg": "EdDSA"}, "not JSON")
+	jws, err = buildJWS(proofCreator, map[string]any{"alg": "EdDSA"}, "not JSON")
 	r.NoError(err)
 	token, _, err = ParseAndCheckProof(jws, proofChecker, true)
 	r.Error(err)
@@ -204,24 +204,24 @@ func TestParse(t *testing.T) {
 
 	// invalid issuer
 	jws, err = buildJWS(proofCreator,
-		map[string]interface{}{"alg": "EdDSA", "typ": "JWT"},
-		map[string]interface{}{"iss": "Albert"})
+		map[string]any{"alg": "EdDSA", "typ": "JWT"},
+		map[string]any{"iss": "Albert"})
 	r.NoError(err)
 	_, _, err = ParseAndCheckProof(jws, proofChecker, true)
 	r.ErrorContains(err, "\"Albert\" not supports \"did:test:example#key1\"")
 
 	// missed issuer
 	jws, err = buildJWS(proofCreator,
-		map[string]interface{}{"alg": "EdDSA", "typ": "JWT"},
-		map[string]interface{}{})
+		map[string]any{"alg": "EdDSA", "typ": "JWT"},
+		map[string]any{})
 	r.NoError(err)
 	_, _, err = ParseAndCheckProof(jws, proofChecker, true)
 	r.ErrorContains(err, "iss claim is required")
 
 	// type is not JWT
 	jws, err = buildJWS(proofCreator,
-		map[string]interface{}{"alg": "EdDSA", "typ": "JWM"},
-		map[string]interface{}{"iss": "Albert"})
+		map[string]any{"alg": "EdDSA", "typ": "JWM"},
+		map[string]any{"iss": "Albert"})
 	r.NoError(err)
 	token, _, err = ParseAndCheckProof(jws, proofChecker, true)
 	r.Error(err)
@@ -230,8 +230,8 @@ func TestParse(t *testing.T) {
 
 	// content type is not empty (equals to JWT)
 	jws, err = buildJWS(proofCreator,
-		map[string]interface{}{"alg": "EdDSA", "typ": "JWT", "cty": "JWT"},
-		map[string]interface{}{"iss": "Albert"})
+		map[string]any{"alg": "EdDSA", "typ": "JWT", "cty": "JWT"},
+		map[string]any{"iss": "Albert"})
 	r.NoError(err)
 	token, _, err = ParseAndCheckProof(jws, proofChecker, true)
 	r.Error(err)
@@ -251,7 +251,7 @@ func TestParse(t *testing.T) {
 	r.Nil(token)
 }
 
-func buildJWS(signer ProofCreator, headers jose.Headers, claims interface{}) (string, error) {
+func buildJWS(signer ProofCreator, headers jose.Headers, claims any) (string, error) {
 	claimsBytes, err := json.Marshal(claims)
 	if err != nil {
 		return "", err
@@ -276,11 +276,11 @@ func TestJSONWebToken_DecodeClaims(t *testing.T) {
 	token, err := getValidJSONWebToken()
 	require.NoError(t, err)
 
-	var tokensMap map[string]interface{}
+	var tokensMap map[string]any
 
 	err = token.DecodeClaims(&tokensMap)
 	require.NoError(t, err)
-	require.Equal(t, map[string]interface{}{"iss": "Albert"}, tokensMap)
+	require.Equal(t, map[string]any{"iss": "Albert"}, tokensMap)
 
 	var claims Claims
 
@@ -447,7 +447,7 @@ type testToMapStruct struct {
 }
 
 func Test_toMap(t *testing.T) {
-	inputMap := map[string]interface{}{"a": "b"}
+	inputMap := map[string]any{"a": "b"}
 
 	r := require.New(t)
 
@@ -489,7 +489,7 @@ func Test_toMap(t *testing.T) {
 }
 
 func getValidJSONWebToken() (*JSONWebToken, error) {
-	claims := map[string]interface{}{"iss": "Albert"}
+	claims := map[string]any{"iss": "Albert"}
 
 	pubKey, privKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -500,7 +500,7 @@ func getValidJSONWebToken() (*JSONWebToken, error) {
 
 	return NewSigned(claims, SignParameters{
 		JWTAlg:            signatureEdDSA,
-		AdditionalHeaders: map[string]interface{}{"typ": "JWT"},
+		AdditionalHeaders: map[string]any{"typ": "JWT"},
 	}, proofCreator)
 }
 
@@ -516,7 +516,7 @@ func getJSONWebTokenWithInvalidPayload() (*JSONWebToken, error) {
 	return token, nil
 }
 
-func verifyEd25519ViaGoJose(jws string, pubKey ed25519.PublicKey, claims interface{}) error {
+func verifyEd25519ViaGoJose(jws string, pubKey ed25519.PublicKey, claims any) error {
 	jwtToken, err := jwt.ParseSigned(jws)
 	if err != nil {
 		return fmt.Errorf("parse VC from signed JWS: %w", err)
@@ -529,7 +529,7 @@ func verifyEd25519ViaGoJose(jws string, pubKey ed25519.PublicKey, claims interfa
 	return nil
 }
 
-func VerifyRS256ViaGoJose(jws string, pubKey *rsa.PublicKey, claims interface{}) error {
+func VerifyRS256ViaGoJose(jws string, pubKey *rsa.PublicKey, claims any) error {
 	jwtToken, err := jwt.ParseSigned(jws)
 	if err != nil {
 		return fmt.Errorf("parse VC from signed JWS: %w", err)
@@ -542,8 +542,8 @@ func VerifyRS256ViaGoJose(jws string, pubKey *rsa.PublicKey, claims interface{})
 	return nil
 }
 
-func getUnmarshallableMap() map[string]interface{} {
-	return map[string]interface{}{"error": map[chan int]interface{}{make(chan int): 6}}
+func getUnmarshallableMap() map[string]any {
+	return map[string]any{"error": map[chan int]any{make(chan int): 6}}
 }
 
 func createClaims() *CustomClaim {
@@ -568,7 +568,7 @@ func createClaims() *CustomClaim {
 
 func Test_checkHeaders(t *testing.T) {
 	type args struct {
-		headers map[string]interface{}
+		headers map[string]any
 	}
 
 	tests := []struct {
@@ -579,7 +579,7 @@ func Test_checkHeaders(t *testing.T) {
 		{
 			name: "OK",
 			args: args{
-				headers: map[string]interface{}{
+				headers: map[string]any{
 					jose.HeaderAlgorithm:   "EdDSA",
 					jose.HeaderType:        "JWT",
 					jose.HeaderContentType: "application/example;part=\"1/2\"",
@@ -590,7 +590,7 @@ func Test_checkHeaders(t *testing.T) {
 		{
 			name: "OK Explicit type",
 			args: args{
-				headers: map[string]interface{}{
+				headers: map[string]any{
 					jose.HeaderAlgorithm:   "EdDSA",
 					jose.HeaderType:        "openid4vci-proof+jwt",
 					jose.HeaderContentType: "application/example;part=\"1/2\"",
@@ -601,7 +601,7 @@ func Test_checkHeaders(t *testing.T) {
 		{
 			name: "alg missed",
 			args: args{
-				headers: map[string]interface{}{
+				headers: map[string]any{
 					jose.HeaderType:        "JWT",
 					jose.HeaderContentType: "application/example;part=\"1/2\"",
 				},
@@ -611,7 +611,7 @@ func Test_checkHeaders(t *testing.T) {
 		{
 			name: "invalid typ format",
 			args: args{
-				headers: map[string]interface{}{
+				headers: map[string]any{
 					jose.HeaderAlgorithm:   "EdDSA",
 					jose.HeaderType:        123,
 					jose.HeaderContentType: "application/example;part=\"1/2\"",
@@ -622,7 +622,7 @@ func Test_checkHeaders(t *testing.T) {
 		{
 			name: "Explicit type - invalid prefix",
 			args: args{
-				headers: map[string]interface{}{
+				headers: map[string]any{
 					jose.HeaderAlgorithm:   "EdDSA",
 					jose.HeaderType:        "jose+json",
 					jose.HeaderContentType: "application/example;part=\"1/2\"",
@@ -633,7 +633,7 @@ func Test_checkHeaders(t *testing.T) {
 		{
 			name: "invalid typ",
 			args: args{
-				headers: map[string]interface{}{
+				headers: map[string]any{
 					jose.HeaderAlgorithm:   "EdDSA",
 					jose.HeaderType:        "jwt",
 					jose.HeaderContentType: "application/example;part=\"1/2\"",
@@ -644,7 +644,7 @@ func Test_checkHeaders(t *testing.T) {
 		{
 			name: "invalid cty",
 			args: args{
-				headers: map[string]interface{}{
+				headers: map[string]any{
 					jose.HeaderAlgorithm:   "EdDSA",
 					jose.HeaderType:        "JWT",
 					jose.HeaderContentType: "JWT",

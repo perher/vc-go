@@ -175,12 +175,12 @@ func TestGetDisclosureClaims(t *testing.T) {
 			}
 		}
 
-		r.Equal(map[string]interface{}{
-			"extraArrInclude": []interface{}{
+		r.Equal(map[string]any{
+			"extraArrInclude": []any{
 				"UA", "PL",
 			},
-			"extra": map[string]interface{}{
-				"recursive": map[string]interface{}{
+			"extra": map[string]any{
+				"recursive": map[string]any{
 					"key1": "value1",
 				},
 			},
@@ -188,7 +188,7 @@ func TestGetDisclosureClaims(t *testing.T) {
 			"country":        "DE",
 			"street_address": "Schulstr. 12",
 			"locality":       "Schulpforta",
-			"extraArr": []interface{}{
+			"extraArr": []any{
 				"Extra1", "Extra2",
 			},
 		}, address.Value)
@@ -211,19 +211,19 @@ func TestGetDisclosureClaims(t *testing.T) {
 			}
 		}
 
-		r.Equal(map[string]interface{}{
-			"extraArrInclude": []interface{}{
+		r.Equal(map[string]any{
+			"extraArrInclude": []any{
 				"PL",
 			},
-			"extra": map[string]interface{}{
-				"recursive": map[string]interface{}{
+			"extra": map[string]any{
+				"recursive": map[string]any{
 					"key1": "value1",
 				},
 			},
 			"region":         "Sachsen-Anhalt",
 			"country":        "DE",
 			"street_address": "Schulstr. 12",
-			"extraArr": []interface{}{
+			"extraArr": []any{
 				"Extra1", "Extra2",
 			},
 		}, address.Value)
@@ -246,7 +246,7 @@ func TestGetDisclosureClaims(t *testing.T) {
 	})
 
 	t.Run("error - invalid disclosure array (less then 2 parts)", func(t *testing.T) {
-		disclosureArr := []interface{}{"name"}
+		disclosureArr := []any{"name"}
 		disclosureJSON, err := json.Marshal(disclosureArr)
 		require.NoError(t, err)
 
@@ -267,7 +267,7 @@ func TestGetDisclosureClaims(t *testing.T) {
 	})
 
 	t.Run("error - invalid disclosure array (name is not a string)", func(t *testing.T) {
-		disclosureArr := []interface{}{"salt", 123, "value"}
+		disclosureArr := []any{"salt", 123, "value"}
 		disclosureJSON, err := json.Marshal(disclosureArr)
 		require.NoError(t, err)
 
@@ -304,7 +304,7 @@ func TestGetDisclosedClaims(t *testing.T) {
 	disclosureClaims, err := GetDisclosureClaims(cfi.Disclosures, hash)
 	r.NoError(err)
 
-	var claims map[string]interface{}
+	var claims map[string]any
 	err = token.DecodeClaims(&claims)
 	r.NoError(err)
 
@@ -337,13 +337,13 @@ func TestGetDisclosedClaims(t *testing.T) {
 
 		r.Equal(2, len(disclosedClaims))
 		r.Equal("https://example.com/issuer", disclosedClaims["iss"])
-		r.Equal(map[string]interface{}{
+		r.Equal(map[string]any{
 			"locality":     "Schulpforta",
 			"region":       "Sachsen-Anhalt",
-			"cities":       []interface{}{"Albuquerque", "El Paso"},
-			"countryCodes": []interface{}{"UA", "PL"},
-			"extra": map[string]interface{}{
-				"recursive": map[string]interface{}{
+			"cities":       []any{"Albuquerque", "El Paso"},
+			"countryCodes": []any{"UA", "PL"},
+			"extra": map[string]any{
+				"recursive": map[string]any{
 					"key1": "value1",
 				},
 			},
@@ -388,11 +388,11 @@ func TestGetDisclosedClaims(t *testing.T) {
 
 		r.Equal(2, len(disclosedClaims))
 		r.Equal("https://example.com/issuer", disclosedClaims["iss"])
-		r.Equal(map[string]interface{}{
+		r.Equal(map[string]any{
 			"region": "Sachsen-Anhalt",
-			"cities": []interface{}{"El Paso"},
-			"extra": map[string]interface{}{
-				"recursive": map[string]interface{}{
+			"cities": []any{"El Paso"},
+			"extra": map[string]any{
+				"recursive": map[string]any{
 					"key1": "value1",
 				},
 			},
@@ -405,9 +405,9 @@ func TestGetDisclosedClaims(t *testing.T) {
 		additionalDigest, err := GetHash(crypto.SHA256, additionalSDDisclosure)
 		r.NoError(err)
 
-		parentObj := make(map[string]interface{})
+		parentObj := make(map[string]any)
 		parentObj["last_name"] = "Brown"
-		parentObj[SDKey] = []interface{}{additionalDigest}
+		parentObj[SDKey] = []any{additionalDigest}
 
 		testClaims["father"] = parentObj
 
@@ -433,7 +433,7 @@ func TestGetDisclosedClaims(t *testing.T) {
 
 		r.Equal(6, len(disclosedClaims))
 		r.Equal("John", disclosedClaims["given_name"])
-		r.Equal("value-y", disclosedClaims["father"].(map[string]interface{})["key-x"])
+		r.Equal("value-y", disclosedClaims["father"].(map[string]any)["key-x"])
 	})
 
 	t.Run("success - claim value contains _sd", func(t *testing.T) {
@@ -442,9 +442,9 @@ func TestGetDisclosedClaims(t *testing.T) {
 		additionalDigest, err := GetHash(crypto.SHA256, additionalSDDisclosure)
 		r.NoError(err)
 
-		parentObj := make(map[string]interface{})
+		parentObj := make(map[string]any)
 		parentObj["last_name"] = "Smith"
-		parentObj[SDKey] = []interface{}{additionalDigest}
+		parentObj[SDKey] = []any{additionalDigest}
 
 		testClaims["father"] = parentObj
 
@@ -457,8 +457,8 @@ func TestGetDisclosedClaims(t *testing.T) {
 				Type:       DisclosureClaimTypeObject,
 				Version:    SDJWTVersionV2,
 				Name:       "key-x",
-				Value: map[string]interface{}{
-					"_sd": []interface{}{"test-digest"},
+				Value: map[string]any{
+					"_sd": []any{"test-digest"},
 				},
 				IsValueParsed: false,
 			}),
@@ -470,7 +470,7 @@ func TestGetDisclosedClaims(t *testing.T) {
 	t.Run("error - same claim key at the same level ", func(t *testing.T) {
 		testClaims := utils.CopyMap(claims)
 
-		parentObj := make(map[string]interface{})
+		parentObj := make(map[string]any)
 		parentObj["given_name"] = "Albert"
 		parentObj[SDKey] = claims[SDKey]
 
@@ -489,7 +489,7 @@ func TestGetDisclosedClaims(t *testing.T) {
 	t.Run("error - digest included in more than one spot ", func(t *testing.T) {
 		testClaims := utils.CopyMap(claims)
 
-		parentObj := make(map[string]interface{})
+		parentObj := make(map[string]any)
 		parentObj["last_name"] = "Smith"
 		parentObj[SDKey] = claims[SDKey]
 
@@ -507,9 +507,9 @@ func TestGetDisclosedClaims(t *testing.T) {
 	t.Run("error - with complex object", func(t *testing.T) {
 		testClaims := utils.CopyMap(claims)
 
-		parentObj := make(map[string]interface{})
+		parentObj := make(map[string]any)
 		parentObj["given_name"] = "Albert"
-		parentObj[SDKey] = []interface{}{0}
+		parentObj[SDKey] = []any{0}
 
 		testClaims["father"] = parentObj
 
@@ -522,7 +522,7 @@ func TestGetDisclosedClaims(t *testing.T) {
 	})
 
 	t.Run("error - no _sd_alg", func(t *testing.T) {
-		disclosedClaims, err := GetDisclosedClaims(disclosureClaims, make(map[string]interface{}))
+		disclosedClaims, err := GetDisclosedClaims(disclosureClaims, make(map[string]any))
 		r.Error(err)
 		r.Nil(disclosedClaims)
 
@@ -531,9 +531,9 @@ func TestGetDisclosedClaims(t *testing.T) {
 	})
 
 	t.Run("error - invalid _sd item", func(t *testing.T) {
-		testClaims := make(map[string]interface{})
+		testClaims := make(map[string]any)
 		testClaims[SDAlgorithmKey] = testAlg
-		testClaims[SDKey] = []interface{}{0}
+		testClaims[SDKey] = []any{0}
 
 		disclosedClaims, err := GetDisclosedClaims(disclosureClaims, testClaims)
 		r.Error(err)
@@ -544,7 +544,7 @@ func TestGetDisclosedClaims(t *testing.T) {
 	})
 
 	t.Run("error - invalid _sd type", func(t *testing.T) {
-		testClaims := make(map[string]interface{})
+		testClaims := make(map[string]any)
 		testClaims[SDAlgorithmKey] = "sha-256"
 		testClaims[SDKey] = "not-array"
 
@@ -586,7 +586,7 @@ func TestGetSDAlg(t *testing.T) {
 	r := require.New(t)
 
 	t.Run("success", func(t *testing.T) {
-		claims := map[string]interface{}{
+		claims := map[string]any{
 			"_sd_alg": "sha-256",
 		}
 
@@ -596,9 +596,9 @@ func TestGetSDAlg(t *testing.T) {
 	})
 
 	t.Run("success - algorithm is in VC credential subject", func(t *testing.T) {
-		claims := map[string]interface{}{
+		claims := map[string]any{
 			"given_name": "John",
-			"vc": map[string]interface{}{
+			"vc": map[string]any{
 				"_sd_alg": "sha-256",
 			},
 		}
@@ -609,7 +609,7 @@ func TestGetSDAlg(t *testing.T) {
 	})
 
 	t.Run("error - algorithm not found (no vc)", func(t *testing.T) {
-		alg, err := GetSDAlg(make(map[string]interface{}))
+		alg, err := GetSDAlg(make(map[string]any))
 		r.Error(err)
 		r.Empty(alg)
 
@@ -617,8 +617,8 @@ func TestGetSDAlg(t *testing.T) {
 	})
 
 	t.Run("error - algorithm not found (vc is empty)", func(t *testing.T) {
-		claims := map[string]interface{}{
-			"vc": map[string]interface{}{},
+		claims := map[string]any{
+			"vc": map[string]any{},
 		}
 
 		alg, err := GetSDAlg(claims)
@@ -629,7 +629,7 @@ func TestGetSDAlg(t *testing.T) {
 	})
 
 	t.Run("error - algorithm not found (vc is not a map)", func(t *testing.T) {
-		claims := map[string]interface{}{
+		claims := map[string]any{
 			"vc": "invalid",
 		}
 
@@ -641,8 +641,8 @@ func TestGetSDAlg(t *testing.T) {
 	})
 
 	t.Run("error - algorithm must be a string", func(t *testing.T) {
-		claims := map[string]interface{}{
-			"vc": map[string]interface{}{
+		claims := map[string]any{
+			"vc": map[string]any{
 				"_sd_alg": 123,
 			},
 		}
@@ -655,7 +655,7 @@ func TestGetSDAlg(t *testing.T) {
 	})
 
 	t.Run("error - algorithm must be a string", func(t *testing.T) {
-		claims := map[string]interface{}{
+		claims := map[string]any{
 			"_sd_alg": 123,
 		}
 
@@ -671,9 +671,9 @@ func TestGetCNF(t *testing.T) {
 	r := require.New(t)
 
 	t.Run("success - cnf is at the top level", func(t *testing.T) {
-		claims := make(map[string]interface{})
-		claims["cnf"] = map[string]interface{}{
-			"jwk": map[string]interface{}{
+		claims := make(map[string]any)
+		claims["cnf"] = map[string]any{
+			"jwk": map[string]any{
 				"kty": "RSA",
 				"e":   "AQAB",
 				"n":   "pm4bOHBg-oYhAyPWzR56AWX3rUIXp11",
@@ -686,7 +686,7 @@ func TestGetCNF(t *testing.T) {
 	})
 
 	t.Run("success - cnf is in VC", func(t *testing.T) {
-		var payload map[string]interface{}
+		var payload map[string]any
 
 		err := json.Unmarshal([]byte(vcSample), &payload)
 		require.NoError(t, err)
@@ -697,7 +697,7 @@ func TestGetCNF(t *testing.T) {
 	})
 
 	t.Run("error - cnf not found (empty claims)", func(t *testing.T) {
-		cnf, err := GetCNF(make(map[string]interface{}))
+		cnf, err := GetCNF(make(map[string]any))
 		r.Error(err)
 		r.Empty(cnf)
 
@@ -705,7 +705,7 @@ func TestGetCNF(t *testing.T) {
 	})
 
 	t.Run("error - cnf is not an object", func(t *testing.T) {
-		claims := make(map[string]interface{})
+		claims := make(map[string]any)
 		claims["cnf"] = "abc"
 
 		cnf, err := GetCNF(claims)
@@ -722,7 +722,7 @@ func TestKeyExistInMap(t *testing.T) {
 	key := "_sd"
 
 	t.Run("true - claims contain _sd key (top level object)", func(t *testing.T) {
-		claims := map[string]interface{}{
+		claims := map[string]any{
 			key: "whatever",
 		}
 
@@ -731,8 +731,8 @@ func TestKeyExistInMap(t *testing.T) {
 	})
 
 	t.Run("true - claims contain _sd key (inner object)", func(t *testing.T) {
-		claims := map[string]interface{}{
-			"degree": map[string]interface{}{
+		claims := map[string]any{
+			"degree": map[string]any{
 				key:    "whatever",
 				"type": "BachelorDegree",
 			},
@@ -743,9 +743,9 @@ func TestKeyExistInMap(t *testing.T) {
 	})
 
 	t.Run("false - _sd key not present in claims", func(t *testing.T) {
-		claims := map[string]interface{}{
+		claims := map[string]any{
 			"key-x": "value-y",
-			"degree": map[string]interface{}{
+			"degree": map[string]any{
 				"key-x": "whatever",
 				"type":  "BachelorDegree",
 			},
@@ -759,20 +759,20 @@ func TestKeyExistInMap(t *testing.T) {
 func TestGetKeyFromVC(t *testing.T) {
 	type args struct {
 		key    string
-		claims map[string]interface{}
+		claims map[string]any
 	}
 
 	tests := []struct {
 		name  string
 		args  args
-		want  interface{}
+		want  any
 		want1 bool
 	}{
 		{
 			name: "success - vc root claim does not exist",
 			args: args{
 				key: "credentialSubject",
-				claims: map[string]interface{}{
+				claims: map[string]any{
 					"credentialSubject": 123,
 				},
 			},
@@ -783,8 +783,8 @@ func TestGetKeyFromVC(t *testing.T) {
 			name: "success - vc root claim exist",
 			args: args{
 				key: "credentialSubject",
-				claims: map[string]interface{}{
-					"vc": map[string]interface{}{
+				claims: map[string]any{
+					"vc": map[string]any{
 						"credentialSubject": 321,
 					},
 				},
@@ -796,8 +796,8 @@ func TestGetKeyFromVC(t *testing.T) {
 			name: "error - vc root claim does not exist",
 			args: args{
 				key: "credentialSubject",
-				claims: map[string]interface{}{
-					"some": map[string]interface{}{
+				claims: map[string]any{
+					"some": map[string]any{
 						"credentialSubject": 321,
 					},
 				},
@@ -809,7 +809,7 @@ func TestGetKeyFromVC(t *testing.T) {
 			name: "error - vc root claim exist but not a map",
 			args: args{
 				key: "credentialSubject",
-				claims: map[string]interface{}{
+				claims: map[string]any{
 					"vc": 123,
 				},
 			},
@@ -820,8 +820,8 @@ func TestGetKeyFromVC(t *testing.T) {
 			name: "error - vc root claim exist but key does not exist in nested map",
 			args: args{
 				key: "credentialSubject",
-				claims: map[string]interface{}{
-					"vc": map[string]interface{}{
+				claims: map[string]any{
+					"vc": map[string]any{
 						"some": 321,
 					},
 				},
@@ -846,7 +846,7 @@ func TestGetKeyFromVC(t *testing.T) {
 
 func TestGetDisclosureDigests(t *testing.T) {
 	type args struct {
-		claims map[string]interface{}
+		claims map[string]any
 	}
 
 	tests := []struct {
@@ -858,12 +858,12 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "success - sd and array elements",
 			args: args{
-				claims: map[string]interface{}{
+				claims: map[string]any{
 					SDKey: []string{
 						"digest1", "digest2",
 					},
-					"claim1": []interface{}{
-						map[string]interface{}{
+					"claim1": []any{
+						map[string]any{
 							ArrayElementDigestKey: "digest3",
 						},
 					},
@@ -879,11 +879,11 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "success - sd root and nested claims",
 			args: args{
-				claims: map[string]interface{}{
+				claims: map[string]any{
 					SDKey: []string{
 						"digest1", "digest2",
 					},
-					"claim1": map[string]interface{}{
+					"claim1": map[string]any{
 						SDKey: []string{
 							"digest3",
 						},
@@ -899,9 +899,9 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "success - array element on nested level",
 			args: args{
-				claims: map[string]interface{}{
-					"claim1": map[string]interface{}{
-						"claim2": map[string]interface{}{
+				claims: map[string]any{
+					"claim1": map[string]any{
+						"claim2": map[string]any{
 							ArrayElementDigestKey: "digest3",
 						},
 					},
@@ -913,9 +913,9 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "success - array element not a string",
 			args: args{
-				claims: map[string]interface{}{
-					"claim1": []interface{}{
-						map[string]interface{}{
+				claims: map[string]any{
+					"claim1": []any{
+						map[string]any{
 							ArrayElementDigestKey: 123,
 						},
 					},
@@ -927,9 +927,9 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "success - array element map longer then one",
 			args: args{
-				claims: map[string]interface{}{
-					"claim1": []interface{}{
-						map[string]interface{}{
+				claims: map[string]any{
+					"claim1": []any{
+						map[string]any{
 							ArrayElementDigestKey: "digest3",
 							"claim2":              "digest4",
 						},
@@ -942,8 +942,8 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "success - array element is not a map",
 			args: args{
-				claims: map[string]interface{}{
-					"claim1": []interface{}{"digest3"},
+				claims: map[string]any{
+					"claim1": []any{"digest3"},
 				},
 			},
 			want:    map[string]bool{},
@@ -952,9 +952,9 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "success - no array and sd elements",
 			args: args{
-				claims: map[string]interface{}{
-					"claim1": map[string]interface{}{
-						"claim2": []interface{}{"claim3"},
+				claims: map[string]any{
+					"claim1": map[string]any{
+						"claim2": []any{"claim3"},
 					},
 				},
 			},
@@ -964,7 +964,7 @@ func TestGetDisclosureDigests(t *testing.T) {
 		{
 			name: "error - sd element is not a string",
 			args: args{
-				claims: map[string]interface{}{
+				claims: map[string]any{
 					SDKey: []int{123},
 				},
 			},
@@ -1004,7 +1004,7 @@ func TestFormatCryptoHashAlg(t *testing.T) {
 	require.Error(t, err)
 }
 
-func printObject(t *testing.T, name string, obj interface{}) {
+func printObject(t *testing.T, name string, obj any) {
 	t.Helper()
 
 	objBytes, err := json.Marshal(obj)

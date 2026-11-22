@@ -33,7 +33,7 @@ const (
 // JWTCredClaims is JWT Claims extension by Verifiable Credential (with custom "vc" claim).
 type JWTCredClaims struct {
 	*jwt.Claims
-	VC map[string]interface{} `json:"vc,omitempty"`
+	VC map[string]any `json:"vc,omitempty"`
 }
 
 // CWTClaims converts Verifiable Credential into CWT Credential claims, which can be than serialized.
@@ -51,7 +51,7 @@ type CWTClaims struct {
 // CWTCredClaims converts Verifiable Credential into CWT Credential claims, which can be than serialized.
 type CWTCredClaims struct {
 	*CWTClaims
-	VC map[string]interface{} `json:"vc,omitempty"`
+	VC map[string]any `json:"vc,omitempty"`
 }
 
 // ToSDJWTV5CredentialPayload defines custom marshalling of JWTCredClaims.
@@ -224,7 +224,7 @@ func (jcc *JWTCredClaims) refineFromJWTClaims() error {
 	return nil
 }
 
-func refineVCIssuerFromJWTClaims(vcMap map[string]interface{}, iss string) error {
+func refineVCIssuerFromJWTClaims(vcMap map[string]any, iss string) error {
 	// Issuer of Verifiable Credential could be either string (id) or struct (with "id" field).
 	if _, exists := vcMap[vcIssuerField]; !exists {
 		vcMap[vcIssuerField] = iss
@@ -236,7 +236,7 @@ func refineVCIssuerFromJWTClaims(vcMap map[string]interface{}, iss string) error
 	switch issuerFld := vcMap[vcIssuerField].(type) {
 	case string:
 		issuerID = issuerFld
-	case map[string]interface{}:
+	case map[string]any:
 		id, err := parseStringFld(issuerFld, jsonFldIssuerID)
 		if err != nil {
 			return fmt.Errorf("get issuer id from vc: %w", err)
@@ -252,7 +252,7 @@ func refineVCIssuerFromJWTClaims(vcMap map[string]interface{}, iss string) error
 	switch issuerFld := vcMap[vcIssuerField].(type) {
 	case string:
 		vcMap[vcIssuerField] = iss
-	case map[string]interface{}:
+	case map[string]any:
 		issuerFld[vcIssuerIDField] = iss
 	}
 

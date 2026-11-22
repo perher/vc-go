@@ -25,7 +25,7 @@ import (
 type Claim struct {
 	Disclosure string
 	Name       string
-	Value      interface{}
+	Value      any
 }
 
 // jwtParseOpts holds options for the SD-JWT parsing.

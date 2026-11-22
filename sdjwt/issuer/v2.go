@@ -17,10 +17,10 @@ import (
 type builder interface {
 	CreateDisclosuresAndDigests(
 		path string,
-		claims map[string]interface{},
+		claims map[string]any,
 		opts *newOpts,
-	) ([]*DisclosureEntity, map[string]interface{}, error)
-	ExtractCredentialClaims(vcClaims map[string]interface{}) (map[string]interface{}, error)
+	) ([]*DisclosureEntity, map[string]any, error)
+	ExtractCredentialClaims(vcClaims map[string]any) (map[string]any, error)
 	GenerateSalt() (string, error)
 }
 
@@ -55,14 +55,14 @@ func NewSDJWTBuilderV2() *SDJWTBuilderV2 {
 // CreateDisclosuresAndDigests creates disclosures and digests.
 func (s *SDJWTBuilderV2) CreateDisclosuresAndDigests(
 	path string,
-	claims map[string]interface{},
+	claims map[string]any,
 	opts *newOpts,
-) ([]*DisclosureEntity, map[string]interface{}, error) { // nolint:lll
+) ([]*DisclosureEntity, map[string]any, error) { // nolint:lll
 	var disclosures []*DisclosureEntity
 
 	var levelDisclosures []*DisclosureEntity
 
-	digestsMap := make(map[string]interface{})
+	digestsMap := make(map[string]any)
 
 	decoyDisclosures, err := createDecoyDisclosures(opts)
 	if err != nil {
@@ -75,7 +75,7 @@ func (s *SDJWTBuilderV2) CreateDisclosuresAndDigests(
 			curPath = path + "." + key
 		}
 
-		if obj, ok := value.(map[string]interface{}); ok && opts.structuredClaims {
+		if obj, ok := value.(map[string]any); ok && opts.structuredClaims {
 			nestedDisclosures, nestedDigestsMap, e := s.CreateDisclosuresAndDigests(curPath, obj, opts)
 			if e != nil {
 				return nil, nil, e
@@ -114,7 +114,7 @@ func (s *SDJWTBuilderV2) CreateDisclosuresAndDigests(
 
 func (s *SDJWTBuilderV2) createDisclosure(
 	key string,
-	value interface{},
+	value any,
 	opts *newOpts,
 ) (*DisclosureEntity, error) {
 	salt, err := opts.getSalt()
@@ -122,7 +122,7 @@ func (s *SDJWTBuilderV2) createDisclosure(
 		return nil, fmt.Errorf("generate salt: %w", err)
 	}
 
-	disclosure := []interface{}{salt, key, value}
+	disclosure := []any{salt, key, value}
 
 	disclosureBytes, err := opts.jsonMarshal(disclosure)
 	if err != nil {
@@ -135,8 +135,8 @@ func (s *SDJWTBuilderV2) createDisclosure(
 }
 
 // ExtractCredentialClaims extracts credential claims.
-func (s *SDJWTBuilderV2) ExtractCredentialClaims(vcClaims map[string]interface{}) (map[string]interface{}, error) {
-	vc, ok := vcClaims[vcKey].(map[string]interface{})
+func (s *SDJWTBuilderV2) ExtractCredentialClaims(vcClaims map[string]any) (map[string]any, error) {
+	vc, ok := vcClaims[vcKey].(map[string]any)
 	if !ok {
 		return nil, errors.New("invalid vc claim")
 	}

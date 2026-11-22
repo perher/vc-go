@@ -13,7 +13,7 @@ import (
 	"github.com/trustbloc/vc-go/jwt"
 )
 
-func marshalUnsecuredJWT(claims interface{}) (string, error) {
+func marshalUnsecuredJWT(claims any) (string, error) {
 	token, err := jwt.NewUnsecured(claims)
 	if err != nil {
 		return "", fmt.Errorf("marshal unsecured JWT: %w", err)
@@ -22,7 +22,7 @@ func marshalUnsecuredJWT(claims interface{}) (string, error) {
 	return token.Serialize(false)
 }
 
-func unmarshalUnsecuredJWT(rawJWT string, claims interface{}) (jose.Headers, error) {
+func unmarshalUnsecuredJWT(rawJWT string, claims any) (jose.Headers, error) {
 	token, _, err := jwt.Parse(rawJWT)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal unsecured JWT: %w", err)

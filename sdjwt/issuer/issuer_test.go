@@ -54,7 +54,7 @@ func TestNew(t *testing.T) {
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 1, len(cfi.Disclosures))
 
-		var payload map[string]interface{}
+		var payload map[string]any
 		err = token.DecodeClaims(&payload)
 		r.NoError(err)
 
@@ -83,7 +83,7 @@ func TestNew(t *testing.T) {
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 1, len(cfi.Disclosures))
 
-		var parsedClaims map[string]interface{}
+		var parsedClaims map[string]any
 		err = verifyEd25519ViaGoJose(cfi.SDJWT, pubKey, &parsedClaims)
 		r.NoError(err)
 
@@ -121,7 +121,7 @@ func TestNew(t *testing.T) {
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 1, len(cfi.Disclosures))
 
-		var parsedClaims map[string]interface{}
+		var parsedClaims map[string]any
 		err = verifyRS256ViaGoJose(cfi.SDJWT, pubKey, &parsedClaims)
 		r.NoError(err)
 
@@ -179,7 +179,7 @@ func TestNew(t *testing.T) {
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 7, len(cfi.Disclosures))
 
-		var parsedClaims map[string]interface{}
+		var parsedClaims map[string]any
 		err = verifyEd25519ViaGoJose(cfi.SDJWT, pubKey, &parsedClaims)
 		r.NoError(err)
 
@@ -230,7 +230,7 @@ func TestNew(t *testing.T) {
 		// expected 6 simple + 4 address object disclosures
 		require.Equal(t, 10, len(cfi.Disclosures))
 
-		var parsedClaims map[string]interface{}
+		var parsedClaims map[string]any
 		err = verifyEd25519ViaGoJose(cfi.SDJWT, pubKey, &parsedClaims)
 		r.NoError(err)
 
@@ -252,8 +252,8 @@ func TestNew(t *testing.T) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		r.NoError(err)
 
-		complexClaims := map[string]interface{}{
-			"degree": map[string]interface{}{
+		complexClaims := map[string]any{
+			"degree": map[string]any{
 				"degree": "MIT",
 				"type":   "BachelorDegree",
 				"id":     "some-id",
@@ -273,7 +273,7 @@ func TestNew(t *testing.T) {
 		token, err := New(issuer, complexClaims, nil, testutil.NewEd25519Signer(privKey), newOpts...)
 		r.NoError(err)
 
-		var tokenClaims map[string]interface{}
+		var tokenClaims map[string]any
 		err = token.DecodeClaims(&tokenClaims)
 		r.NoError(err)
 
@@ -307,8 +307,8 @@ func TestNew(t *testing.T) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		r.NoError(err)
 
-		complexClaims := map[string]interface{}{
-			"degree": map[string]interface{}{
+		complexClaims := map[string]any{
+			"degree": map[string]any{
 				"degree": "MIT",
 				"type":   "BachelorDegree",
 				"id":     "some-id",
@@ -328,7 +328,7 @@ func TestNew(t *testing.T) {
 		token, err := New(issuer, complexClaims, nil, testutil.NewEd25519Signer(privKey), newOpts...)
 		r.NoError(err)
 
-		var tokenClaims map[string]interface{}
+		var tokenClaims map[string]any
 		err = token.DecodeClaims(&tokenClaims)
 		r.NoError(err)
 
@@ -374,7 +374,7 @@ func TestNew(t *testing.T) {
 		afjwtToken, _, err := afjwt.ParseAndCheckProof(cfi.SDJWT, verifier, true)
 		r.NoError(err)
 
-		var parsedClaims map[string]interface{}
+		var parsedClaims map[string]any
 		err = afjwtToken.DecodeClaims(&parsedClaims)
 		r.NoError(err)
 
@@ -413,7 +413,7 @@ func TestNew(t *testing.T) {
 		afjwtToken, _, err := afjwt.ParseAndCheckProof(cfi.SDJWT, verifier, true)
 		r.NoError(err)
 
-		var claimsMap map[string]interface{}
+		var claimsMap map[string]any
 		err = afjwtToken.DecodeClaims(&claimsMap)
 		r.NoError(err)
 
@@ -443,7 +443,7 @@ func TestNew(t *testing.T) {
 		cfi := common.ParseCombinedFormatForIssuance(combinedFormatForIssuance)
 		require.Equal(t, 1, len(cfi.Disclosures))
 
-		var parsedClaims map[string]interface{}
+		var parsedClaims map[string]any
 		err = verifyEd25519ViaGoJose(cfi.SDJWT, pubKey, &parsedClaims)
 		r.NoError(err)
 		require.NotEmpty(t, parsedClaims["cnf"])
@@ -463,7 +463,7 @@ func TestNew(t *testing.T) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		r.NoError(err)
 
-		complexClaims := map[string]interface{}{
+		complexClaims := map[string]any{
 			"_sd": "whatever",
 		}
 
@@ -479,8 +479,8 @@ func TestNew(t *testing.T) {
 		_, privKey, err := ed25519.GenerateKey(rand.Reader)
 		r.NoError(err)
 
-		complexClaims := map[string]interface{}{
-			"degree": map[string]interface{}{
+		complexClaims := map[string]any{
+			"degree": map[string]any{
 				"_sd":  "whatever",
 				"type": "BachelorDegree",
 			},
@@ -560,7 +560,7 @@ func TestNew(t *testing.T) {
 		privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 		r.NoError(err)
 		token, err := New(issuer, claims, nil, testutil.NewRS256Signer(privKey),
-			WithJSONMarshaller(func(v interface{}) ([]byte, error) {
+			WithJSONMarshaller(func(v any) ([]byte, error) {
 				return nil, fmt.Errorf("marshal error")
 			}))
 		r.Error(err)
@@ -585,7 +585,7 @@ func TestNewFromVC(t *testing.T) {
 		require.NoError(t, err)
 
 		// create VC - we will use template here
-		var vc map[string]interface{}
+		var vc map[string]any
 		err = json.Unmarshal([]byte(sampleVCFull), &vc)
 		r.NoError(err)
 
@@ -600,7 +600,7 @@ func TestNewFromVC(t *testing.T) {
 
 		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
 
-		var vcWithSelectedDisclosures map[string]interface{}
+		var vcWithSelectedDisclosures map[string]any
 		err = token.DecodeClaims(&vcWithSelectedDisclosures)
 		r.NoError(err)
 
@@ -628,7 +628,7 @@ func TestNewFromVC(t *testing.T) {
 		require.NoError(t, err)
 
 		// create VC - we will use template here
-		var vc map[string]interface{}
+		var vc map[string]any
 		err = json.Unmarshal([]byte(sampleSDJWTV5Full), &vc)
 		r.NoError(err)
 
@@ -644,7 +644,7 @@ func TestNewFromVC(t *testing.T) {
 
 		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
 
-		var vcWithSelectedDisclosures map[string]interface{}
+		var vcWithSelectedDisclosures map[string]any
 		err = token.DecodeClaims(&vcWithSelectedDisclosures)
 		r.NoError(err)
 
@@ -672,7 +672,7 @@ func TestNewFromVC(t *testing.T) {
 		require.NoError(t, err)
 
 		// create VC - we will use template here
-		var vc map[string]interface{}
+		var vc map[string]any
 		err = json.Unmarshal([]byte(sampleVCFull), &vc)
 		r.NoError(err)
 
@@ -686,7 +686,7 @@ func TestNewFromVC(t *testing.T) {
 
 		fmt.Println(fmt.Sprintf("issuer SD-JWT: %s", vcCombinedFormatForIssuance))
 
-		var vcWithSelectedDisclosures map[string]interface{}
+		var vcWithSelectedDisclosures map[string]any
 		err = token.DecodeClaims(&vcWithSelectedDisclosures)
 		r.NoError(err)
 
@@ -698,7 +698,7 @@ func TestNewFromVC(t *testing.T) {
 	})
 
 	t.Run("error - missing credential subject", func(t *testing.T) {
-		vc := make(map[string]interface{})
+		vc := make(map[string]any)
 
 		token, err := NewFromVC(vc, nil, signer,
 			WithID("did:example:ebfeb1f712ebc6f1c276e12ec21"),
@@ -710,8 +710,8 @@ func TestNewFromVC(t *testing.T) {
 	})
 
 	t.Run("error - credential subject no an object", func(t *testing.T) {
-		vc := map[string]interface{}{
-			"vc": map[string]interface{}{
+		vc := map[string]any{
+			"vc": map[string]any{
 				"credentialSubject": "invalid",
 			},
 		}
@@ -727,7 +727,7 @@ func TestNewFromVC(t *testing.T) {
 
 	t.Run("error - signing error", func(t *testing.T) {
 		// create VC - we will use template here
-		var vc map[string]interface{}
+		var vc map[string]any
 		err := json.Unmarshal([]byte(sampleVCFull), &vc)
 		r.NoError(err)
 
@@ -748,7 +748,7 @@ func TestJSONWebToken_DecodeClaims(t *testing.T) {
 		}))
 	require.NoError(t, err)
 
-	var tokensMap map[string]interface{}
+	var tokensMap map[string]any
 
 	err = token.DecodeClaims(&tokensMap)
 	require.NoError(t, err)
@@ -867,8 +867,8 @@ func getOpts(opts ...NewOpt) *newOpts {
 }
 
 func getValidJSONWebToken(opts ...NewOpt) (*SelectiveDisclosureJWT, error) {
-	headers := map[string]interface{}{"typ": "JWT", "alg": "EdDSA"}
-	claims := map[string]interface{}{"given_name": "John"}
+	headers := map[string]any{"typ": "JWT", "alg": "EdDSA"}
+	claims := map[string]any{"given_name": "John"}
 
 	_, privKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -892,7 +892,7 @@ func getJSONWebTokenWithInvalidPayload() (*SelectiveDisclosureJWT, error) {
 	return token, nil
 }
 
-func verifyEd25519ViaGoJose(jws string, pubKey ed25519.PublicKey, claims interface{}) error {
+func verifyEd25519ViaGoJose(jws string, pubKey ed25519.PublicKey, claims any) error {
 	jwtToken, err := jwt.ParseSigned(jws)
 	if err != nil {
 		return fmt.Errorf("parse VC from signed JWS: %w", err)
@@ -905,7 +905,7 @@ func verifyEd25519ViaGoJose(jws string, pubKey ed25519.PublicKey, claims interfa
 	return nil
 }
 
-func verifyRS256ViaGoJose(jws string, pubKey *rsa.PublicKey, claims interface{}) error {
+func verifyRS256ViaGoJose(jws string, pubKey *rsa.PublicKey, claims any) error {
 	jwtToken, err := jwt.ParseSigned(jws)
 	if err != nil {
 		return fmt.Errorf("parse VC from signed JWS: %w", err)
@@ -918,27 +918,27 @@ func verifyRS256ViaGoJose(jws string, pubKey *rsa.PublicKey, claims interface{})
 	return nil
 }
 
-func getUnmarshallableMap() map[string]interface{} {
-	return map[string]interface{}{"error": map[chan int]interface{}{make(chan int): 6}}
+func getUnmarshallableMap() map[string]any {
+	return map[string]any{"error": map[chan int]any{make(chan int): 6}}
 }
 
-func createClaims() map[string]interface{} {
-	claims := map[string]interface{}{
+func createClaims() map[string]any {
+	claims := map[string]any{
 		"given_name": "John",
 	}
 
 	return claims
 }
 
-func createComplexClaims() map[string]interface{} {
-	claims := map[string]interface{}{
+func createComplexClaims() map[string]any {
+	claims := map[string]any{
 		"sub":          "john_doe_42",
 		"given_name":   "John",
 		"family_name":  "Doe",
 		"email":        "johndoe@example.com",
 		"phone_number": "+1-202-555-0101",
 		"birthdate":    "1940-01-01",
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street_address": "123 Main St",
 			"locality":       "Anytown",
 			"region":         "Anystate",
@@ -949,15 +949,15 @@ func createComplexClaims() map[string]interface{} {
 	return claims
 }
 
-func createComplexClaimsWithSlice() map[string]interface{} {
-	claims := map[string]interface{}{
-		"address": map[string]interface{}{
+func createComplexClaimsWithSlice() map[string]any {
+	claims := map[string]any{
+		"address": map[string]any{
 			"locality":     "Schulpforta",
 			"region":       "Sachsen-Anhalt",
 			"countryCodes": []string{"UA", "PL"},
 			"cities":       []string{"Albuquerque", "El Paso"},
-			"extra": map[string]interface{}{
-				"recursive": map[string]interface{}{
+			"extra": map[string]any{
+				"recursive": map[string]any{
 					"key1": "value1",
 				},
 			},
@@ -997,13 +997,13 @@ func verifyRS256(jws string, pubKey *rsa.PublicKey) error {
 	return nil
 }
 
-func existsInDisclosures(claims map[string]interface{}, val string) bool {
+func existsInDisclosures(claims map[string]any, val string) bool {
 	disclosuresObj, ok := claims[common.SDKey]
 	if !ok {
 		return false
 	}
 
-	disclosures, ok := disclosuresObj.([]interface{})
+	disclosures, ok := disclosuresObj.([]any)
 	if !ok {
 		return false
 	}
@@ -1017,7 +1017,7 @@ func existsInDisclosures(claims map[string]interface{}, val string) bool {
 	return false
 }
 
-func jsonMarshalWithSpace(v interface{}) ([]byte, error) {
+func jsonMarshalWithSpace(v any) ([]byte, error) {
 	vBytes, err := json.Marshal(v)
 	if err != nil {
 		return nil, err
@@ -1037,7 +1037,7 @@ func prettyPrint(msg []byte) (string, error) {
 	return prettyJSON.String(), nil
 }
 
-func printObject(t *testing.T, name string, obj interface{}) {
+func printObject(t *testing.T, name string, obj any) {
 	t.Helper()
 
 	objBytes, err := json.Marshal(obj)

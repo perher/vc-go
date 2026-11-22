@@ -108,15 +108,15 @@ func TestResponse_GetMessageData(t *testing.T) {
 					},
 					Entries: []Message{
 						{
-							Descriptor: map[string]interface{}{},
+							Descriptor: map[string]any{},
 						},
 						{
-							Descriptor: map[string]interface{}{
+							Descriptor: map[string]any{
 								objectIDKey: "different ID",
 							},
 						},
 						{
-							Descriptor: map[string]interface{}{
+							Descriptor: map[string]any{
 								objectIDKey: objectID,
 							},
 							Data: base64.StdEncoding.EncodeToString(data),
@@ -145,10 +145,10 @@ func TestResponse_GetMessageData(t *testing.T) {
 					},
 					Entries: []Message{
 						{
-							Descriptor: map[string]interface{}{},
+							Descriptor: map[string]any{},
 						},
 						{
-							Descriptor: map[string]interface{}{
+							Descriptor: map[string]any{
 								objectIDKey: "different ID",
 							},
 						},
@@ -174,7 +174,7 @@ func TestResponse_GetMessageData(t *testing.T) {
 					},
 					Entries: []Message{
 						{
-							Descriptor: map[string]interface{}{
+							Descriptor: map[string]any{
 								objectIDKey: objectID,
 							},
 							Data: "!!! not base 64 !!!",
@@ -196,7 +196,7 @@ func TestMessage_GetObjectID(t *testing.T) {
 		expectID := "foo"
 
 		msg := &Message{
-			Descriptor: map[string]interface{}{
+			Descriptor: map[string]any{
 				objectIDKey: expectID,
 			},
 		}
@@ -223,7 +223,7 @@ func TestGetRequest(t *testing.T) {
 	)
 
 	t.Run("success", func(t *testing.T) {
-		objID, req, err := GetRequest(targetDID, messageMethod, []map[string]interface{}{
+		objID, req, err := GetRequest(targetDID, messageMethod, []map[string]any{
 			{
 				methodKey: "wrong-method",
 			},
@@ -247,7 +247,7 @@ func TestGetRequest(t *testing.T) {
 	})
 
 	t.Run("no valid matching message found", func(t *testing.T) {
-		_, _, err := GetRequest(targetDID, messageMethod, []map[string]interface{}{
+		_, _, err := GetRequest(targetDID, messageMethod, []map[string]any{
 			{
 				objectIDKey: expectObjID,
 				methodKey:   "wrong-method",
@@ -301,7 +301,7 @@ func TestServiceEndpoint(t *testing.T) {
 				name: "did core object",
 				svc: did.Service{
 					Type: serviceTypeIdentityHub,
-					ServiceEndpoint: model.NewDIDCoreEndpoint(map[string]interface{}{
+					ServiceEndpoint: model.NewDIDCoreEndpoint(map[string]any{
 						"0": []string{endpointURL},
 					}),
 				},
@@ -340,7 +340,7 @@ func TestServiceEndpoint(t *testing.T) {
 				name: "no contents",
 				svc: did.Service{
 					Type:            serviceTypeIdentityHub,
-					ServiceEndpoint: model.NewDIDCoreEndpoint(map[string]interface{}{}),
+					ServiceEndpoint: model.NewDIDCoreEndpoint(map[string]any{}),
 				},
 				err: "unable to extract DIDCore service endpoint",
 			},

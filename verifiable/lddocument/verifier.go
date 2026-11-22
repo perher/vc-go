@@ -21,7 +21,7 @@ type ProofChecker interface {
 	CheckLDProof(proof *proof.Proof, expectedProofIssuer string, msg, signature []byte) error
 
 	// GetLDPCanonicalDocument will return normalized/canonical version of the document.
-	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]interface{}, opts ...processor.Opts) ([]byte, error)
+	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]any, opts ...processor.Opts) ([]byte, error)
 
 	// GetLDPDigest returns document digest.
 	GetLDPDigest(proof *proof.Proof, doc []byte) ([]byte, error)
@@ -40,7 +40,7 @@ func NewDocumentVerifier(proofChecker ProofChecker) *DocumentVerifier {
 
 // Verify will verify document proofs.
 func (dv *DocumentVerifier) Verify(jsonLdDoc []byte, expectedProofIssuer *string, opts ...processor.Opts) error {
-	var jsonLdObject map[string]interface{}
+	var jsonLdObject map[string]any
 
 	err := json.Unmarshal(jsonLdDoc, &jsonLdObject)
 	if err != nil {
@@ -51,7 +51,7 @@ func (dv *DocumentVerifier) Verify(jsonLdDoc []byte, expectedProofIssuer *string
 }
 
 // VerifyObject will verify document proofs for JSON LD object.
-func (dv *DocumentVerifier) VerifyObject(jsonLdObject map[string]interface{},
+func (dv *DocumentVerifier) VerifyObject(jsonLdObject map[string]any,
 	expectedProofIssuerPtr *string, opts ...processor.Opts) error {
 	proofs, err := proof.GetProofs(jsonLdObject)
 	if err != nil {
@@ -107,7 +107,7 @@ func getProofVerifyValue(p *proof.Proof) ([]byte, error) {
 }
 
 type signatureSuiteCompatible interface {
-	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]interface{}, opts ...processor.Opts) ([]byte, error)
+	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]any, opts ...processor.Opts) ([]byte, error)
 	GetLDPDigest(proof *proof.Proof, doc []byte) ([]byte, error)
 }
 
@@ -119,7 +119,7 @@ type signatureSuiteWrapper struct {
 }
 
 // GetCanonicalDocument will return normalized/canonical version of the document.
-func (w *signatureSuiteWrapper) GetCanonicalDocument(doc map[string]interface{},
+func (w *signatureSuiteWrapper) GetCanonicalDocument(doc map[string]any,
 	opts ...processor.Opts) ([]byte, error) {
 	return w.wrapped.GetLDPCanonicalDocument(w.proof, doc, opts...)
 }

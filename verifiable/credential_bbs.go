@@ -14,7 +14,7 @@ import (
 )
 
 // GenerateBBSSelectiveDisclosure generate BBS+ selective disclosure from one BBS+ signature.
-func (vc *Credential) GenerateBBSSelectiveDisclosure(revealDoc map[string]interface{},
+func (vc *Credential) GenerateBBSSelectiveDisclosure(revealDoc map[string]any,
 	nonce []byte, bbsProofCreator *BBSProofCreator, opts ...CredentialOpt) (*Credential, error) {
 	if len(vc.ldProofs) == 0 {
 		return nil, errors.New("expected at least one proof present")

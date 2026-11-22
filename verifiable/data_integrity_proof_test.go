@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/piprate/json-gold/ld"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/trustbloc/did-go/doc/did"
@@ -92,8 +91,8 @@ func Test_DataIntegrity_SignVerify(t *testing.T) {
 		SigningKeyID: signingDID + vmID,
 		ProofPurpose: "",
 		CryptoSuite:  ecdsa2019.SuiteType,
-		Created:      lo.ToPtr(time.Now()),
-		Expires:      lo.ToPtr(time.Now().Add(time.Hour)),
+		Created:      new(time.Now()),
+		Expires:      new(time.Now().Add(time.Hour)),
 		Domain:       "mock-domain",
 		Challenge:    "mock-challenge",
 	}
@@ -174,7 +173,7 @@ func Test_DataIntegrity_SignVerify(t *testing.T) {
 	t.Run("failure", func(t *testing.T) {
 		t.Run("marshal json", func(t *testing.T) {
 			vc, err := CreateCredential(CredentialContents{
-				CustomContext: []interface{}{make(chan int)},
+				CustomContext: []any{make(chan int)},
 			}, nil)
 			require.NoError(t, err)
 

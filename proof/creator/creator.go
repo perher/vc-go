@@ -94,7 +94,7 @@ func (c *ProofCreator) SignLinkedDocument(proof *proof.Proof, keyType kms.KeyTyp
 
 // GetLDPCanonicalDocument will return normalized/canonical version of the document.
 func (c *ProofCreator) GetLDPCanonicalDocument(proof *proof.Proof,
-	doc map[string]interface{}, opts ...processor.Opts) ([]byte, error) {
+	doc map[string]any, opts ...processor.Opts) ([]byte, error) {
 	supportedProof, err := c.getSupportedProof(proof.Type)
 	if err != nil {
 		return nil, err
@@ -182,7 +182,7 @@ func (c *ProofCreator) SignCWT(params cwt.SignParameters, cborData []byte) ([]by
 
 // CreateJWTHeaders creates correct jwt headers.
 func (c *ProofCreator) CreateJWTHeaders(params jwt.SignParameters) (jose.Headers, error) {
-	headers := map[string]interface{}{
+	headers := map[string]any{
 		jose.HeaderAlgorithm: params.JWTAlg,
 	}
 

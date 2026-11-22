@@ -17,6 +17,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -760,7 +761,7 @@ func (sc *ExpirableSchemaCache) Get(k string) ([]byte, bool) {
 }
 
 // Evidence defines evidence of Verifiable Credential.
-type Evidence interface{}
+type Evidence any
 
 const (
 	jsonFldIssuerID = "id"
@@ -843,7 +844,7 @@ func SubjectFromJSON(subjectObj JSONObject) (Subject, error) {
 // CredentialContents store credential contents as typed structure.
 type CredentialContents struct {
 	Context          []string
-	CustomContext    []interface{}
+	CustomContext    []any
 	ID               string
 	Types            []string
 	Subject          []Subject
@@ -867,7 +868,7 @@ type RelatedResource struct {
 }
 
 // JSONObject used to store json object.
-type JSONObject = map[string]interface{}
+type JSONObject = map[string]any
 
 // Credential Verifiable Credential definition.
 type Credential struct {
@@ -962,7 +963,7 @@ func (vc *Credential) ToJWTString() (string, error) {
 }
 
 // ToUniversalForm returns vc in its natural form. For jwt-vc it is a jwt string. For json-ld vc it is a json object.
-func (vc *Credential) ToUniversalForm() (interface{}, error) {
+func (vc *Credential) ToUniversalForm() (any, error) {
 	switch {
 	case vc.IsCWT():
 		return vc.toEnvelopedForm(
@@ -993,7 +994,7 @@ func (vc *Credential) ToUniversalForm() (interface{}, error) {
 }
 
 func (vc *Credential) toEnvelopedForm(mediaType MediaType, marshal func(vc *Credential) (string, error),
-) (interface{}, error) {
+) (any, error) {
 	result, err := marshal(vc)
 	if err != nil {
 		return nil, err
@@ -1058,7 +1059,7 @@ func (vc *Credential) SetSDJWTDisclosures(disclosures []*common.DisclosureClaim)
 }
 
 // CustomField returns custom field by name.
-func (vc *Credential) CustomField(name string) interface{} {
+func (vc *Credential) CustomField(name string) any {
 	return vc.credentialJSON[name]
 }
 
@@ -1087,7 +1088,7 @@ type CombinedProofChecker interface {
 	CheckLDProof(proof *proof.Proof, expectedProofIssuer string, msg, signature []byte) error
 
 	// GetLDPCanonicalDocument will return normalized/canonical version of the document
-	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]interface{}, opts ...processor.Opts) ([]byte, error)
+	GetLDPCanonicalDocument(proof *proof.Proof, doc map[string]any, opts ...processor.Opts) ([]byte, error)
 
 	// GetLDPDigest returns document digest
 	GetLDPDigest(proof *proof.Proof, doc []byte) ([]byte, error)
@@ -1325,7 +1326,7 @@ func WithJSONLDIncludeDetailedStructureDiffOnError() CredentialOpt {
 // - a string which is ID of the issuer;
 //
 // - object with mandatory "id" field and optional "name" field.
-func parseIssuer(issuerRaw interface{}) (*Issuer, error) {
+func parseIssuer(issuerRaw any) (*Issuer, error) {
 	if issuerRaw == nil {
 		return nil, nil
 	}
@@ -1337,14 +1338,14 @@ func parseIssuer(issuerRaw interface{}) (*Issuer, error) {
 		}
 
 		return &Issuer{ID: issuer}, nil
-	case map[string]interface{}:
+	case map[string]any:
 		return IssuerFromJSON(issuer)
 	}
 
 	return nil, fmt.Errorf("should be json object or string but got %v", issuerRaw)
 }
 
-func serializeIssuer(issuer Issuer) interface{} {
+func serializeIssuer(issuer Issuer) any {
 	if len(issuer.CustomFields) == 0 {
 		return issuer.ID
 	}
@@ -1355,7 +1356,7 @@ func serializeIssuer(issuer Issuer) interface{} {
 // parseSubject parses raw credential subject.
 //
 // Subject can be defined as a string (subject ID) or single object or array of objects.
-func parseSubject(subjectRaw interface{}) ([]Subject, error) {
+func parseSubject(subjectRaw any) ([]Subject, error) {
 	if subjectRaw == nil {
 		return nil, nil
 	}
@@ -1363,18 +1364,18 @@ func parseSubject(subjectRaw interface{}) ([]Subject, error) {
 	switch subject := subjectRaw.(type) {
 	case string:
 		return []Subject{{ID: subject}}, nil
-	case map[string]interface{}:
+	case map[string]any:
 		parsed, err := SubjectFromJSON(subject)
 		if err != nil {
 			return nil, fmt.Errorf("parse subject: %w", err)
 		}
 
 		return []Subject{parsed}, nil
-	case []interface{}:
+	case []any:
 		var subjects []Subject
 
 		for _, raw := range subject {
-			sub, ok := raw.(map[string]interface{})
+			sub, ok := raw.(map[string]any)
 			if !ok {
 				return nil, errors.New("verifiable credential subject of unsupported format")
 			}
@@ -1396,7 +1397,7 @@ func parseSubject(subjectRaw interface{}) ([]Subject, error) {
 // decodeCredentialSchemas decodes credential schema(s).
 //
 // credential schema can be defined as a single object or array of objects.
-func decodeCredentialSchemas(schema interface{}) ([]TypedID, error) {
+func decodeCredentialSchemas(schema any) ([]TypedID, error) {
 	return parseTypedID(schema)
 }
 
@@ -1573,7 +1574,7 @@ func validateDisclosures(vcBytes []byte, disclosures []string) error {
 	}
 
 	if _, hasSDAlg := vcPayload.Payload["_sd_alg"]; !hasSDAlg {
-		credentialSubject, ok := vcPayload.Payload["credentialSubject"].(map[string]interface{})
+		credentialSubject, ok := vcPayload.Payload["credentialSubject"].(map[string]any)
 		if !ok {
 			return errors.New("unsupported type of credentialSubject")
 		}
@@ -1816,7 +1817,7 @@ func parseCredentialContents(raw JSONObject, isSDJWT bool) (*CredentialContents,
 	}, nil
 }
 
-func parseRefreshService(typeIDRaw interface{}) (*TypedID, error) {
+func parseRefreshService(typeIDRaw any) (*TypedID, error) {
 	typed, err := parseTypedID(typeIDRaw)
 	if err != nil {
 		return nil, fmt.Errorf("parse refresh service: %w", err)
@@ -1829,12 +1830,12 @@ func parseRefreshService(typeIDRaw interface{}) (*TypedID, error) {
 	return &typed[0], nil
 }
 
-func parseRelatedResources(typeRaw interface{}) ([]RelatedResource, error) {
+func parseRelatedResources(typeRaw any) ([]RelatedResource, error) {
 	if typeRaw == nil {
 		return nil, nil
 	}
 
-	relatedResources, ok := typeRaw.([]interface{})
+	relatedResources, ok := typeRaw.([]any)
 	if !ok {
 		return nil, fmt.Errorf("related resources of unsupported format, %v", typeRaw)
 	}
@@ -1842,7 +1843,7 @@ func parseRelatedResources(typeRaw interface{}) ([]RelatedResource, error) {
 	var resources []RelatedResource
 
 	for _, rawResource := range relatedResources {
-		mapVal, mapOk := rawResource.(map[string]interface{})
+		mapVal, mapOk := rawResource.(map[string]any)
 		if !mapOk {
 			return nil, fmt.Errorf("related resource of unsupported format, %v", rawResource)
 		}
@@ -1866,24 +1867,24 @@ func stringify(val any) string {
 	return fmt.Sprint(val)
 }
 
-func parseTypedID(typeIDRaw interface{}) ([]TypedID, error) {
+func parseTypedID(typeIDRaw any) ([]TypedID, error) {
 	if typeIDRaw == nil {
 		return nil, nil
 	}
 
 	switch typeID := typeIDRaw.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		parsed, err := parseTypedIDObj(typeID)
 		if err != nil {
 			return nil, fmt.Errorf("parse type id: %w", err)
 		}
 
 		return []TypedID{parsed}, nil
-	case []interface{}:
+	case []any:
 		var typedIDS []TypedID
 
 		for _, s := range typeID {
-			json, ok := s.(map[string]interface{})
+			json, ok := s.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("slice with typeIDs of unsupported format, %v", typeIDRaw)
 			}
@@ -2153,7 +2154,7 @@ func newDefaultSchemaLoader() *CredentialSchemaLoader {
 
 // SerializeSubject converts subject(s) JSON object or array
 // If the subject is nil no error will be returned.
-func SerializeSubject(subject []Subject) interface{} {
+func SerializeSubject(subject []Subject) any {
 	if subject == nil {
 		return nil
 	}
@@ -2271,24 +2272,17 @@ func jsonSchemaLoader(schemaTemplate string, defaultRequired []string, opts ...S
 		opt(dsOpts)
 	}
 
-	required := ""
+	var required strings.Builder
 
 	for _, prop := range defaultRequired {
-		filterOut := false
-
-		for _, d := range dsOpts.disabledChecks {
-			if prop == d {
-				filterOut = true
-				break
-			}
-		}
+		filterOut := slices.Contains(dsOpts.disabledChecks, prop)
 
 		if !filterOut {
-			required += fmt.Sprintf(",%q", prop)
+			required.WriteString(fmt.Sprintf(",%q", prop))
 		}
 	}
 
-	return fmt.Sprintf(schemaTemplate, required)
+	return fmt.Sprintf(schemaTemplate, required.String())
 }
 
 func schemaLoaderV1() gojsonschema.JSONLoader {
@@ -2456,7 +2450,7 @@ func SubjectID(subject []Subject) (string, error) { //nolint:funlen
 func serializeCredentialContents(vcc *CredentialContents, proofs []Proof) (JSONObject, error) { //nolint:funlen,gocyclo
 	contexts := contextToRaw(vcc.Context, vcc.CustomContext)
 
-	vcJSON := map[string]interface{}{}
+	vcJSON := map[string]any{}
 
 	if len(contexts) > 0 {
 		vcJSON[jsonFldContext] = contexts
@@ -2482,7 +2476,7 @@ func serializeCredentialContents(vcc *CredentialContents, proofs []Proof) (JSONO
 		if len(vcc.Status) == 1 {
 			vcJSON[jsonFldStatus] = serializeTypedIDObj(*vcc.Status[0])
 		} else {
-			statuses := make([]map[string]interface{}, len(vcc.Status))
+			statuses := make([]map[string]any, len(vcc.Status))
 
 			for i, status := range vcc.Status {
 				statuses[i] = serializeTypedIDObj(*status)
@@ -2544,25 +2538,25 @@ func serializeCredentialContents(vcc *CredentialContents, proofs []Proof) (JSONO
 	return vcJSON, nil
 }
 
-func serializeTime(t *util.TimeWrapper) interface{} {
+func serializeTime(t *util.TimeWrapper) any {
 	return t.FormatToString()
 }
 
-func serializeTypes(types []string) interface{} {
+func serializeTypes(types []string) any {
 	if len(types) == 1 {
 		// as string
 		return types[0]
 	}
 
 	// as []interface{} if strings
-	return mapSlice(types, func(t string) interface{} {
+	return mapSlice(types, func(t string) any {
 		return t
 	})
 }
 
-func contextToRaw(context []string, cContext []interface{}) []interface{} {
+func contextToRaw(context []string, cContext []any) []any {
 	// return as array
-	sContext := make([]interface{}, len(context), len(context)+len(cContext))
+	sContext := make([]any, len(context), len(context)+len(cContext))
 	for i := range context {
 		sContext[i] = context[i]
 	}
@@ -2572,7 +2566,7 @@ func contextToRaw(context []string, cContext []interface{}) []interface{} {
 	return sContext
 }
 
-func typedIDsToRaw(typedIDs []TypedID) interface{} {
+func typedIDsToRaw(typedIDs []TypedID) any {
 	switch len(typedIDs) {
 	case 1:
 		return serializeTypedIDObj(typedIDs[0])
@@ -2741,7 +2735,7 @@ func (vc *Credential) WithModifiedStatus(status ...*TypedID) *Credential {
 	if len(statuses) == 1 {
 		newCredJSON[jsonFldStatus] = serializeTypedIDObj(*statuses[0])
 	} else if len(statuses) > 1 {
-		statusObjects := make([]interface{}, len(statuses))
+		statusObjects := make([]any, len(statuses))
 
 		for i, s := range statuses {
 			statusObjects[i] = serializeTypedIDObj(*s)
@@ -2816,7 +2810,7 @@ func (vc *Credential) WithModifiedSubject(subject []Subject) *Credential {
 }
 
 // SetCustomField should be used only in tests. Remove after proper vc test tool created.
-func (vc *Credential) SetCustomField(name string, value interface{}) {
+func (vc *Credential) SetCustomField(name string, value any) {
 	vc.credentialJSON[name] = value
 }
 

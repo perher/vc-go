@@ -82,20 +82,20 @@ type valueOption struct {
 // CreateDisclosuresAndDigests creates disclosures and digests.
 func (s *SDJWTBuilderV5) CreateDisclosuresAndDigests( // nolint:funlen,gocyclo
 	path string,
-	claims map[string]interface{},
+	claims map[string]any,
 	opts *newOpts,
-) ([]*DisclosureEntity, map[string]interface{}, error) {
+) ([]*DisclosureEntity, map[string]any, error) {
 	return s.createDisclosuresAndDigestsInternal(path, claims, opts, false)
 }
 
 //nolint:funlen,gocyclo
 func (s *SDJWTBuilderV5) createDisclosuresAndDigestsInternal(
 	path string,
-	claims map[string]interface{},
+	claims map[string]any,
 	opts *newOpts,
 	ignorePrimitives bool,
-) ([]*DisclosureEntity, map[string]interface{}, error) {
-	digestsMap := map[string]interface{}{}
+) ([]*DisclosureEntity, map[string]any, error) {
+	digestsMap := map[string]any{}
 	finalSDDigest, err := createDecoyDisclosures(opts)
 
 	if err != nil {
@@ -120,7 +120,7 @@ func (s *SDJWTBuilderV5) createDisclosuresAndDigestsInternal(
 			case valOption.IsIgnored:
 				digestsMap[key] = value
 			case valOption.IsRecursive:
-				claims, ok := value.(map[string]interface{})
+				claims, ok := value.(map[string]any)
 				if !ok {
 					return nil, nil, errors.New("unsupported map value type")
 				}
@@ -151,7 +151,7 @@ func (s *SDJWTBuilderV5) createDisclosuresAndDigestsInternal(
 
 				allDisclosures = append(allDisclosures, nestedDisclosures...)
 			case valOption.IsAlwaysInclude || valOption.IsStructured:
-				claims, ok := value.(map[string]interface{})
+				claims, ok := value.(map[string]any)
 				if !ok {
 					return nil, nil, errors.New("unsupported map value type")
 				}
@@ -170,7 +170,7 @@ func (s *SDJWTBuilderV5) createDisclosuresAndDigestsInternal(
 
 				allDisclosures = append(allDisclosures, nestedDisclosures...)
 			default:
-				claims, ok := value.(map[string]interface{})
+				claims, ok := value.(map[string]any)
 				if !ok {
 					return nil, nil, errors.New("unsupported map value type")
 				}
@@ -251,13 +251,13 @@ func (s *SDJWTBuilderV5) createDisclosuresAndDigestsInternal(
 }
 
 func (s *SDJWTBuilderV5) processArrayElements(
-	value interface{},
+	value any,
 	path string,
 	opts *newOpts,
-) ([]interface{}, []*DisclosureEntity, error) {
+) ([]any, []*DisclosureEntity, error) {
 	valSl := reflect.ValueOf(value)
 
-	var digestArr []interface{}
+	var digestArr []any
 
 	var elementsDisclosures []*DisclosureEntity
 
@@ -292,7 +292,7 @@ func (s *SDJWTBuilderV5) processArrayElements(
 
 func (s *SDJWTBuilderV5) createDisclosure(
 	key string,
-	value interface{},
+	value any,
 	opts *newOpts,
 ) (*DisclosureEntity, error) {
 	if opts.getSalt == nil {
@@ -308,7 +308,7 @@ func (s *SDJWTBuilderV5) createDisclosure(
 	finalDis := &DisclosureEntity{
 		Salt: salt,
 	}
-	disclosure := []interface{}{salt}
+	disclosure := []any{salt}
 
 	if key != "" {
 		disclosure = append(disclosure, key)
@@ -338,17 +338,17 @@ type DisclosureEntity struct {
 	Result      string
 	Salt        string
 	Key         string
-	Value       interface{}
-	DebugArr    []interface{} `json:"-"`
+	Value       any
+	DebugArr    []any `json:"-"`
 	DebugStr    string
 	DebugDigest string
 }
 
 // ExtractCredentialClaims extracts credential claims.
 func (s *SDJWTBuilderV5) ExtractCredentialClaims(
-	vc map[string]interface{},
-) (map[string]interface{}, error) {
-	vcClaims, ok := vc[vcKey].(map[string]interface{})
+	vc map[string]any,
+) (map[string]any, error) {
+	vcClaims, ok := vc[vcKey].(map[string]any)
 	if ok {
 		return vcClaims, nil
 	}

@@ -84,10 +84,10 @@ func TestPresentation_AddLinkedDataProof(t *testing.T) {
 
 		r.Contains(vpMap, "proof")
 		vpProof := vpMap["proof"]
-		vpProofs, ok := vpProof.([]interface{})
+		vpProofs, ok := vpProof.([]any)
 		r.True(ok)
 		r.Len(vpProofs, 3)
-		newVPProof, ok := vpProofs[1].(map[string]interface{})
+		newVPProof, ok := vpProofs[1].(map[string]any)
 		r.True(ok)
 		r.Contains(newVPProof, "created")
 		r.Contains(newVPProof, "proofValue")

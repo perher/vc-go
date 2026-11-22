@@ -58,7 +58,7 @@ func (vp *Presentation) CreateCWTVP(
 		return nil, fmt.Errorf("failed to marshal CWT: %w", err)
 	}
 
-	var vpMap map[interface{}]interface{}
+	var vpMap map[any]any
 
 	err = cbor.Unmarshal(msg.Payload, &vpMap)
 	if err != nil {

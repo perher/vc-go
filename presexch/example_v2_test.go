@@ -92,7 +92,7 @@ func ExamplePresentationDefinition_CreateVP_v2() {
 				Type: "JsonSchemaValidator2018",
 			}},
 
-			Subject: parseSubject(map[string]interface{}{
+			Subject: parseSubject(map[string]any{
 				"id":         "did:example:ebfeb1f712ebc6f1c276e12ec21",
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
@@ -220,7 +220,7 @@ func ExamplePresentationDefinition_CreateVP_with_LdpVC_Format() {
 				Type: "JsonSchemaValidator2018",
 			}},
 
-			Subject: parseSubject(map[string]interface{}{
+			Subject: parseSubject(map[string]any{
 				"id":         "did:example:ebfeb1f712ebc6f1c276e12ec21",
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
@@ -351,7 +351,7 @@ func ExamplePresentationDefinition_CreateVP_with_Ldp_Format() {
 				Type: "JsonSchemaValidator2018",
 			}},
 
-			Subject: parseSubject(map[string]interface{}{
+			Subject: parseSubject(map[string]any{
 				"id":         "did:example:ebfeb1f712ebc6f1c276e12ec21",
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
@@ -482,7 +482,7 @@ func ExamplePresentationDefinition_CreateVP_withFormatInInputDescriptor() {
 				Type: "JsonSchemaValidator2018",
 			}},
 
-			Subject: parseSubject(map[string]interface{}{
+			Subject: parseSubject(map[string]any{
 				"id":         "did:example:ebfeb1f712ebc6f1c276e12ec21",
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
@@ -613,7 +613,7 @@ func TestExamplePresentationDefinition_CreateVPWithFormat_NoMatch(t *testing.T) 
 				Type: "JsonSchemaValidator2018",
 			}},
 
-			Subject: parseSubject(map[string]interface{}{
+			Subject: parseSubject(map[string]any{
 				"id":         "did:example:ebfeb1f712ebc6f1c276e12ec21",
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
@@ -881,7 +881,7 @@ func ExamplePresentationDefinition_CreateVP_limitedDisclosureSkipsNonSDVCs() {
 				Type: "JsonSchemaValidator2018",
 			}},
 
-			Subject: parseSubject(map[string]interface{}{
+			Subject: parseSubject(map[string]any{
 				"id":         "did:example:ebfeb1f712ebc6f1c276e12ec21",
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
@@ -960,7 +960,7 @@ func ExamplePresentationDefinition_CreateVP_limitedDisclosureSkipsNonSDVCs() {
 
 	vcStr := string(vcBytes)
 
-	for _, sd := range presentedVC.Contents().Subject[0].CustomFields["_sd"].([]interface{}) {
+	for _, sd := range presentedVC.Contents().Subject[0].CustomFields["_sd"].([]any) {
 		vcStr = strings.ReplaceAll(vcStr, sd.(string), "DUMMY")
 	}
 
@@ -1067,7 +1067,7 @@ func signVCWithBBS(privKey *bbs12381g2pub.PrivateKey, vc *verifiable.Credential,
 	}
 }
 
-func parseSubject(raw map[string]interface{}) []verifiable.Subject {
+func parseSubject(raw map[string]any) []verifiable.Subject {
 	subject, err := verifiable.SubjectFromJSON(raw)
 	if err != nil {
 		panic(fmt.Errorf("subject parsing %w", err))

@@ -44,7 +44,7 @@ func GetBaseContext(contexts []string) (string, error) {
 //
 // - https://www.w3.org/2018/credentials/v1
 // - https://www.w3.org/ns/credentials/v2
-func GetBaseContextFromRawDocument(doc map[string]interface{}) (string, error) {
+func GetBaseContextFromRawDocument(doc map[string]any) (string, error) {
 	ctx, ok := doc[jsonFldContext]
 	if !ok {
 		return "", fmt.Errorf("%s is required", jsonFldContext)
@@ -68,7 +68,7 @@ func IsBaseContext(contexts []string, ctx string) bool {
 }
 
 // HasBaseContext returns true if the given document has the given base context.
-func HasBaseContext(doc map[string]interface{}, ctx string) bool {
+func HasBaseContext(doc map[string]any, ctx string) bool {
 	rawContext, ok := doc[jsonFldContext]
 	if !ok {
 		return false

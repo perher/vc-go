@@ -38,7 +38,7 @@ type Claims jwt.Claims
 type parseOpts struct {
 	detachedPayload         []byte
 	ignoreClaimsMapDecoding bool
-	decodeClaimsDestination interface{}
+	decodeClaimsDestination any
 }
 
 // ParseOpt is the JWT Parser option.
@@ -60,7 +60,7 @@ func WithIgnoreClaimsMapDecoding(ignoreClaimsMapDecoding bool) ParseOpt {
 }
 
 // DecodeClaimsTo if set claims will be decoded into object pointed by decodeDestination argument.
-func DecodeClaimsTo(decodeDestination interface{}) ParseOpt {
+func DecodeClaimsTo(decodeDestination any) ParseOpt {
 	return func(opts *parseOpts) {
 		opts.decodeClaimsDestination = decodeDestination
 	}
@@ -80,7 +80,7 @@ func (s unsecuredJWTSigner) Sign(_ []byte) ([]byte, error) {
 }
 
 func (s unsecuredJWTSigner) Headers() jose.Headers {
-	return map[string]interface{}{
+	return map[string]any{
 		jose.HeaderAlgorithm: AlgorithmNone,
 	}
 }
@@ -89,7 +89,7 @@ func (s unsecuredJWTSigner) Headers() jose.Headers {
 type JSONWebToken struct {
 	Headers jose.Headers
 
-	Payload map[string]interface{}
+	Payload map[string]any
 
 	jws *jose.JSONWebSignature
 }
@@ -163,7 +163,7 @@ func CheckProof(jwtSerialized string, proofChecker ProofChecker,
 }
 
 // DecodeClaims fills input c with claims of a token.
-func (j *JSONWebToken) DecodeClaims(c interface{}) error {
+func (j *JSONWebToken) DecodeClaims(c any) error {
 	pBytes, err := json.Marshal(j.Payload)
 	if err != nil {
 		return err
@@ -240,7 +240,7 @@ func mapJWSToJWT(jws *jose.JSONWebSignature, opts *parseOpts) (*JSONWebToken, []
 }
 
 // NewSigned creates new signed JSON Web Token based on input claims.
-func NewSigned(claims interface{}, signParams SignParameters, signer ProofCreator) (*JSONWebToken, error) {
+func NewSigned(claims any, signParams SignParameters, signer ProofCreator) (*JSONWebToken, error) {
 	joseSignr, err := NewJOSESigner(signParams, signer)
 	if err != nil {
 		return nil, err
@@ -250,12 +250,12 @@ func NewSigned(claims interface{}, signParams SignParameters, signer ProofCreato
 }
 
 // NewUnsecured creates new unsecured JSON Web Token based on input claims.
-func NewUnsecured(claims interface{}) (*JSONWebToken, error) {
+func NewUnsecured(claims any) (*JSONWebToken, error) {
 	return NewJoseSigned(claims, nil, &unsecuredJWTSigner{})
 }
 
 // NewJoseSigned creates new signed JSON Web Token based on input claims.
-func NewJoseSigned(claims interface{}, headers jose.Headers, signer jose.Signer) (*JSONWebToken, error) {
+func NewJoseSigned(claims any, headers jose.Headers, signer jose.Signer) (*JSONWebToken, error) {
 	payloadMap, err := PayloadToMap(claims)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshallable claims: %w", err)
@@ -305,14 +305,14 @@ func isValidJSON(s string) bool {
 		return false
 	}
 
-	var j map[string]interface{}
+	var j map[string]any
 	err = json.Unmarshal(b, &j)
 
 	return err == nil
 }
 
 // CheckHeaders checks jwt headers.
-func CheckHeaders(headers map[string]interface{}) error {
+func CheckHeaders(headers map[string]any) error {
 	if _, ok := headers[jose.HeaderAlgorithm]; !ok {
 		return errors.New("alg header is not defined")
 	}
@@ -332,7 +332,7 @@ func CheckHeaders(headers map[string]interface{}) error {
 	return nil
 }
 
-func checkTypHeader(typ interface{}) error {
+func checkTypHeader(typ any) error {
 	typStr, ok := typ.(string)
 	if !ok {
 		return errors.New("invalid typ header format")
@@ -359,9 +359,9 @@ func checkTypHeader(typ interface{}) error {
 }
 
 // PayloadToMap transforms interface to map.
-func PayloadToMap(i interface{}) (map[string]interface{}, error) {
+func PayloadToMap(i any) (map[string]any, error) {
 	if reflect.ValueOf(i).Kind() == reflect.Map {
-		m, ok := i.(map[string]interface{})
+		m, ok := i.(map[string]any)
 		if !ok {
 			return nil, errors.New("unsupported map value type")
 		}
@@ -386,7 +386,7 @@ func PayloadToMap(i interface{}) (map[string]interface{}, error) {
 		}
 	}
 
-	var m map[string]interface{}
+	var m map[string]any
 
 	d := json.NewDecoder(bytes.NewReader(b))
 	d.SetNumberType(json.UnmarshalJSONNumber)

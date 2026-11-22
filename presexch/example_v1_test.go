@@ -68,7 +68,7 @@ func ExamplePresentationDefinition_CreateVP_v1() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:76e12ec712ebc6f1c221ebfeb1f"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
 				"age":        21,
@@ -179,7 +179,7 @@ func ExamplePresentationDefinition_CreateVP_v1_With_LDP_FormatAndProof() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:76e12ec712ebc6f1c221ebfeb1f"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
 				"age":        21,
@@ -291,7 +291,7 @@ func ExamplePresentationDefinition_CreateVP_v1_With_LDPVC_FormatAndProof() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:76e12ec712ebc6f1c221ebfeb1f"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
 				"age":        21,
@@ -413,7 +413,7 @@ func ExamplePresentationDefinition_CreateVP_multipleMatches() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:777"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Andrew",
 				"last_name":  "Hanks",
 				"age":        25,
@@ -430,7 +430,7 @@ func ExamplePresentationDefinition_CreateVP_multipleMatches() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:888"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
 				"age":        21,
@@ -603,7 +603,7 @@ func ExamplePresentationDefinition_CreateVP_multipleMatchesDisclosure() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:777"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Andrew",
 				"last_name":  "Hanks",
 				"age":        25,
@@ -620,7 +620,7 @@ func ExamplePresentationDefinition_CreateVP_multipleMatchesDisclosure() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:888"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
 				"age":        21,
@@ -857,7 +857,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirementsLimitDisclosur
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:777"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Andrew",
 				"last_name":  "Hanks",
 				"image":      "http://image.com/user777",
@@ -875,7 +875,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirementsLimitDisclosur
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:888"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
 				"photo":      "http://image.com/user777",
@@ -1096,7 +1096,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirements() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:777"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Andrew",
 				"last_name":  "Hanks",
 				"image":      "http://image.com/user777",
@@ -1114,7 +1114,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirements() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:888"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Jesse",
 				"last_name":  "Pinkman",
 				"photo":      "http://image.com/user777",
@@ -1391,7 +1391,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirements2() {
 				Time: time.Time{},
 			},
 			Subject: []verifiable.Subject{{ID: "did:example:777"}},
-			CustomFields: map[string]interface{}{
+			CustomFields: map[string]any{
 				"first_name": "Andrew",
 				"last_name":  "Hanks",
 				"photo":      "https://image.com/user777",
@@ -1410,10 +1410,10 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirements2() {
 			},
 			Subject: []verifiable.Subject{{
 				ID: "did:example:888",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"clearance_level": []string{"Public", "Low-Security", "Facility-Supervised"},
 					"employee_id":     "2956348576547",
-					"travel_authorization": map[string]interface{}{
+					"travel_authorization": map[string]any{
 						"subnational":           "Allow",
 						"international_default": "S2-Signoff",
 					},
@@ -1432,7 +1432,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirements2() {
 			},
 			Subject: []verifiable.Subject{{
 				ID: "did:example:123",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"pilot_id":                "4358793",
 					"accrediting_institution": "Nowheresville Community College",
 					"licensed_vehicles":       []string{"hang_glider", "kite", "Cessna 152"},
@@ -1452,7 +1452,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirements2() {
 			},
 			Subject: []verifiable.Subject{{
 				ID: "did:example:12345",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"employed_since": "2021-07-06",
 					"employed_until": "2021-07-07",
 					"role":           "Management Consultant",
@@ -1473,7 +1473,7 @@ func ExamplePresentationDefinition_CreateVP_submissionRequirements2() {
 			},
 			Subject: []verifiable.Subject{{
 				ID: "did:example:7",
-				CustomFields: map[string]interface{}{
+				CustomFields: map[string]any{
 					"employed_since": "2017-01-01",
 					"employed_until": "2021-08-09",
 					"role":           "Customer Relationships Manager",
@@ -1840,20 +1840,20 @@ func newPresentationSubmission(
 	vp.Type = append(vp.Type, "PresentationSubmission")
 
 	if submission != nil {
-		vp.CustomFields = make(map[string]interface{})
+		vp.CustomFields = make(map[string]any)
 		vp.CustomFields["presentation_submission"] = toExampleMap(submission)
 	}
 
 	return vp, nil
 }
 
-func toExampleMap(v interface{}) map[string]interface{} {
+func toExampleMap(v any) map[string]any {
 	bits, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
 	}
 
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 
 	err = json.Unmarshal(bits, &m)
 	if err != nil {

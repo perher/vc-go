@@ -25,7 +25,7 @@ func AddDIDDataIntegrityProof(
 		return nil, fmt.Errorf("decode did doc: %w", err)
 	}
 
-	var jsonLdObject map[string]interface{}
+	var jsonLdObject map[string]any
 
 	err = json.Unmarshal(didBytes, &jsonLdObject)
 	if err != nil {

@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"slices"
 
 	jsonld "github.com/piprate/json-gold/ld"
 	diddoc "github.com/trustbloc/did-go/doc/did"
@@ -81,8 +82,8 @@ func WithVDRegistry(didResolver didResolver) DIDConfigurationOpt {
 }
 
 type rawDoc struct {
-	Context    string        `json:"@context,omitempty"`
-	LinkedDIDs []interface{} `json:"linked_dids,omitempty"`
+	Context    string `json:"@context,omitempty"`
+	LinkedDIDs []any  `json:"linked_dids,omitempty"`
 }
 
 // VerifyDIDAndDomain will verify that there is valid domain linkage credential in did configuration
@@ -149,7 +150,7 @@ func verifyDidConfigurationProperties(data []byte) error {
 	requiredProperties := []string{contextProperty, linkedDIDsProperty}
 	allowedProperties := []string{contextProperty, linkedDIDsProperty}
 
-	var didCfgMap map[string]interface{}
+	var didCfgMap map[string]any
 
 	err := json.Unmarshal(data, &didCfgMap)
 	if err != nil {
@@ -165,7 +166,7 @@ func verifyDidConfigurationProperties(data []byte) error {
 	return verifyAllowedProperties(didCfgMap, allowedProperties)
 }
 
-func verifyRequiredProperties(values map[string]interface{}, requiredProperties []string) error {
+func verifyRequiredProperties(values map[string]any, requiredProperties []string) error {
 	for _, key := range requiredProperties {
 		if _, ok := values[key]; !ok {
 			return fmt.Errorf("property '%s' is required", key)
@@ -175,7 +176,7 @@ func verifyRequiredProperties(values map[string]interface{}, requiredProperties 
 	return nil
 }
 
-func verifyAllowedProperties(values map[string]interface{}, allowedProperty []string) error {
+func verifyAllowedProperties(values map[string]any, allowedProperty []string) error {
 	for key := range values {
 		if !contains(key, allowedProperty) {
 			return fmt.Errorf("property '%s' is not allowed", key)
@@ -271,7 +272,7 @@ func validateJWTHeader(headers jose.Headers) error {
 	return nil
 }
 
-func validateJWTPayload(vc *verifiable.Credential, payload map[string]interface{}, did string) error {
+func validateJWTPayload(vc *verifiable.Credential, payload map[string]any, did string) error {
 	// iat added for interop
 	allowedProperties := []string{"exp", "iss", "nbf", "sub", "vc", "iat"}
 
@@ -301,16 +302,10 @@ func validateJWTClaims(vc *verifiable.Credential, did string) error {
 }
 
 func contains(v string, values []string) bool {
-	for _, val := range values {
-		if v == val {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(values, v)
 }
 
-func validateSubject(subject interface{}, did, origin string) error {
+func validateSubject(subject any, did, origin string) error {
 	switch s := subject.(type) {
 	case []verifiable.Subject:
 		if len(s) > 1 {
@@ -382,7 +377,7 @@ func validateOrigin(origin1, origin2 string) error {
 	return nil
 }
 
-func getCredentials(linkedDIDs []interface{}, did, domain string, opts ...verifiable.CredentialOpt) ([][]byte, error) {
+func getCredentials(linkedDIDs []any, did, domain string, opts ...verifiable.CredentialOpt) ([][]byte, error) {
 	var credentialsForDIDAndDomain [][]byte
 
 	for _, linkedDID := range linkedDIDs {
@@ -393,7 +388,7 @@ func getCredentials(linkedDIDs []interface{}, did, domain string, opts ...verifi
 		switch linkedDID := linkedDID.(type) {
 		case string: // JWT
 			rawBytes = []byte(linkedDID)
-		case map[string]interface{}: // Linked Data
+		case map[string]any: // Linked Data
 			rawBytes, err = json.Marshal(linkedDID)
 			if err != nil {
 				return nil, err

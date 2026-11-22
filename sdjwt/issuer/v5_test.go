@@ -80,7 +80,7 @@ func TestDisclosureV5Map(
 			"country": "DE"
 		  }
 }`
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(input), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -115,7 +115,7 @@ func TestDisclosureV5Map(
 		assert.Equal(t, "street_address", disclosures[4].Key)
 		assert.Equal(t, "Schulstr. 12", disclosures[4].Value)
 
-		recursiveElements := disclosures[0].Value.(map[string]interface{})["_sd"].([]string) // nolint:errcheck
+		recursiveElements := disclosures[0].Value.(map[string]any)["_sd"].([]string) // nolint:errcheck
 		assert.Len(t, recursiveElements, 4)
 
 		for _, expected := range []string{
@@ -133,7 +133,7 @@ func TestDisclosureV5Map(
 	})
 
 	t.Run("recursive with array and and include always", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(sampleV5ComplexData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 		bb.debugMode = true
@@ -177,11 +177,11 @@ func TestDisclosureV5Map(
 		sdID := finalMap["_sd"].([]string)[0]
 		assert.NotEmpty(t, sdID)
 		val := disMap[sdID]
-		recursiveData := val.Value.(map[string]interface{})["extra"].(map[string]interface{})["_sd"].([]string)[0]
+		recursiveData := val.Value.(map[string]any)["extra"].(map[string]any)["_sd"].([]string)[0]
 		recursiveDis := disMap[recursiveData]
 
 		assert.Equal(t, "recursive", recursiveDis.Key)
-		itemData := recursiveDis.Value.(map[string]interface{})["_sd"].([]string)[0]
+		itemData := recursiveDis.Value.(map[string]any)["_sd"].([]string)[0]
 		itemDis := disMap[itemData]
 		assert.Equal(t, "key1", itemDis.Key)
 		assert.Equal(t, "value1", itemDis.Value)
@@ -214,7 +214,7 @@ func TestDisclosureV5Array(
 				"a" : "b"
               }
 			}`
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(input), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 		bb.debugMode = true
@@ -251,14 +251,14 @@ func TestDisclosureV5Array(
 			assert.True(t, found, "element %v not found", expectedArrayElements)
 		}
 
-		visibleMapData := cred["visible_map"].(map[string]interface{})["_sd"].([]string) // nolint:errcheck
+		visibleMapData := cred["visible_map"].(map[string]any)["_sd"].([]string) // nolint:errcheck
 		assert.Len(t, visibleMapData, 1)
 
 		visibleDisclosure := disMap[visibleMapData[0]]
 		assert.Equal(t, "a", visibleDisclosure.Key)
 		assert.Equal(t, "b", visibleDisclosure.Value)
 
-		nationalities := cred["nationalities"].([]interface{}) // nolint:errcheck
+		nationalities := cred["nationalities"].([]any) // nolint:errcheck
 		assert.Len(t, nationalities, 2)
 
 		for i, nat := range nationalities {
@@ -296,7 +296,7 @@ func TestDisclosureV5Array(
 				"DE"
 			  ]
 			}`
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(input), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -321,7 +321,7 @@ func TestDisclosureV5Array(
 		assert.Len(t, disclosures, 9)
 		assert.Len(t, cred["_sd"].([]string), 8)
 
-		nat := cred["nationalities"].([]interface{}) // nolint:errcheck
+		nat := cred["nationalities"].([]any) // nolint:errcheck
 		assert.Len(t, nat, 2)
 
 		nat1Val := nat[0].(map[string]string)["..."]
@@ -332,7 +332,7 @@ func TestDisclosureV5Array(
 	})
 
 	t.Run("one array element ignored", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(sampleV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -349,10 +349,10 @@ func TestDisclosureV5Array(
 
 		assert.Len(t, disclosures, 0)
 		assert.Len(t, cred, 2)
-		assert.Equal(t, map[string]interface{}{
+		assert.Equal(t, map[string]any{
 			"a": "b",
 		}, cred["some_map"])
-		assert.Equal(t, []interface{}{"US", "DE"}, cred["nationalities"].([]interface{}))
+		assert.Equal(t, []any{"US", "DE"}, cred["nationalities"].([]any))
 		disMap := map[string]*DisclosureEntity{}
 		for _, d := range disclosures {
 			disMap[d.DebugDigest] = d
@@ -362,7 +362,7 @@ func TestDisclosureV5Array(
 
 func TestFailCases(t *testing.T) {
 	t.Run("map object", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(sampleV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -378,7 +378,7 @@ func TestFailCases(t *testing.T) {
 	})
 
 	t.Run("map object", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(sampleV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -398,7 +398,7 @@ func TestFailCases(t *testing.T) {
 		input := `{
 			  "a" : "b"
 			}`
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(input), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -416,7 +416,7 @@ func TestFailCases(t *testing.T) {
 				"a" : "b"
               }
 			}`
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(input), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -442,7 +442,7 @@ func TestFailCases(t *testing.T) {
 	})
 
 	t.Run("disclosure for slice", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(simpleV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -465,7 +465,7 @@ func TestFailCases(t *testing.T) {
 	})
 
 	t.Run("can not create decoy", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(simpleV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -482,7 +482,7 @@ func TestFailCases(t *testing.T) {
 	})
 
 	t.Run("can not create decoy", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(simpleV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -502,7 +502,7 @@ func TestExamplesV5(
 	t *testing.T,
 ) {
 	t.Run("test array disclosures", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(arrayTwoElementsV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -521,7 +521,7 @@ func TestExamplesV5(
 		assert.Len(t, disclosures, 3)
 		assert.Equal(t, "some_arr", disclosures[0].Key)
 
-		addressArr := disclosures[0].Value.([]interface{}) // nolint:errcheck
+		addressArr := disclosures[0].Value.([]any) // nolint:errcheck
 		assert.Len(t, addressArr, 2)
 
 		assert.Equal(t, "UA", disMap[addressArr[0].(map[string]string)["..."]].Value)
@@ -531,7 +531,7 @@ func TestExamplesV5(
 		assert.Len(t, cred["_sd"].([]string), 1)
 	})
 	t.Run("test array disclosures with one ignored", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(arrayTwoElementsV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 		bb.debugMode = true
@@ -553,7 +553,7 @@ func TestExamplesV5(
 		assert.Len(t, disclosures, 2)
 		assert.Equal(t, "some_arr", disclosures[0].Key)
 
-		addressArr := disclosures[0].Value.([]interface{}) // nolint:errcheck
+		addressArr := disclosures[0].Value.([]any) // nolint:errcheck
 		assert.Len(t, addressArr, 2)
 
 		assert.Equal(t, "UA", addressArr[0])
@@ -563,7 +563,7 @@ func TestExamplesV5(
 		assert.Len(t, cred["_sd"].([]string), 1)
 	})
 	t.Run("always include", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(addressV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -578,11 +578,11 @@ func TestExamplesV5(
 		assert.NoError(t, err)
 
 		assert.Len(t, disclosures, 4)
-		assert.Len(t, cred["address"].(map[string]interface{})["_sd"].([]string), 4)
+		assert.Len(t, cred["address"].(map[string]any)["_sd"].([]string), 4)
 		assert.Len(t, cred, 1)
 	})
 	t.Run("non sd claim", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(addressV5TestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 
@@ -597,12 +597,12 @@ func TestExamplesV5(
 		assert.NoError(t, err)
 
 		assert.Len(t, disclosures, 0)
-		assert.Len(t, cred["address"].(map[string]interface{}), 4)
-		assert.Equal(t, cred["address"].(map[string]interface{})["postal_code"], "12345")
+		assert.Len(t, cred["address"].(map[string]any), 4)
+		assert.Equal(t, cred["address"].(map[string]any)["postal_code"], "12345")
 		assert.Len(t, cred, 1)
 	})
 	t.Run("map address", func(t *testing.T) {
-		var parsedInput map[string]interface{}
+		var parsedInput map[string]any
 		assert.NoError(t, json.Unmarshal([]byte(sampleV5AddressMapTestData), &parsedInput))
 		bb := NewSDJWTBuilderV5()
 		bb.debugMode = true
@@ -631,11 +631,11 @@ func TestExamplesV5(
 
 		address := disMap[cred["_sd"].([]string)[0]]
 		assert.Len(t, address.Value, 4)
-		assert.Equal(t, "Schulstr. 12", address.Value.(map[string]interface{})["street_address"].(string))
-		assert.Equal(t, "Schulpforta", address.Value.(map[string]interface{})["locality"].(string))
-		assert.Equal(t, "Sachsen-Anhalt", address.Value.(map[string]interface{})["region"].(string))
+		assert.Equal(t, "Schulstr. 12", address.Value.(map[string]any)["street_address"].(string))
+		assert.Equal(t, "Schulpforta", address.Value.(map[string]any)["locality"].(string))
+		assert.Equal(t, "Sachsen-Anhalt", address.Value.(map[string]any)["region"].(string))
 
-		country := address.Value.(map[string]interface{})["country"].(map[string]interface{}) // nolint:errcheck
+		country := address.Value.(map[string]any)["country"].(map[string]any) // nolint:errcheck
 		disCountry := disMap[country["_sd"].([]string)[0]]
 		assert.Equal(t, "code", disCountry.Key)
 		assert.Equal(t, "DE", disCountry.Value)
@@ -665,7 +665,7 @@ func TestExamplesV5(
   "is_over_21": true,
   "is_over_65": false
 }`
-			var parsedInput map[string]interface{}
+			var parsedInput map[string]any
 			assert.NoError(t, json.Unmarshal([]byte(input), &parsedInput))
 			bb := NewSDJWTBuilderV5()
 

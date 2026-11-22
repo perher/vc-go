@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -69,7 +70,7 @@ type MatchOptions struct {
 	CredentialOptions       []verifiable.CredentialOpt
 	DisableSchemaValidation bool
 	MergedSubmission        *PresentationSubmission
-	MergedSubmissionMap     map[string]interface{}
+	MergedSubmissionMap     map[string]any
 }
 
 // MatchOption is an option that sets an option for when matching.
@@ -106,7 +107,7 @@ func WithMergedSubmission(submission *PresentationSubmission) MatchOption {
 //
 // If there are multiple Presentations, this merged submission should use the Presentation array as the JSON Path root
 // when referencing the contained Presentations and the Credentials within.
-func WithMergedSubmissionMap(submissionMap map[string]interface{}) MatchOption {
+func WithMergedSubmissionMap(submissionMap map[string]any) MatchOption {
 	return func(m *MatchOptions) {
 		m.MergedSubmissionMap = submissionMap
 	}
@@ -164,7 +165,7 @@ func getMatchedCreds( //nolint:gocyclo,funlen
 		mappingsByVPIndex = descriptorsByPresentationIndex(descs)
 	}
 
-	rawVPs := make([]interface{}, len(vpList))
+	rawVPs := make([]any, len(vpList))
 
 	for vpIdx, vp := range vpList {
 		err := checkJSONLDContextType(vp)
@@ -254,7 +255,7 @@ func getMatchedCreds( //nolint:gocyclo,funlen
 	return result, nil
 }
 
-func selectVC(typelessVerifiable interface{},
+func selectVC(typelessVerifiable any,
 	mapping *InputDescriptorMapping, opts *MatchOptions) (*verifiable.Credential, error) {
 	builder := gval.Full(jsonpath.PlaceholderExtension())
 
@@ -355,7 +356,7 @@ func parseDescriptorMap(vp *verifiable.Presentation) ([]*InputDescriptorMapping,
 	}
 
 	switch submission := untypedSubmission.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		return getDescriptorMapping(submission)
 	case *PresentationSubmission:
 		return submission.DescriptorMap, nil
@@ -366,8 +367,8 @@ func parseDescriptorMap(vp *verifiable.Presentation) ([]*InputDescriptorMapping,
 	}
 }
 
-func getDescriptorMapping(submission map[string]interface{}) ([]*InputDescriptorMapping, error) {
-	descriptorMap, ok := submission[descriptorMapProperty].([]interface{})
+func getDescriptorMapping(submission map[string]any) ([]*InputDescriptorMapping, error) {
+	descriptorMap, ok := submission[descriptorMapProperty].([]any)
 	if !ok {
 		return nil, fmt.Errorf("missing '%s' on verifiable presentation", descriptorMapProperty)
 	}
@@ -463,7 +464,7 @@ func rootIndex(jsonPathStr string) int {
 // [The Input Descriptor Mapping Object] MUST include a path property, and its value MUST be a JSONPath
 // string expression that selects the credential to be submit in relation to the identified Input Descriptor
 // identified, when executed against the top-level of the object the Presentation Submission is embedded within.
-func selectByPath(builder gval.Language, vp interface{}, jsonPath string) (interface{}, error) {
+func selectByPath(builder gval.Language, vp any, jsonPath string) (any, error) {
 	path, err := builder.NewEvaluable(jsonPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build new json path evaluator: %w", err)
@@ -478,16 +479,10 @@ func selectByPath(builder gval.Language, vp interface{}, jsonPath string) (inter
 }
 
 func stringsContain(s []string, val string) bool {
-	for i := range s {
-		if s[i] == val {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(s, val)
 }
 
-func getTypelessVP(vp *verifiable.Presentation) (interface{}, error) {
+func getTypelessVP(vp *verifiable.Presentation) (any, error) {
 	switch {
 	case vp.IsJWT():
 		token, _, parseErr := jwt.Parse(vp.JWT)
@@ -504,7 +499,7 @@ func getTypelessVP(vp *verifiable.Presentation) (interface{}, error) {
 			return nil, fmt.Errorf("failed to marshal vp: %w", marshalErr)
 		}
 
-		typelessVP := interface{}(nil)
+		typelessVP := any(nil)
 
 		if err := json.Unmarshal(b, &typelessVP); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal vp: %w", err)

@@ -233,7 +233,7 @@ func TestAllCWTSignersVerifiers(t *testing.T) {
 			encoded, err := cbor.Marshal(data)
 			assert.NoError(t, err)
 
-			var targetKey interface{}
+			var targetKey any
 			if v, ok := testCase.signingKey.PublicKey.(*jwk.JWK); ok {
 				targetKey = v.Key
 			} else {

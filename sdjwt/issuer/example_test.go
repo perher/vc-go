@@ -21,9 +21,9 @@ func ExampleNew() {
 		fmt.Println("failed to set-up test: %w", err.Error())
 	}
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"last_name": "Smith",
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street_address": "123 Main St",
 			"country":        "US",
 		},
@@ -40,7 +40,7 @@ func ExampleNew() {
 		fmt.Println("failed to issue SD-JWT: %w", err.Error())
 	}
 
-	var decoded map[string]interface{}
+	var decoded map[string]any
 
 	err = token.DecodeClaims(&decoded)
 	if err != nil {
@@ -80,7 +80,7 @@ func setUp() (*testutil.Ed25519Signer, error) {
 	return signer, nil
 }
 
-func marshalObj(obj interface{}) (string, error) {
+func marshalObj(obj any) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
 		fmt.Println("failed to marshal object: %w", err.Error())

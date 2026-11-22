@@ -44,8 +44,8 @@ type MessageResult struct {
 
 // Message holds a single data element inside an identity hub response.
 type Message struct {
-	Descriptor map[string]interface{} `json:"descriptor"`
-	Data       string                 `json:"data,omitempty"`
+	Descriptor map[string]any `json:"descriptor"`
+	Data       string         `json:"data,omitempty"`
 }
 
 // Status holds a http status code and error message, for an identity hub response or message result.
@@ -123,7 +123,7 @@ func (m Message) IsMethod(method string) bool {
 // Returns the object ID of the selected message, and the Request.
 func GetRequest(
 	hubDID, messageMethod string,
-	messageDescriptorData []map[string]interface{},
+	messageDescriptorData []map[string]any,
 ) (string, *Request, error) {
 	request := Request{
 		RequestID: uuid.NewString(),
@@ -141,7 +141,7 @@ func GetRequest(
 	return objectID, &request, nil
 }
 
-func firstValidMessage(selectMethod string, messageDescriptors []map[string]interface{}) (string, *Message, error) {
+func firstValidMessage(selectMethod string, messageDescriptors []map[string]any) (string, *Message, error) {
 	for _, descriptor := range messageDescriptors {
 		msg := &Message{Descriptor: descriptor}
 		if !msg.IsMethod(selectMethod) {
@@ -199,7 +199,7 @@ func getDIDCoreServiceEndpoint(svc *did.Service) (string, error) {
 		return "", fmt.Errorf("unable to marshal DIDCore service endpoint: %w", err)
 	}
 
-	var mapped map[string]interface{}
+	var mapped map[string]any
 	if err = json.Unmarshal(endpointBytes, &mapped); err != nil {
 		return "", fmt.Errorf("unable to unmarshal DIDCore service endpoint: %w", err)
 	}

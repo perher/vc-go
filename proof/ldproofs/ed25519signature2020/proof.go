@@ -85,7 +85,7 @@ func (s *Proof) IsJWTAlgSupported(alg string) bool {
 
 // GetCanonicalDocument will return normalized/canonical version of the document
 // Ed25519Signature2020 signature SignatureSuite uses RDF Dataset Normalization as canonicalization algorithm.
-func (s *Proof) GetCanonicalDocument(doc map[string]interface{}, opts ...processor.Opts) ([]byte, error) {
+func (s *Proof) GetCanonicalDocument(doc map[string]any, opts ...processor.Opts) ([]byte, error) {
 	return s.jsonldProcessor.GetCanonicalDocument(doc, opts...)
 }
 

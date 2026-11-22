@@ -1,5 +1,4 @@
 //go:build testsuite
-// +build testsuite
 
 /*
 Copyright SecureKey Technologies Inc. All Rights Reserved.

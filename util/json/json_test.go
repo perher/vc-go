@@ -29,14 +29,14 @@ func Test_marshalJSON(t *testing.T) {
 			I: 7,
 		}
 
-		cf := map[string]interface{}{
+		cf := map[string]any{
 			"boolValue": false,
 			"intValue":  8,
 		}
 		actual, err := MarshalWithCustomFields(&v, cf)
 		require.NoError(t, err)
 
-		expectedMap := map[string]interface{}{
+		expectedMap := map[string]any{
 			"stringSlice": []string{"a", "b", "c"},
 			"intValue":    7,
 			"boolValue":   false,
@@ -49,14 +49,14 @@ func Test_marshalJSON(t *testing.T) {
 
 	t.Run("Failed JSON marshall", func(t *testing.T) {
 		// artificial example - pass smth which cannot be marshalled
-		jsonBytes, err := MarshalWithCustomFields(make(chan int), map[string]interface{}{})
+		jsonBytes, err := MarshalWithCustomFields(make(chan int), map[string]any{})
 		require.Error(t, err)
 		require.Nil(t, jsonBytes)
 	})
 }
 
 func Test_unmarshalJSON(t *testing.T) {
-	originalMap := map[string]interface{}{
+	originalMap := map[string]any{
 		"stringSlice": []string{"a", "b", "c"},
 		"intValue":    7,
 		"boolValue":   false,
@@ -67,7 +67,7 @@ func Test_unmarshalJSON(t *testing.T) {
 
 	t.Run("Successful JSON unmarshalling", func(t *testing.T) {
 		v := new(testJSON)
-		cf := make(map[string]interface{})
+		cf := make(map[string]any)
 		err := UnmarshalWithCustomFields(data, v, cf)
 		require.NoError(t, err)
 
@@ -75,7 +75,7 @@ func Test_unmarshalJSON(t *testing.T) {
 			S: []string{"a", "b", "c"},
 			I: 7,
 		}
-		expectedEf := map[string]interface{}{
+		expectedEf := map[string]any{
 			"boolValue": false,
 		}
 		require.Equal(t, expectedV, *v)
@@ -83,7 +83,7 @@ func Test_unmarshalJSON(t *testing.T) {
 	})
 
 	t.Run("Failed JSON unmarshalling", func(t *testing.T) {
-		cf := make(map[string]interface{})
+		cf := make(map[string]any)
 
 		// invalid JSON
 		err := UnmarshalWithCustomFields([]byte("not JSON"), "", cf)
@@ -100,19 +100,19 @@ func Test_unmarshalJSON(t *testing.T) {
 }
 
 func TestAddCustomFields(t *testing.T) {
-	orign := map[string]interface{}{
+	orign := map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
 	}
 
-	cf := map[string]interface{}{
+	cf := map[string]any{
 		"fld3": "cv3",
 		"fld4": "cv4",
 		"fld5": "cv5",
 	}
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
@@ -126,7 +126,7 @@ func TestAddCustomFields(t *testing.T) {
 }
 
 func TestSplitJSONObj(t *testing.T) {
-	orign := map[string]interface{}{
+	orign := map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
@@ -136,20 +136,20 @@ func TestSplitJSONObj(t *testing.T) {
 
 	obj, cf := SplitJSONObj(orign, "fld1", "fld2", "fld3")
 
-	require.Equal(t, map[string]interface{}{
+	require.Equal(t, map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
 	}, obj)
 
-	require.Equal(t, map[string]interface{}{
+	require.Equal(t, map[string]any{
 		"fld4": "cv4",
 		"fld5": "cv5",
 	}, cf)
 }
 
 func TestShallowCopyObj(t *testing.T) {
-	orign := map[string]interface{}{
+	orign := map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
@@ -165,7 +165,7 @@ func TestShallowCopyObj(t *testing.T) {
 }
 
 func TestCopyExcept(t *testing.T) {
-	orign := map[string]interface{}{
+	orign := map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
@@ -173,7 +173,7 @@ func TestCopyExcept(t *testing.T) {
 		"fld5": "cv5",
 	}
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
@@ -184,7 +184,7 @@ func TestCopyExcept(t *testing.T) {
 }
 
 func TestSelect(t *testing.T) {
-	orign := map[string]interface{}{
+	orign := map[string]any{
 		"fld1": "v1",
 		"fld2": "v2",
 		"fld3": "v3",
@@ -192,7 +192,7 @@ func TestSelect(t *testing.T) {
 		"fld5": "cv5",
 	}
 
-	expected := map[string]interface{}{
+	expected := map[string]any{
 		"fld4": "cv4",
 		"fld5": "cv5",
 	}

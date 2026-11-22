@@ -44,8 +44,8 @@ type BBSProofCreator struct {
 
 // BBSSelectiveDisclosure creates selective disclosure from the input doc which must have a BBS+ proof
 // (with BbsBlsSignature2020 type).
-func BBSSelectiveDisclosure(doc map[string]interface{}, revealDoc map[string]interface{},
-	nonce []byte, bbsProofCreator *BBSProofCreator, opts ...processor.Opts) (map[string]interface{}, error) {
+func BBSSelectiveDisclosure(doc map[string]any, revealDoc map[string]any,
+	nonce []byte, bbsProofCreator *BBSProofCreator, opts ...processor.Opts) (map[string]any, error) {
 	docWithoutProof, rawProofs, err := prepareDocAndProof(doc, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("preparing doc failed: %w", err)
@@ -65,7 +65,7 @@ func BBSSelectiveDisclosure(doc map[string]interface{}, revealDoc map[string]int
 		return nil, fmt.Errorf("build document verification data: %w", pErr)
 	}
 
-	proofs := make([]map[string]interface{}, len(blsSignatures))
+	proofs := make([]map[string]any, len(blsSignatures))
 
 	for i, blsSignature := range blsSignatures {
 		verData, dErr := buildVerificationData(blsSignature, docVerData, opts...)
@@ -87,8 +87,8 @@ func BBSSelectiveDisclosure(doc map[string]interface{}, revealDoc map[string]int
 	return revealDocumentResult, nil
 }
 
-func prepareDocAndProof(doc map[string]interface{},
-	opts ...processor.Opts) (map[string]interface{}, interface{}, error) {
+func prepareDocAndProof(doc map[string]any,
+	opts ...processor.Opts) (map[string]any, any, error) {
 	docCompacted, err := getCompactedWithSecuritySchema(doc, opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("compact doc with security schema: %w", err)
@@ -104,8 +104,8 @@ func prepareDocAndProof(doc map[string]interface{},
 	return docCompacted, rawProofs, nil
 }
 
-func generateSignatureProof(blsSignature map[string]interface{}, creator *BBSProofCreator, nonce []byte,
-	verData *verificationData) (map[string]interface{}, error) {
+func generateSignatureProof(blsSignature map[string]any, creator *BBSProofCreator, nonce []byte,
+	verData *verificationData) (map[string]any, error) {
 	pubKeyBytes, signatureBytes, pErr := getPublicKeyAndSignature(blsSignature, creator.VerificationMethodResolver)
 	if pErr != nil {
 		return nil, fmt.Errorf("get public key and signature: %w", pErr)
@@ -117,7 +117,7 @@ func generateSignatureProof(blsSignature map[string]interface{}, creator *BBSPro
 		return nil, fmt.Errorf("derive BBS+ proof: %w", err)
 	}
 
-	derivedProof := map[string]interface{}{
+	derivedProof := map[string]any{
 		"type":               bbsblssignatureproof2020.ProofType,
 		"nonce":              base64.StdEncoding.EncodeToString(nonce),
 		"verificationMethod": blsSignature["verificationMethod"],
@@ -129,7 +129,7 @@ func generateSignatureProof(blsSignature map[string]interface{}, creator *BBSPro
 	return derivedProof, nil
 }
 
-func getPublicKeyAndSignature(blsSignatureMap map[string]interface{},
+func getPublicKeyAndSignature(blsSignatureMap map[string]any,
 	resolver verificationMethodResolver) ([]byte, []byte, error) {
 	blsSignature, err := proof.NewProof(blsSignatureMap)
 	if err != nil {
@@ -149,13 +149,13 @@ func getPublicKeyAndSignature(blsSignatureMap map[string]interface{},
 	return vm.Value, blsSignature.ProofValue, nil
 }
 
-func getBlsProofs(rawProofs interface{}) ([]map[string]interface{}, error) {
+func getBlsProofs(rawProofs any) ([]map[string]any, error) {
 	allProofs, err := getProofs(rawProofs)
 	if err != nil {
 		return nil, fmt.Errorf("read document proofs: %w", err)
 	}
 
-	blsProofs := make([]map[string]interface{}, 0)
+	blsProofs := make([]map[string]any, 0)
 
 	for _, p := range allProofs {
 		proofType, ok := p["type"].(string)
@@ -170,7 +170,7 @@ func getBlsProofs(rawProofs interface{}) ([]map[string]interface{}, error) {
 
 type docVerificationData struct {
 	revealIndexes        []int
-	revealDocumentResult map[string]interface{}
+	revealDocumentResult map[string]any
 	documentStatements   []string
 }
 
@@ -179,7 +179,7 @@ type verificationData struct {
 	revealIndexes []int
 }
 
-func buildVerificationData(blsProof map[string]interface{}, docVerData *docVerificationData,
+func buildVerificationData(blsProof map[string]any, docVerData *docVerificationData,
 	opts ...processor.Opts) (*verificationData, error) {
 	proofStatements, err := createVerifyProofData(blsProof, opts...)
 	if err != nil {
@@ -206,7 +206,7 @@ func buildVerificationData(blsProof map[string]interface{}, docVerData *docVerif
 	}, nil
 }
 
-func buildDocVerificationData(docCompacted, revealDoc map[string]interface{},
+func buildDocVerificationData(docCompacted, revealDoc map[string]any,
 	opts ...processor.Opts) (*docVerificationData, error) {
 	documentStatements, transformedStatements, err := createVerifyDocumentData(docCompacted, opts...)
 	if err != nil {
@@ -245,16 +245,16 @@ func buildDocVerificationData(docCompacted, revealDoc map[string]interface{},
 	}, nil
 }
 
-func getCompactedWithSecuritySchema(docMap map[string]interface{},
-	opts ...processor.Opts) (map[string]interface{}, error) {
-	contextMap := map[string]interface{}{
+func getCompactedWithSecuritySchema(docMap map[string]any,
+	opts ...processor.Opts) (map[string]any, error) {
+	contextMap := map[string]any{
 		"@context": securityContext,
 	}
 
 	return processor.Default().Compact(docMap, contextMap, opts...)
 }
 
-func createVerifyDocumentData(doc map[string]interface{},
+func createVerifyDocumentData(doc map[string]any,
 	opts ...processor.Opts) ([]string, []string, error) {
 	docBytes, err := processor.Default().GetCanonicalDocument(doc, opts...)
 	if err != nil {
@@ -271,7 +271,7 @@ func createVerifyDocumentData(doc map[string]interface{},
 	return documentStatements, transformedStatements, nil
 }
 
-func createVerifyRevealData(doc map[string]interface{}, opts ...processor.Opts) ([]string, error) {
+func createVerifyRevealData(doc map[string]any, opts ...processor.Opts) ([]string, error) {
 	docBytes, err := processor.Default().GetCanonicalDocument(doc, opts...)
 	if err != nil {
 		return nil, err
@@ -294,8 +294,8 @@ func splitMessageIntoLines(msg string) []string {
 	return msgs
 }
 
-func createVerifyProofData(proofMap map[string]interface{}, opts ...processor.Opts) ([]string, error) {
-	proofMapCopy := make(map[string]interface{}, len(proofMap)-1)
+func createVerifyProofData(proofMap map[string]any, opts ...processor.Opts) ([]string, error) {
+	proofMapCopy := make(map[string]any, len(proofMap)-1)
 
 	for k, v := range proofMap {
 		if k != "proofValue" {

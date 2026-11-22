@@ -196,7 +196,7 @@ func ExamplePresentation_two() {
 		Issued:  utiltime.NewTime(issued),
 		Expired: utiltime.NewTime(expired),
 		Schemas: []verifiable.TypedID{},
-	}, map[string]interface{}{
+	}, map[string]any{
 		"referenceNumber": 83294847,
 	})
 
@@ -341,7 +341,7 @@ func ExamplePresentation_MarshalJSON() {
 		Issued:  utiltime.NewTime(issued),
 		Expired: utiltime.NewTime(expired),
 		Schemas: []verifiable.TypedID{},
-	}, map[string]interface{}{
+	}, map[string]any{
 		"referenceNumber": 83294847,
 	})
 

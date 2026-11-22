@@ -31,7 +31,7 @@ func checkEmbeddedProofBytes(docBytes []byte, expectedProofIssuer *string, opts 
 		return nil
 	}
 
-	var jsonldDoc map[string]interface{}
+	var jsonldDoc map[string]any
 
 	if err := json.Unmarshal(docBytes, &jsonldDoc); err != nil {
 		return fmt.Errorf("embedded proof is not JSON: %w", err)
@@ -43,7 +43,7 @@ func checkEmbeddedProofBytes(docBytes []byte, expectedProofIssuer *string, opts 
 }
 
 // nolint:gocyclo
-func checkEmbeddedProof(jsonldDoc map[string]interface{}, expectedProofIssuer *string,
+func checkEmbeddedProof(jsonldDoc map[string]any, expectedProofIssuer *string,
 	opts *embeddedProofCheckOpts) error {
 	proofElement, ok := jsonldDoc["proof"]
 	if !ok || proofElement == nil {
@@ -87,16 +87,16 @@ func checkEmbeddedProof(jsonldDoc map[string]interface{}, expectedProofIssuer *s
 	return nil
 }
 
-func getProofs(proofElement interface{}) ([]map[string]interface{}, error) {
+func getProofs(proofElement any) ([]map[string]any, error) {
 	switch p := proofElement.(type) {
-	case map[string]interface{}:
-		return []map[string]interface{}{p}, nil
+	case map[string]any:
+		return []map[string]any{p}, nil
 
-	case []interface{}:
-		proofs := make([]map[string]interface{}, len(p))
+	case []any:
+		proofs := make([]map[string]any, len(p))
 
 		for i := range p {
-			proofMap, ok := p[i].(map[string]interface{})
+			proofMap, ok := p[i].(map[string]any)
 			if !ok {
 				return nil, errors.New("invalid proof type")
 			}

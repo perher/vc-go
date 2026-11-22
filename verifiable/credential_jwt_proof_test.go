@@ -233,7 +233,7 @@ func TestJwtWithExtension(t *testing.T) {
 
 func TestRefineVcIssuerFromJwtClaims(t *testing.T) {
 	t.Run("refine verifiable credential issuer defined by plain id", func(t *testing.T) {
-		vcMap := map[string]interface{}{
+		vcMap := map[string]any{
 			"issuer": "id to override",
 		}
 		refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
@@ -241,8 +241,8 @@ func TestRefineVcIssuerFromJwtClaims(t *testing.T) {
 	})
 
 	t.Run("refine verifiable credential issuer defined by structure", func(t *testing.T) {
-		issuerMap := map[string]interface{}{"id": "id to override", "name": "Example University"}
-		vcMap := map[string]interface{}{
+		issuerMap := map[string]any{"id": "id to override", "name": "Example University"}
+		vcMap := map[string]any{
 			"issuer": issuerMap,
 		}
 		refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
@@ -253,7 +253,7 @@ func TestRefineVcIssuerFromJwtClaims(t *testing.T) {
 	})
 
 	t.Run("refine not defined verifiable credential issuer", func(t *testing.T) {
-		vcMap := make(map[string]interface{})
+		vcMap := make(map[string]any)
 		refineVCIssuerFromJWTClaims(vcMap, "did:example:76e12ec712ebc6f1c221ebfeb1f")
 		require.Equal(t, "did:example:76e12ec712ebc6f1c221ebfeb1f", vcMap["issuer"])
 	})

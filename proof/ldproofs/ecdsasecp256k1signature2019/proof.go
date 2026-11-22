@@ -85,7 +85,7 @@ func (s *Proof) SupportedVerificationMethods() []proof.SupportedVerificationMeth
 
 // GetCanonicalDocument will return normalized/canonical version of the document.
 // EcdsaSecp256k1Signature2019 signature suite uses RDF Dataset Normalization as canonicalization algorithm.
-func (s *Proof) GetCanonicalDocument(doc map[string]interface{}, opts ...processor.Opts) ([]byte, error) {
+func (s *Proof) GetCanonicalDocument(doc map[string]any, opts ...processor.Opts) ([]byte, error) {
 	return s.jsonldProcessor.GetCanonicalDocument(doc, opts...)
 }
 

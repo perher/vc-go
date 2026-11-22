@@ -189,7 +189,7 @@ func ExampleCredential_extraFields() {
 		Issued:  utiltime.NewTime(issued),
 		Expired: utiltime.NewTime(expired),
 		Schemas: []verifiable.TypedID{},
-	}, map[string]interface{}{
+	}, map[string]any{
 		"referenceNumber": 83294847,
 	})
 
@@ -266,7 +266,7 @@ func ExampleParseCredential() {
 		Issued:  utiltime.NewTime(issued),
 		Expired: utiltime.NewTime(expired),
 		Schemas: []verifiable.TypedID{},
-	}, map[string]interface{}{
+	}, map[string]any{
 		"referenceNumber": 83294847,
 	})
 
@@ -598,7 +598,7 @@ func ExampleCredential_GenerateBBSSelectiveDisclosure() {
 }
 `
 
-	var revealDocMap map[string]interface{}
+	var revealDocMap map[string]any
 
 	err = json.Unmarshal([]byte(revealDoc), &revealDocMap)
 	if err != nil {
@@ -731,13 +731,13 @@ func createExampleCredCF(vcc verifiable.CredentialContents,
 	return vc
 }
 
-func serializeSingleSubject(subj interface{}) []verifiable.Subject {
+func serializeSingleSubject(subj any) []verifiable.Subject {
 	subjBytes, err := json.Marshal(subj)
 	if err != nil {
 		panic(fmt.Errorf("failed marshal subject: %w", err))
 	}
 
-	var raw map[string]interface{}
+	var raw map[string]any
 
 	err = json.Unmarshal(subjBytes, &raw)
 	if err != nil {
@@ -752,13 +752,13 @@ func serializeSingleSubject(subj interface{}) []verifiable.Subject {
 	return []verifiable.Subject{subject}
 }
 
-func hideProofValue(proof verifiable.Proof, dummyValue string) interface{} {
+func hideProofValue(proof verifiable.Proof, dummyValue string) any {
 	oldProofValue := proof["proofValue"]
 	proof["proofValue"] = base64.StdEncoding.EncodeToString([]byte(dummyValue))
 
 	return oldProofValue
 }
 
-func restoreProofValue(proof verifiable.Proof, proofValue interface{}) {
+func restoreProofValue(proof verifiable.Proof, proofValue any) {
 	proof["proofValue"] = proofValue
 }

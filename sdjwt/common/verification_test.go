@@ -113,7 +113,7 @@ func TestVerifyDisclosuresInSDJWT(t *testing.T) {
 	})
 
 	t.Run("success - selective disclosures nil", func(t *testing.T) {
-		payload := make(map[string]interface{})
+		payload := make(map[string]any)
 		payload[SDAlgorithmKey] = testAlg
 		payload[SDKey] = nil
 
@@ -180,7 +180,7 @@ func TestVerifyDisclosuresInSDJWT(t *testing.T) {
 	})
 
 	t.Run("error - algorithm is not a string", func(t *testing.T) {
-		payload := make(map[string]interface{})
+		payload := make(map[string]any)
 		payload[SDAlgorithmKey] = 18
 
 		signedJWT, err := afjwt.NewJoseSigned(payload, nil, signer)
@@ -192,7 +192,7 @@ func TestVerifyDisclosuresInSDJWT(t *testing.T) {
 	})
 
 	t.Run("error - selective disclosures must be an array", func(t *testing.T) {
-		payload := make(map[string]interface{})
+		payload := make(map[string]any)
 		payload[SDAlgorithmKey] = testAlg
 		payload[SDKey] = "test"
 
@@ -205,7 +205,7 @@ func TestVerifyDisclosuresInSDJWT(t *testing.T) {
 	})
 
 	t.Run("error - selective disclosures must be a string", func(t *testing.T) {
-		payload := make(map[string]interface{})
+		payload := make(map[string]any)
 		payload[SDAlgorithmKey] = testAlg
 		payload[SDKey] = []float64{123}
 
@@ -301,16 +301,16 @@ func TestVerifyDisclosuresInSDJWT(t *testing.T) {
 		signedJWT, _, err := afjwt.Parse(sdJWT.SDJWT)
 		require.NoError(t, err)
 
-		signedJWT.Payload["address"].(map[string]interface{})["locality"] = "some existing claim"
+		signedJWT.Payload["address"].(map[string]any)["locality"] = "some existing claim"
 
 		err = VerifyDisclosuresInSDJWT(append(sdJWT.Disclosures, additionalSDDisclosure), signedJWT)
 		r.ErrorContains(err, "claim name 'locality' already exists at the same level")
 	})
 }
 
-func findAndAppendSDElementDigest(claimsMap map[string]interface{}, additionalDigest ...interface{}) bool {
+func findAndAppendSDElementDigest(claimsMap map[string]any, additionalDigest ...any) bool {
 	if digests, ok := claimsMap[SDKey]; ok {
-		if d, ok := digests.([]interface{}); ok {
+		if d, ok := digests.([]any); ok {
 			claimsMap[SDKey] = append(d, additionalDigest...)
 			return true
 		}
@@ -318,7 +318,7 @@ func findAndAppendSDElementDigest(claimsMap map[string]interface{}, additionalDi
 
 	for _, v := range claimsMap {
 		switch t := v.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			if ok := findAndAppendSDElementDigest(t, additionalDigest...); ok {
 				return ok
 			}
@@ -328,7 +328,7 @@ func findAndAppendSDElementDigest(claimsMap map[string]interface{}, additionalDi
 	return false
 }
 
-func findAndReplaceArrayElementDigest(claimsMap map[string]interface{}, additionalDigest string) string {
+func findAndReplaceArrayElementDigest(claimsMap map[string]any, additionalDigest string) string {
 	if digest, ok := claimsMap[ArrayElementDigestKey]; ok {
 		claimsMap[ArrayElementDigestKey] = additionalDigest
 		return digest.(string)
@@ -336,16 +336,16 @@ func findAndReplaceArrayElementDigest(claimsMap map[string]interface{}, addition
 
 	for _, v := range claimsMap {
 		switch t := v.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			res := findAndReplaceArrayElementDigest(t, additionalDigest)
 			if res == "" {
 				continue
 			}
 
 			return res
-		case []interface{}:
+		case []any:
 			for _, nv := range t {
-				if mapped, ok := nv.(map[string]interface{}); ok {
+				if mapped, ok := nv.(map[string]any); ok {
 					return findAndReplaceArrayElementDigest(mapped, additionalDigest)
 				}
 			}
@@ -355,20 +355,20 @@ func findAndReplaceArrayElementDigest(claimsMap map[string]interface{}, addition
 	return ""
 }
 
-func findAndAppendArrayElementDigest(claimsMap map[string]interface{}, additionalDigest string) bool {
+func findAndAppendArrayElementDigest(claimsMap map[string]any, additionalDigest string) bool {
 	for k, v := range claimsMap {
 		switch t := v.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			if ok := findAndAppendArrayElementDigest(t, additionalDigest); ok {
 				return true
 			}
-		case []interface{}:
+		case []any:
 			for _, nv := range t {
-				if mapped, ok := nv.(map[string]interface{}); ok {
+				if mapped, ok := nv.(map[string]any); ok {
 					if _, ok := mapped[ArrayElementDigestKey]; ok {
-						updatedList := append(t, map[string]interface{}{
+						updatedList := append(t, map[string]any{
 							ArrayElementDigestKey: additionalDigest,
-						}, map[string]interface{}{
+						}, map[string]any{
 							ArrayElementDigestKey: additionalDigest,
 						})
 
@@ -481,7 +481,7 @@ func TestVerifyJWT(t *testing.T) {
 					signedJWT, err := afjwt.NewJoseSigned(jwtPayload, nil, signer)
 					r.NoError(err)
 
-					signedJWT.Payload = map[string]interface{}{
+					signedJWT.Payload = map[string]any{
 						"iss": []string{"iss1"},
 					}
 

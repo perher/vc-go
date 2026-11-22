@@ -56,7 +56,7 @@ func TestGetContext(t *testing.T) {
 	})
 
 	t.Run("missing @context field", func(t *testing.T) {
-		missingCtxLoader := mockLoader{ctxDoc: ld.RemoteDocument{Document: map[string]interface{}{
+		missingCtxLoader := mockLoader{ctxDoc: ld.RemoteDocument{Document: map[string]any{
 			"foo": "bar",
 		}}}
 

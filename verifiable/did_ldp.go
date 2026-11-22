@@ -134,13 +134,13 @@ func VerifyDIDProof(didDoc *did.Doc, opts ...VerifyDIDOpt) error {
 	return checkEmbeddedProof(jsonldDoc, expectedProofIssuer, embeddedProofCheckOptions)
 }
 
-func didToMap(didDoc *did.Doc) (map[string]interface{}, error) {
+func didToMap(didDoc *did.Doc) (map[string]any, error) {
 	didBytes, err := didDoc.JSONBytes()
 	if err != nil {
 		return nil, fmt.Errorf("decode did doc: %w", err)
 	}
 
-	var jsonLdObject map[string]interface{}
+	var jsonLdObject map[string]any
 
 	err = json.Unmarshal(didBytes, &jsonLdObject)
 	if err != nil {

@@ -339,7 +339,7 @@ type CreatePresentationOpt func(p *Presentation) error
 // Presentation Verifiable Presentation base data model definition.
 type Presentation struct {
 	Context       []string
-	CustomContext []interface{}
+	CustomContext []any
 	ID            string
 	Type          []string
 	credentials   []*Credential
@@ -521,7 +521,7 @@ func (vp *Presentation) raw() (rawPresentation, error) {
 
 		rp[vpFldCredential], err = mapSlice2(
 			vp.credentials,
-			func(cred *Credential) (interface{}, error) {
+			func(cred *Credential) (any, error) {
 				return cred.ToUniversalForm()
 			},
 		)
@@ -565,7 +565,7 @@ const (
 )
 
 // rawPresentation is a basic verifiable credential.
-type rawPresentation = map[string]interface{}
+type rawPresentation = map[string]any
 
 // presentationOpts holds options for the Verifiable Presentation decoding.
 type presentationOpts struct {
@@ -732,7 +732,7 @@ func decodeHolder(holder any) (string, error) {
 		return "", nil
 	case string:
 		return val, nil
-	case map[string]interface{}:
+	case map[string]any:
 		return parseStringFld(val, "id")
 	default:
 		return "", fmt.Errorf("holder must be string or map[string]interface{}, got: %T", holder)
@@ -886,13 +886,13 @@ func newPresentation(vpRaw rawPresentation, vpOpts *presentationOpts) (*Presenta
 // 2) the same as 1) but as array - e.g. zero ore more JWS
 // 3) struct (should be map[string]interface{}) representing credential data model
 // 4) the same as 3) but as array - i.e. zero or more credentials structs.
-func decodeCredentials(rawCred interface{}, opts *presentationOpts) ([]*Credential, error) { //nolint:funlen
+func decodeCredentials(rawCred any, opts *presentationOpts) ([]*Credential, error) { //nolint:funlen
 	// Accept the case when VP does not have any VCs.
 	if rawCred == nil {
 		return nil, nil
 	}
 
-	unmarshalSingleCredFn := func(cred interface{}) (*Credential, error) {
+	unmarshalSingleCredFn := func(cred any) (*Credential, error) {
 		credOpts := []CredentialOpt{
 			WithProofChecker(opts.proofChecker),
 			WithJSONLDDocumentLoader(opts.jsonldCredentialOpts.jsonldDocumentLoader),
@@ -918,7 +918,7 @@ func decodeCredentials(rawCred interface{}, opts *presentationOpts) ([]*Credenti
 	}
 
 	switch cred := rawCred.(type) {
-	case []interface{}:
+	case []any:
 		// Accept the case when VP does not have any VCs.
 		if len(cred) == 0 {
 			return nil, nil

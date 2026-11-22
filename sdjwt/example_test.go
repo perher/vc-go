@@ -32,7 +32,7 @@ func Example_simpleClaims() { //nolint:govet
 		fmt.Println("failed to set-up test: %w", err.Error())
 	}
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"given_name": "Albert",
 		"last_name":  "Smith",
 	}
@@ -95,14 +95,14 @@ func Example_complexClaimsWithHolderBinding() { //nolint:govet
 		fmt.Println("failed to set-up test: %w", err.Error())
 	}
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"sub":          "john_doe_42",
 		"given_name":   "John",
 		"family_name":  "Doe",
 		"email":        "johndoe@example.com",
 		"phone_number": "+1-202-555-0101",
 		"birthdate":    "1940-01-01",
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street_address": "123 Main St",
 			"locality":       "Anytown",
 			"region":         "Anystate",
@@ -177,14 +177,14 @@ func Example_complexObjectWithStructuredClaims() { //nolint:govet
 		fmt.Println("failed to set-up test: %w", err.Error())
 	}
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"sub":          "john_doe_42",
 		"given_name":   "John",
 		"family_name":  "Doe",
 		"email":        "johndoe@example.com",
 		"phone_number": "+1-202-555-0101",
 		"birthdate":    "1940-01-01",
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street_address": "123 Main St",
 			"locality":       "Anytown",
 			"region":         "Anystate",
@@ -274,7 +274,7 @@ func setUpHolderBinding() (*testutil.Ed25519Signer, *jwk.JWK, error) {
 	return holderSigner, holderPublicJWK, nil
 }
 
-func marshalObj(obj interface{}) (string, error) {
+func marshalObj(obj any) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
 		fmt.Println("failed to marshal object: %w", err.Error())

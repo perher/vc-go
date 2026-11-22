@@ -68,7 +68,7 @@ type KMSSigner interface { // TODO note: only used by deprecated function
 	// returns:
 	// 		signature in []byte
 	//		error in case of errors
-	Sign(msg []byte, kh interface{}) ([]byte, error)
+	Sign(msg []byte, kh any) ([]byte, error)
 }
 
 // A Signer is able to sign messages.
@@ -248,7 +248,7 @@ func (s *Suite) transformAndHash(doc []byte, opts *models.ProofOptions) ([]byte,
 		opts.SuiteType = SuiteType
 	}
 
-	docData := make(map[string]interface{})
+	docData := make(map[string]any)
 
 	err := json.Unmarshal(doc, &docData)
 	if err != nil {
@@ -374,7 +374,7 @@ func (s *Suite) RequiresCreated() bool {
 	return false
 }
 
-func canonicalize(data map[string]interface{}, loader ld.DocumentLoader, mda ld.MessageDigestAlgorithm,
+func canonicalize(data map[string]any, loader ld.DocumentLoader, mda ld.MessageDigestAlgorithm,
 ) ([]byte, error) {
 	out, err := processor.Default().GetCanonicalDocument(
 		data,
@@ -399,8 +399,8 @@ func hashData(docData, proofData []byte, h hash.Hash) []byte {
 	return append(proofHash, docHash...)
 }
 
-func proofConfig(docCtx interface{}, opts *models.ProofOptions) map[string]interface{} {
-	proof := map[string]interface{}{
+func proofConfig(docCtx any, opts *models.ProofOptions) map[string]any {
+	proof := map[string]any{
 		ldCtxKey:             docCtx,
 		"type":               models.DataIntegrityProof,
 		"cryptosuite":        opts.SuiteType,

@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -71,7 +72,7 @@ type (
 	// Preference can be "required" or "preferred".
 	Preference string
 	// StrOrInt type that defines string or integer.
-	StrOrInt interface{}
+	StrOrInt any
 )
 
 func (v *Preference) isRequired() bool {
@@ -129,7 +130,7 @@ type PresentationDefinition struct {
 	// (jwt, jwt_vc, jwt_vp, etc.) to inform the Holder of the claim format configurations the Verifier can process.
 	Format *Format `json:"format,omitempty"`
 	// Frame is used for JSON-LD document framing.
-	Frame map[string]interface{} `json:"frame,omitempty"`
+	Frame map[string]any `json:"frame,omitempty"`
 	// SubmissionRequirements must conform to the Submission Requirement Format.
 	// If not present, all inputs listed in the InputDescriptors array are required for submission.
 	SubmissionRequirements []*SubmissionRequirement `json:"submission_requirements,omitempty"`
@@ -151,14 +152,14 @@ type SubmissionRequirement struct {
 
 // InputDescriptor input descriptors.
 type InputDescriptor struct {
-	ID          string                 `json:"id,omitempty"`
-	Group       []string               `json:"group,omitempty"`
-	Name        string                 `json:"name,omitempty"`
-	Purpose     string                 `json:"purpose,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	Schema      []*Schema              `json:"schema,omitempty"`
-	Constraints *Constraints           `json:"constraints,omitempty"`
-	Format      *Format                `json:"format,omitempty"`
+	ID          string         `json:"id,omitempty"`
+	Group       []string       `json:"group,omitempty"`
+	Name        string         `json:"name,omitempty"`
+	Purpose     string         `json:"purpose,omitempty"`
+	Metadata    map[string]any `json:"metadata,omitempty"`
+	Schema      []*Schema      `json:"schema,omitempty"`
+	Constraints *Constraints   `json:"constraints,omitempty"`
+	Format      *Format        `json:"format,omitempty"`
 }
 
 // Schema input descriptor schema.
@@ -200,19 +201,19 @@ type Filter struct {
 
 // FilterItem describes filter item.
 type FilterItem struct {
-	Type             *string                `json:"type,omitempty"`
-	Format           string                 `json:"format,omitempty"`
-	Pattern          string                 `json:"pattern,omitempty"`
-	Minimum          StrOrInt               `json:"minimum,omitempty"`
-	Maximum          StrOrInt               `json:"maximum,omitempty"`
-	MinLength        int                    `json:"minLength,omitempty"`
-	MaxLength        int                    `json:"maxLength,omitempty"`
-	ExclusiveMinimum StrOrInt               `json:"exclusiveMinimum,omitempty"`
-	ExclusiveMaximum StrOrInt               `json:"exclusiveMaximum,omitempty"`
-	Const            StrOrInt               `json:"const,omitempty"`
-	Enum             []StrOrInt             `json:"enum,omitempty"`
-	Not              map[string]interface{} `json:"not,omitempty"`
-	Contains         map[string]interface{} `json:"contains,omitempty"`
+	Type             *string        `json:"type,omitempty"`
+	Format           string         `json:"format,omitempty"`
+	Pattern          string         `json:"pattern,omitempty"`
+	Minimum          StrOrInt       `json:"minimum,omitempty"`
+	Maximum          StrOrInt       `json:"maximum,omitempty"`
+	MinLength        int            `json:"minLength,omitempty"`
+	MaxLength        int            `json:"maxLength,omitempty"`
+	ExclusiveMinimum StrOrInt       `json:"exclusiveMinimum,omitempty"`
+	ExclusiveMaximum StrOrInt       `json:"exclusiveMaximum,omitempty"`
+	Const            StrOrInt       `json:"const,omitempty"`
+	Enum             []StrOrInt     `json:"enum,omitempty"`
+	Not              map[string]any `json:"not,omitempty"`
+	Contains         map[string]any `json:"contains,omitempty"`
 }
 
 // MatchedSubmissionRequirement contains information about VCs that matched a presentation definition.
@@ -393,13 +394,7 @@ func descriptorIDMap(descs []*InputDescriptor) map[string]*InputDescriptor {
 	return out
 }
 func contains(data []string, e string) bool {
-	for _, el := range data {
-		if el == e {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(data, e)
 }
 
 func toRequirement(sr *SubmissionRequirement, descriptors []*InputDescriptor) (*requirement, error) {
@@ -872,11 +867,11 @@ func (pd *PresentationDefinition) filterCredentialsThatMatchDescriptor(
 	return vpFormat, filteredByConstraints, nil
 }
 
-func getSubjectIDs(subject interface{}) []string { // nolint: gocyclo
+func getSubjectIDs(subject any) []string { // nolint: gocyclo
 	switch s := subject.(type) {
 	case string:
 		return []string{s}
-	case []map[string]interface{}:
+	case []map[string]any:
 		var res []string
 
 		for i := range s {
@@ -894,7 +889,7 @@ func getSubjectIDs(subject interface{}) []string { // nolint: gocyclo
 		}
 
 		return res
-	case map[string]interface{}:
+	case map[string]any:
 		v, ok := s["id"]
 		if !ok {
 			return nil
@@ -938,12 +933,12 @@ func subjectIsIssuer(contents *verifiable.CredentialContents) bool {
 // nolint: gocyclo,funlen,gocognit,unparam
 func filterConstraints(constraints *Constraints, creds []*verifiable.Credential) (
 	[]constraintsFilterResult,
-	[]map[string]interface{},
+	[]map[string]any,
 	error,
 ) {
 	var result []constraintsFilterResult
 
-	var debugCred []map[string]interface{}
+	var debugCred []map[string]any
 
 	if constraints == nil {
 		for _, credential := range creds {
@@ -980,7 +975,7 @@ func filterConstraints(constraints *Constraints, creds []*verifiable.Credential)
 			continue
 		}
 
-		var credentialMap map[string]interface{}
+		var credentialMap map[string]any
 
 		err = json.Unmarshal(credentialSrc, &credentialMap)
 		if err != nil {
@@ -1060,7 +1055,7 @@ func limitDisclosure(filterResults []constraintsFilterResult,
 
 			if constraints.LimitDisclosure.isRequired() {
 				var (
-					contexts []interface{}
+					contexts []any
 					err      error
 				)
 
@@ -1152,7 +1147,7 @@ func getLimitedDisclosures(constraints *Constraints, displaySrc []byte, credenti
 
 			parentPath, key := splitLast(path.oldPath, ".")
 
-			parentObj, ok := gjson.GetBytes(credentialSrc, parentPath).Value().(map[string]interface{})
+			parentObj, ok := gjson.GetBytes(credentialSrc, parentPath).Value().(map[string]any)
 			if !ok {
 				// no selective disclosures at this level, so nothing to add to limited disclosures
 				continue
@@ -1197,7 +1192,7 @@ func getLimitedDisclosures(constraints *Constraints, displaySrc []byte, credenti
 }
 
 // ExtractArrayValuesForSDJWTV5 extracts array values for SD JWT V5.
-func ExtractArrayValuesForSDJWTV5(obj map[string]interface{}) []string {
+func ExtractArrayValuesForSDJWTV5(obj map[string]any) []string {
 	var extractedValues []string
 
 	for key, v := range obj {
@@ -1206,11 +1201,11 @@ func ExtractArrayValuesForSDJWTV5(obj map[string]interface{}) []string {
 			if key == "..." {
 				extractedValues = append(extractedValues, val)
 			}
-		case map[string]interface{}:
+		case map[string]any:
 			extractedValues = append(extractedValues, ExtractArrayValuesForSDJWTV5(val)...)
-		case []interface{}:
+		case []any:
 			for _, valData := range val {
-				if d1, ok1 := valData.(map[string]interface{}); ok1 {
+				if d1, ok1 := valData.(map[string]any); ok1 {
 					extractedValues = append(extractedValues, ExtractArrayValuesForSDJWTV5(d1)...)
 				}
 			}
@@ -1220,7 +1215,7 @@ func ExtractArrayValuesForSDJWTV5(obj map[string]interface{}) []string {
 	return extractedValues
 }
 
-func frameCreds(frame map[string]interface{}, creds []*verifiable.Credential,
+func frameCreds(frame map[string]any, creds []*verifiable.Credential,
 	sdBBSProofCreator *verifiable.BBSProofCreator,
 	opts ...verifiable.CredentialOpt) ([]*verifiable.Credential, error) {
 	if frame == nil {
@@ -1241,7 +1236,7 @@ func frameCreds(frame map[string]interface{}, creds []*verifiable.Credential,
 	return result, nil
 }
 
-func copyOnlySubjectIDs(subject []verifiable.Subject) interface{} {
+func copyOnlySubjectIDs(subject []verifiable.Subject) any {
 	if len(subject) == 1 {
 		if len(subject[0].CustomFields) == 0 {
 			return subject[0].ID
@@ -1250,7 +1245,7 @@ func copyOnlySubjectIDs(subject []verifiable.Subject) interface{} {
 		return verifiable.SubjectToJSON(verifiable.Subject{ID: subject[0].ID})
 	}
 
-	var withOnlyIDs []interface{}
+	var withOnlyIDs []any
 
 	for _, s := range subject {
 		withOnlyIDs = append(withOnlyIDs, verifiable.SubjectToJSON(verifiable.Subject{ID: s.ID}))
@@ -1284,7 +1279,7 @@ func createNewCredential(constraints *Constraints, src, limitedCred []byte,
 				continue
 			}
 
-			var val interface{} = true
+			var val any = true
 
 			if f.Predicate.isRequired() {
 				modifiedByPredicate = true
@@ -1314,7 +1309,7 @@ func createNewCredential(constraints *Constraints, src, limitedCred []byte,
 		return nil, err
 	}
 
-	var doc map[string]interface{}
+	var doc map[string]any
 	if err := json.Unmarshal(revealDoc, &doc); err != nil {
 		return nil, err
 	}
@@ -1454,7 +1449,7 @@ func supportsSelectiveDisclosure(credential *verifiable.Credential) bool {
 }
 
 //nolint:gocyclo,nestif
-func filterField(f *Field, credential map[string]interface{}, isJWTCredential bool) error {
+func filterField(f *Field, credential map[string]any, isJWTCredential bool) error {
 	var schema gojsonschema.JSONLoader
 
 	if f.Filter != nil {
@@ -1530,7 +1525,7 @@ func checkPathValue(
 
 		if strings.EqualFold(path, "$.issuer") {
 			switch issuerFld := credential["issuer"].(type) {
-			case map[string]interface{}:
+			case map[string]any:
 				if _, ok := issuerFld["id"]; ok {
 					path = "$.issuer.id"
 				}
@@ -1593,7 +1588,7 @@ func checkPathValue(
 }
 
 //nolint:gocyclo
-func validatePath(schema gojsonschema.JSONLoader, patch interface{}, field *Field, isJWTCredential bool) error {
+func validatePath(schema gojsonschema.JSONLoader, patch any, field *Field, isJWTCredential bool) error {
 	if schema == nil {
 		return nil
 	}
@@ -1651,7 +1646,7 @@ type pathTransform struct {
 	oldPath string
 }
 
-func getPath(keys []interface{}, set map[string]int) *pathTransform {
+func getPath(keys []any, set map[string]int) *pathTransform {
 	var (
 		newPath      []string
 		originalPath []string
@@ -1916,7 +1911,7 @@ func typeFoundInContext(typ string, ctxObj *ld.Context) ([]string, error) {
 		out = append(out, id)
 	}
 
-	tdCtx, ok := td["@context"].(map[string]interface{})
+	tdCtx, ok := td["@context"].(map[string]any)
 	if !ok {
 		return out, nil
 	}
@@ -1944,7 +1939,7 @@ func getContext(contextURI string, documentLoader ld.DocumentLoader) (*ld.Contex
 		return nil, fmt.Errorf("loading document: %w", err)
 	}
 
-	doc, ok := remoteDoc.Document.(map[string]interface{})
+	doc, ok := remoteDoc.Document.(map[string]any)
 	if !ok {
 		return nil, errors.New("expects jsonld document to be unmarshaled into map[string]interface{}")
 	}

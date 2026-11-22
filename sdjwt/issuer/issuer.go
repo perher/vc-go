@@ -92,7 +92,7 @@ type newOpts struct {
 
 	HashAlg crypto.Hash
 
-	jsonMarshal func(v interface{}) ([]byte, error)
+	jsonMarshal func(v any) ([]byte, error)
 	getSalt     func() (string, error)
 
 	addDecoyDigests  bool
@@ -115,7 +115,7 @@ func WithSDJWTVersion(version common.SDJWTVersion) NewOpt {
 }
 
 // WithJSONMarshaller is option is for marshalling disclosure.
-func WithJSONMarshaller(jsonMarshal func(v interface{}) ([]byte, error)) NewOpt {
+func WithJSONMarshaller(jsonMarshal func(v any) ([]byte, error)) NewOpt {
 	return func(opts *newOpts) {
 		opts.jsonMarshal = jsonMarshal
 	}
@@ -349,7 +349,7 @@ func WithRecursiveClaimsObjects(recursiveClaimsObject []string) NewOpt {
 //
 // Then JSON-encode the array such that an UTF-8 string is produced.
 // Then base64url-encode the byte representation of the UTF-8 string to create the Disclosure.
-func New(issuer string, claims interface{}, headers jose.Headers,
+func New(issuer string, claims any, headers jose.Headers,
 	signer jose.Signer, opts ...NewOpt) (*SelectiveDisclosureJWT, error) {
 	nOpts := &newOpts{
 		jsonMarshal:    json.Marshal,
@@ -412,7 +412,7 @@ Algorithm:
   - create signed SD-JWT based on VC
   - return signed SD-JWT plus Disclosures
 */
-func NewFromVC(vc map[string]interface{}, headers jose.Headers,
+func NewFromVC(vc map[string]any, headers jose.Headers,
 	signer jose.Signer, opts ...NewOpt) (*SelectiveDisclosureJWT, error) {
 	nOpts := &newOpts{
 		version: common.SDJWTVersionDefault,
@@ -427,7 +427,7 @@ func NewFromVC(vc map[string]interface{}, headers jose.Headers,
 		return nil, errors.New("credential subject not found")
 	}
 
-	cs, ok := csObj.(map[string]interface{})
+	cs, ok := csObj.(map[string]any)
 	if !ok {
 		return nil, errors.New("credential subject must be an object")
 	}
@@ -470,9 +470,9 @@ func NewFromVC(vc map[string]interface{}, headers jose.Headers,
 }
 
 func createPayload(issuer string, nOpts *newOpts) *payload {
-	var cnf map[string]interface{}
+	var cnf map[string]any
 	if nOpts.HolderPublicKey != nil {
-		cnf = make(map[string]interface{})
+		cnf = make(map[string]any)
 		cnf["jwk"] = nOpts.HolderPublicKey
 	}
 
@@ -553,7 +553,7 @@ type SelectiveDisclosureJWT struct {
 }
 
 // DecodeClaims fills input c with claims of a token.
-func (j *SelectiveDisclosureJWT) DecodeClaims(c interface{}) error {
+func (j *SelectiveDisclosureJWT) DecodeClaims(c any) error {
 	return j.SignedJWT.DecodeClaims(c)
 }
 
@@ -608,8 +608,8 @@ type payload struct {
 	ID string `json:"id,omitempty"`
 
 	// SD-JWT specific
-	CNF   map[string]interface{} `json:"cnf,omitempty"`
-	SDAlg string                 `json:"_sd_alg,omitempty"`
+	CNF   map[string]any `json:"cnf,omitempty"`
+	SDAlg string         `json:"_sd_alg,omitempty"`
 }
 
 type unsecuredJWTSigner struct{}
@@ -619,7 +619,7 @@ func (s unsecuredJWTSigner) Sign(_ []byte) ([]byte, error) {
 }
 
 func (s unsecuredJWTSigner) Headers() jose.Headers {
-	return map[string]interface{}{
+	return map[string]any{
 		jose.HeaderAlgorithm: afgjwt.AlgorithmNone,
 	}
 }

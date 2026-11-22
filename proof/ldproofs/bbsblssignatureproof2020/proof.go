@@ -62,7 +62,7 @@ func (s *Proof) SupportedVerificationMethods() []proof.SupportedVerificationMeth
 
 // GetCanonicalDocument will return normalized/canonical version of the document.
 // BbsBlsSignatureProof2020 signature suite uses RDF Dataset Normalization as canonicalization algorithm.
-func (s *Proof) GetCanonicalDocument(doc map[string]interface{}, opts ...processor.Opts) ([]byte, error) {
+func (s *Proof) GetCanonicalDocument(doc map[string]any, opts ...processor.Opts) ([]byte, error) {
 	if v, ok := doc["type"]; ok {
 		docType, ok := v.(string)
 

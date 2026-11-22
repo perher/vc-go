@@ -40,11 +40,11 @@ func TestInterop(t *testing.T) {
 
 		printObject(t, "Disclosed Claims for Example 1 - All Claims Disclosed", claims)
 
-		var example1ClaimsObj map[string]interface{}
+		var example1ClaimsObj map[string]any
 		err = json.Unmarshal([]byte(claimsExample1SDJWTV2), &example1ClaimsObj)
 		r.NoError(err)
 
-		var disclosedClaimsForExample1Obj map[string]interface{}
+		var disclosedClaimsForExample1Obj map[string]any
 		err = json.Unmarshal([]byte(disclosedAllClaimsForExample1SDJWTV2), &disclosedClaimsForExample1Obj)
 		r.NoError(err)
 
@@ -67,11 +67,11 @@ func TestInterop(t *testing.T) {
 
 		printObject(t, "Disclosed Claims for Example 1 - All Claims Disclosed", claims)
 
-		var example1ClaimsObj map[string]interface{}
+		var example1ClaimsObj map[string]any
 		err = json.Unmarshal([]byte(claimsExample1SDJWTV5), &example1ClaimsObj)
 		r.NoError(err)
 
-		var disclosedClaimsForExample1Obj map[string]interface{}
+		var disclosedClaimsForExample1Obj map[string]any
 		err = json.Unmarshal([]byte(disclosedAllClaimsForExample1SDJWTV5), &disclosedClaimsForExample1Obj)
 		r.NoError(err)
 
@@ -101,7 +101,7 @@ func TestInterop(t *testing.T) {
 
 		printObject(t, "Disclosed Claims for Example 3 - All Claims Disclosed", claims)
 
-		var disclosedClaimsForExample1Obj map[string]interface{}
+		var disclosedClaimsForExample1Obj map[string]any
 		err = json.Unmarshal([]byte(disclosedAllClaimsForExample3SDJWTV5), &disclosedClaimsForExample1Obj)
 		r.NoError(err)
 
@@ -127,7 +127,7 @@ func TestInterop(t *testing.T) {
 
 		printObject(t, "Disclosed Claims For Example 1 - Partial Disclosure", claims)
 
-		var disclosedPartialClaimsForExample1Obj map[string]interface{}
+		var disclosedPartialClaimsForExample1Obj map[string]any
 		err = json.Unmarshal([]byte(disclosedPartialClaimsForExample1SDJWTV2), &disclosedPartialClaimsForExample1Obj)
 		r.NoError(err)
 
@@ -146,7 +146,7 @@ func TestInterop(t *testing.T) {
 
 		printObject(t, "Disclosed Claims For Example 1 - Partial Disclosure", claims)
 
-		var disclosedPartialClaimsForExample1Obj map[string]interface{}
+		var disclosedPartialClaimsForExample1Obj map[string]any
 		err = json.Unmarshal([]byte(disclosedPartialClaimsForExample1SDJWTV5), &disclosedPartialClaimsForExample1Obj)
 		r.NoError(err)
 

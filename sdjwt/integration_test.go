@@ -13,6 +13,7 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"testing"
 	"time"
 
@@ -45,7 +46,7 @@ func TestSDJWTFlow(t *testing.T) {
 
 	signatureVerifier := testsupport.NewEd25519Verifier(issuerPublicKey)
 
-	claims := map[string]interface{}{
+	claims := map[string]any{
 		"given_name": "Albert",
 		"last_name":  "Smith",
 	}
@@ -63,7 +64,7 @@ func TestSDJWTFlow(t *testing.T) {
 		token, err := issuer.New(testIssuer, claims, nil, signer, timeOpts...)
 		r.NoError(err)
 
-		var simpleClaimsFlatOption map[string]interface{}
+		var simpleClaimsFlatOption map[string]any
 		err = token.DecodeClaims(&simpleClaimsFlatOption)
 		r.NoError(err)
 
@@ -174,7 +175,7 @@ func TestSDJWTFlow(t *testing.T) {
 			issuer.WithStructuredClaims(true))
 		r.NoError(err)
 
-		var structuredClaims map[string]interface{}
+		var structuredClaims map[string]any
 		err = token.DecodeClaims(&structuredClaims)
 		r.NoError(err)
 
@@ -221,7 +222,7 @@ func TestSDJWTFlow(t *testing.T) {
 			issuer.WithHashAlgorithm(crypto.SHA384))
 		r.NoError(err)
 
-		var flatClaims map[string]interface{}
+		var flatClaims map[string]any
 		err = token.DecodeClaims(&flatClaims)
 		r.NoError(err)
 
@@ -268,7 +269,7 @@ func TestSDJWTFlow(t *testing.T) {
 		require.NoError(t, err)
 
 		// create VC - we will use template here
-		var vc map[string]interface{}
+		var vc map[string]any
 		err = json.Unmarshal([]byte(sampleVCFull), &vc)
 		r.NoError(err)
 
@@ -279,7 +280,7 @@ func TestSDJWTFlow(t *testing.T) {
 		)
 		r.NoError(err)
 
-		var decoded map[string]interface{}
+		var decoded map[string]any
 
 		err = token.DecodeClaims(&decoded)
 		require.NoError(t, err)
@@ -369,7 +370,7 @@ func TestSDJWTFlow(t *testing.T) {
 	}
 }`
 		// create VC - we will use template here
-		var vc map[string]interface{}
+		var vc map[string]any
 		err = json.Unmarshal([]byte(localVc), &vc)
 		r.NoError(err)
 
@@ -381,7 +382,7 @@ func TestSDJWTFlow(t *testing.T) {
 		)
 		r.NoError(err)
 
-		var decoded map[string]interface{}
+		var decoded map[string]any
 
 		err = token.DecodeClaims(&decoded)
 		require.NoError(t, err)
@@ -435,15 +436,15 @@ func TestSDJWTFlow(t *testing.T) {
 	})
 }
 
-func createComplexClaims() map[string]interface{} {
-	claims := map[string]interface{}{
+func createComplexClaims() map[string]any {
+	claims := map[string]any{
 		"sub":          "john_doe_42",
 		"given_name":   "John",
 		"family_name":  "Doe",
 		"email":        "johndoe@example.com",
 		"phone_number": "+1-202-555-0101",
 		"birthdate":    "1940-01-01",
-		"address": map[string]interface{}{
+		"address": map[string]any{
 			"street_address": "123 Main St",
 			"locality":       "Anytown",
 			"region":         "Anystate",
@@ -467,16 +468,10 @@ func getDisclosuresFromClaimNames(selectedClaimNames []string, claims []*holder.
 }
 
 func contains(values []string, val string) bool {
-	for _, v := range values {
-		if v == val {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(values, val)
 }
 
-func printObject(t *testing.T, name string, obj interface{}) {
+func printObject(t *testing.T, name string, obj any) {
 	t.Helper()
 
 	objBytes, err := json.Marshal(obj)

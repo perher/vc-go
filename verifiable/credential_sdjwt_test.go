@@ -11,7 +11,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"sort"
+	"slices"
 	"testing"
 
 	"github.com/go-jose/go-jose/v3/jwt"
@@ -61,7 +61,7 @@ func TestParseSDJWT(t *testing.T) {
 		claims, e := vc.JWTClaims(false)
 		require.NoError(t, e)
 
-		claims.VC["credentialSubject"].(map[string]interface{})["_sd_alg"] = claims.VC["_sd_alg"]
+		claims.VC["credentialSubject"].(map[string]any)["_sd_alg"] = claims.VC["_sd_alg"]
 		delete(claims.VC, "_sd_alg")
 
 		ed25519Signer, proofChecker := testsupport.NewKMSSigVerPair(t, kms.ED25519Type, signingKeyID)
@@ -90,7 +90,7 @@ func TestParseSDJWT(t *testing.T) {
 		require.NoError(t, e)
 
 		// TODO: rewrite tests to not directly manipulate JWTEnvelope and claims. And make JWTEnvelope private.
-		claims.VC["credentialSubject"].(map[string]interface{})["_sd_alg"] = claims.VC["_sd_alg"]
+		claims.VC["credentialSubject"].(map[string]any)["_sd_alg"] = claims.VC["_sd_alg"]
 		delete(claims.VC, "_sd_alg")
 
 		ed25519Signer, proofChecker := testsupport.NewKMSSigVerPair(t, kms.ED25519Type, signingKeyID)
@@ -159,13 +159,9 @@ func TestMarshalWithDisclosure(t *testing.T) {
 
 			require.Equal(t, src.SDJWT, res.SDJWT)
 
-			sort.Slice(src.Disclosures, func(i, j int) bool {
-				return src.Disclosures[i] < src.Disclosures[j]
-			})
+			slices.Sort(src.Disclosures)
 
-			sort.Slice(res.Disclosures, func(i, j int) bool {
-				return res.Disclosures[i] < res.Disclosures[j]
-			})
+			slices.Sort(res.Disclosures)
 
 			require.Equal(t, src.Disclosures, res.Disclosures)
 			require.NotEmpty(t, res.HolderVerification)
@@ -460,7 +456,7 @@ func TestCreateDisplayCredential(t *testing.T) {
 			require.Len(t, subj, 1)
 			require.NotEmpty(t, subj[0].ID)
 
-			expectedFields := CustomFields{"degree": map[string]interface{}{
+			expectedFields := CustomFields{"degree": map[string]any{
 				"type":       "BachelorDegree",
 				"university": "MIT",
 			}}
@@ -502,7 +498,7 @@ func TestCreateDisplayCredential(t *testing.T) {
 			require.Len(t, subj, 1)
 			require.NotEmpty(t, subj[0].ID)
 
-			expectedFields := CustomFields{"degree": map[string]interface{}{
+			expectedFields := CustomFields{"degree": map[string]any{
 				"type": "BachelorDegree",
 			}}
 			require.Equal(t, expectedFields, subj[0].CustomFields)
@@ -548,9 +544,9 @@ func TestCreateDisplayCredential(t *testing.T) {
 			subj := vc.Contents().Subject
 			require.Len(t, subj, 1)
 
-			testCases := []interface{}{
-				"foo",                   // sd field not slice
-				[]interface{}{"foo", 5}, // not all elements are strings
+			testCases := []any{
+				"foo",           // sd field not slice
+				[]any{"foo", 5}, // not all elements are strings
 			}
 
 			for _, testCase := range testCases {
@@ -559,7 +555,7 @@ func TestCreateDisplayCredential(t *testing.T) {
 				claims, err := vc.JWTClaims(false)
 				require.NoError(t, err)
 
-				claims.VC["credentialSubject"].(map[string]interface{})["_sd"] = testCase
+				claims.VC["credentialSubject"].(map[string]any)["_sd"] = testCase
 				proofCreator, _ := testsupport.NewKMSSigVerPair(t, kms.ED25519Type, "did:foo:bar#key-1")
 
 				badJWS, headers, err := claims.MarshalJWS(EdDSA, proofCreator, "did:foo:bar#key-1")
