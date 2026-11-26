@@ -7,13 +7,17 @@ SPDX-License-Identifier: Apache-2.0
 package checker_test
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/trustbloc/did-go/doc/ld/proof"
 	"github.com/trustbloc/kms-go/doc/jose"
+	"github.com/trustbloc/kms-go/doc/jose/jwk/jwksupport"
 	"github.com/veraison/go-cose"
 
+	ed25519verifier "github.com/trustbloc/vc-go/crypto-ext/verifiers/ed25519"
 	"github.com/trustbloc/vc-go/proof/checker"
 	"github.com/trustbloc/vc-go/proof/jwtproofs/eddsa"
 	"github.com/trustbloc/vc-go/proof/ldproofs/ed25519signature2018"
@@ -87,6 +91,49 @@ func TestProofChecker_CheckJWTProof(t *testing.T) {
 	err = testable.CheckJWTProof(jose.Headers{
 		jose.HeaderKeyID: "lookupId", jose.HeaderAlgorithm: "EdDSA"}, "issuerID", nil, nil)
 	require.ErrorContains(t, err, "can't verifiy with \"test\" verification method")
+}
+
+func TestProofChecker_CheckJWTProof_JWKAlgorithm(t *testing.T) {
+	pubKey, privKey, err := ed25519.GenerateKey(rand.Reader)
+	require.NoError(t, err)
+	msg := []byte("msg")
+	signature := ed25519.Sign(privKey, msg)
+
+	tests := []struct {
+		name    string
+		jwkAlg  string
+		wantErr string
+	}{
+		{name: "jwk without alg", jwkAlg: ""},
+		{name: "jwk with matching alg", jwkAlg: "EdDSA"},
+		{name: "jwk with other alg", jwkAlg: "ES256", wantErr: "jwt alg EdDSA does not match alg ES256 of the verification key"},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			key, err := jwksupport.JWKFromKey(pubKey)
+			require.NoError(t, err)
+			key.Algorithm = tc.jwkAlg
+			headers := jose.Headers{jose.HeaderKeyID: "lookupId", jose.HeaderAlgorithm: "EdDSA"}
+
+			checkers := map[string]interface {
+				CheckJWTProof(headers jose.Headers, expectedProofIssuer string, msg, signature []byte) error
+			}{
+				"resolved": checker.New(
+					testsupport.NewSingleJWKResolver("lookupId", key, "JsonWebKey2020", "issuerID"),
+					checker.WithJWTAlg(eddsa.New()), checker.WithSignatureVerifiers(ed25519verifier.New())),
+				"embedded": checker.NewEmbeddedJWKProofChecker(key,
+					checker.WithJWTAlg(eddsa.New()), checker.WithSignatureVerifiers(ed25519verifier.New())),
+			}
+			for name, c := range checkers {
+				err = c.CheckJWTProof(headers, "issuerID", msg, signature)
+				if tc.wantErr != "" {
+					require.ErrorContains(t, err, tc.wantErr, name)
+				} else {
+					require.NoError(t, err, name)
+				}
+			}
+		})
+	}
 }
 
 func TestProofCheckerIssuer(t *testing.T) {

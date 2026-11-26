@@ -216,6 +216,11 @@ func (c *ProofChecker) CheckJWTProof(headers jose.Headers, expectedProofIssuer s
 		return fmt.Errorf("invalid public key id: %w", err)
 	}
 
+	err = checkJWKAlgorithm(vm, alg)
+	if err != nil {
+		return err
+	}
+
 	supportedProof, err := c.getSupportedProofByAlg(alg)
 	if err != nil {
 		return err
@@ -366,6 +371,15 @@ func (c *ProofChecker) FindIssuer(payload []byte) string {
 	return ""
 }
 
+// checkJWKAlgorithm rejects a JWT whose alg differs from the alg in verification key if set.
+func checkJWKAlgorithm(vm *vermethod.VerificationMethod, alg string) error {
+	if vm.JWK == nil || vm.JWK.Algorithm == "" || vm.JWK.Algorithm == alg {
+		return nil
+	}
+
+	return fmt.Errorf("jwt alg %s does not match alg %s of the verification key", alg, vm.JWK.Algorithm)
+}
+
 func convertToPublicKey(
 	supportedMethods []proofdesc.SupportedVerificationMethod,
 	vm *vermethod.VerificationMethod,
@@ -457,6 +471,11 @@ func (c *EmbeddedVMProofChecker) CheckJWTProof(headers jose.Headers, _ string, m
 	alg, ok := headers.Algorithm()
 	if !ok {
 		return errors.New("missed alg in jwt header")
+	}
+
+	err := checkJWKAlgorithm(c.vm, alg)
+	if err != nil {
+		return err
 	}
 
 	supportedProof, err := c.getSupportedProofByAlg(alg)
