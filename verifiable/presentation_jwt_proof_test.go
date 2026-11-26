@@ -250,6 +250,49 @@ func TestParsePresentationWithVCJWT(t *testing.T) {
 		r.Equal(vc.stringJSON(t), vcDecoded.stringJSON(t))
 	})
 
+	t.Run("Presentation and VC checked with separate proof checkers", func(t *testing.T) {
+		rq := require.New(t)
+
+		issuerCreators, issuerChecker := testsupport.NewKMSSignersAndVerifier(t, []*testsupport.SigningKey{
+			{Type: kms.RSARS256Type, PublicKeyID: "did:example:76e12ec712ebc6f1c221ebfeb1f#issuer-key"},
+		})
+		holderCreators, holderChecker := testsupport.NewKMSSignersAndVerifier(t, []*testsupport.SigningKey{
+			{Type: kms.ED25519Type, PublicKeyID: "did:456#holder-key"},
+		})
+
+		jwtVC, err := vc.CreateSignedJWTVC(true, RS256, issuerCreators[0], "did:example:76e12ec712ebc6f1c221ebfeb1f#issuer-key")
+		rq.NoError(err)
+
+		vp, err := NewPresentation(WithCredentials(jwtVC))
+		rq.NoError(err)
+		vp.ID = "urn:uuid:1978344f-8596-4c3a-a978-8fcaba3903c"
+		vp.Holder = "did:456"
+
+		jwtClaims, err := vp.JWTClaims([]string{}, true)
+		rq.NoError(err)
+		vpJWS, err := jwtClaims.MarshalJWS(EdDSA, holderCreators[0], "did:456#holder-key")
+		rq.NoError(err)
+
+		vpDecoded, err := newTestPresentation(t, []byte(vpJWS),
+			WithPresProofChecker(holderChecker), WithPresCredentialProofChecker(issuerChecker))
+		rq.NoError(err)
+		rq.Len(vpDecoded.Credentials(), 1)
+
+		// The presentation checker does not know the issuer key.
+		_, err = newTestPresentation(t, []byte(vpJWS), WithPresProofChecker(holderChecker))
+		rq.ErrorContains(err, "decode credentials of presentation")
+
+		// The credential checker does not apply to the presentation.
+		_, err = newTestPresentation(t, []byte(vpJWS),
+			WithPresProofChecker(issuerChecker), WithPresCredentialProofChecker(issuerChecker))
+		rq.ErrorContains(err, "decoding of Verifiable Presentation from JWS")
+
+		// A disabled proof check also disables the credential proof check.
+		_, err = newTestPresentation(t, []byte(vpJWS),
+			WithPresDisabledProofCheck(), WithPresCredentialProofChecker(holderChecker))
+		rq.NoError(err)
+	})
+
 	t.Run("Failed check of VC due to invalid JWS", func(t *testing.T) {
 		proofCreators, _ := testsupport.NewKMSSignersAndVerifier(t, []*testsupport.SigningKey{
 			{Type: kms.RSARS256Type, PublicKeyID: "did:123#issuer-key"},

@@ -571,6 +571,7 @@ type rawPresentation = map[string]interface{}
 // presentationOpts holds options for the Verifiable Presentation decoding.
 type presentationOpts struct {
 	proofChecker        CombinedProofChecker
+	credProofChecker    CombinedProofChecker
 	disabledProofCheck  bool
 	strictValidation    bool
 	requireVC           bool
@@ -592,6 +593,14 @@ type PresentationOpt func(opts *presentationOpts)
 func WithPresProofChecker(fetcher CombinedProofChecker) PresentationOpt {
 	return func(opts *presentationOpts) {
 		opts.proofChecker = fetcher
+	}
+}
+
+// WithPresCredentialProofChecker sets the proofChecker of the credentials embedded in the Verifiable Presentation.
+// By default the credentials are checked with the proofChecker of the presentation (WithPresProofChecker).
+func WithPresCredentialProofChecker(checker CombinedProofChecker) PresentationOpt {
+	return func(opts *presentationOpts) {
+		opts.credProofChecker = checker
 	}
 }
 
@@ -902,8 +911,13 @@ func decodeCredentials(rawCred interface{}, opts *presentationOpts) ([]*Credenti
 	}
 
 	unmarshalSingleCredFn := func(cred interface{}) (*Credential, error) {
+		proofChecker := opts.proofChecker
+		if opts.credProofChecker != nil {
+			proofChecker = opts.credProofChecker
+		}
+
 		credOpts := []CredentialOpt{
-			WithProofChecker(opts.proofChecker),
+			WithProofChecker(proofChecker),
 			WithJSONLDDocumentLoader(opts.jsonldCredentialOpts.jsonldDocumentLoader),
 		}
 
