@@ -572,6 +572,7 @@ type rawPresentation = map[string]interface{}
 type presentationOpts struct {
 	proofChecker        CombinedProofChecker
 	credProofChecker    CombinedProofChecker
+	credOpts            []CredentialOpt
 	disabledProofCheck  bool
 	strictValidation    bool
 	requireVC           bool
@@ -601,6 +602,14 @@ func WithPresProofChecker(fetcher CombinedProofChecker) PresentationOpt {
 func WithPresCredentialProofChecker(checker CombinedProofChecker) PresentationOpt {
 	return func(opts *presentationOpts) {
 		opts.credProofChecker = checker
+	}
+}
+
+// WithPresCredentialOpts adds options for decoding the credentials embedded in the Verifiable Presentation.
+// They are applied after the options derived from the presentation options, so they take precedence,
+func WithPresCredentialOpts(credOpts ...CredentialOpt) PresentationOpt {
+	return func(opts *presentationOpts) {
+		opts.credOpts = append(opts.credOpts, credOpts...)
 	}
 }
 
@@ -924,6 +933,8 @@ func decodeCredentials(rawCred interface{}, opts *presentationOpts) ([]*Credenti
 		if opts.disabledProofCheck {
 			credOpts = append(credOpts, WithDisabledProofCheck())
 		}
+
+		credOpts = append(credOpts, opts.credOpts...)
 
 		// Check the case when VC is defined in string format (e.g. JWT).
 		// Decode credential and keep result of decoding.
